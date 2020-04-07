@@ -1,28 +1,50 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import Drawer from "@material-ui/core/Drawer";
-import {AppBar, Tab, Tabs } from "@material-ui/core";
-import Toolbar from "@material-ui/core/Toolbar";
-import List from "@material-ui/core/List";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
+import {
+  AppBar,
+  Tab,
+  Tabs,
+  Drawer,
+  Toolbar,
+  List,
+  CssBaseline,
+  Typography,
+  Divider,
+  IconButton,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Grid,
+  TextField,
+  InputAdornment,
+  Menu,
+  MenuItem,
+} from "@material-ui/core";
+import {
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  Search,
+  AccountBox,
+  Assignment,
+  ShowChart,
+  Settings,
+  Home,
+  AccountCircle,
+} from "@material-ui/icons";
+import TabPanel from "../utils/tab/TabPanel";
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    flexGrow: 1,
+  },
+  grow: {
+    flexGrow: 1,
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -82,19 +104,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
-
-
-export default function MiniDrawer() {
+export default function MiniDrawer(props) {
+  const { children } = props;
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(0);
+  const [menu] = useState([
+    { name: "HOME", link: "home" },
+    { name: "PATIENT REGISTRATION", link: "register" },
+    { name: "PATIENT LIST", link: "list" },
+    { name: "MONITORING REPORTS", link: "report" },
+    { name: "SETTINGS", link: "settings" },
+  ]);
+  const [wards] = useState(["Ward 1", "Ward 2", "Ward 3"]);
+  const [menuIcons] = useState([
+    <Home />,
+    <AccountBox />,
+    <Assignment />,
+    <ShowChart />,
+    <Settings />,
+  ]);
+  const [menuAnchor, setMenuAnchor] = React.useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -106,6 +137,14 @@ export default function MiniDrawer() {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleMenu = (event) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setMenuAnchor(null);
   };
 
   return (
@@ -129,14 +168,45 @@ export default function MiniDrawer() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
+          {/* <Typography variant="h6" noWrap>
             Mini variant drawer
-          </Typography>
+          </Typography> */}
           <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
-            <Tab label="Item One" {...a11yProps(0)} />
-            <Tab label="Item Two" {...a11yProps(1)} />
-            <Tab label="Item Three" {...a11yProps(2)} />
+            <Tab label="HOME" style={{ minHeight: "64px" }} />
+            {wards.map((el) => {
+              return <Tab label={el} style={{ minHeight: "64px" }} />;
+            })}
           </Tabs>
+          <div className={classes.grow} />
+          <div>
+            <IconButton
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={menuAnchor}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(menuAnchor)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+            </Menu>
+          </div>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -159,48 +229,95 @@ export default function MiniDrawer() {
         </div>
         <Divider />
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
+          <ListItem button>
+            {!open ? (
+              <ListItemIcon>
+                <Search />
+              </ListItemIcon>
+            ) : (
+              ""
+            )}
+            <ListItemText
+              primary={
+                <TextField
+                  className={classes.margin}
+                  id="input-with-icon-textfield"
+                  // label="Search"
+                  variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              }
+            />
+          </ListItem>
+          {menu.map((el, i) => {
+            const { name, link } = el;
+            return (
+              <Link
+                key={name}
+                to={{
+                  pathname: `/${link}`,
+                  state: {},
+                }}
+                style={{ color: "#606060", textDecoration: "none", fontWeight: "bold" }}
+              >
+                <ListItem button>
+                  <ListItemIcon>{menuIcons[i]}</ListItemIcon>
+                  <ListItemText primary={<span style={{ fontWeight: "bold" }}>{name}</span>} />
+                </ListItem>
+              </Link>
+            );
+          })}
+          <ListItem button key={"uunique"}>
+            {!open ? (
+              <ListItemIcon>
+                <Search />
+              </ListItemIcon>
+            ) : (
+              ""
+            )}
+            <ListItemText
+              primary={() => {
+                return (
+                  <TextField
+                    className={classes.margin}
+                    id="input-with-icon-textfield"
+                    // label="Search"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                );
+              }}
+            />
+          </ListItem>
         </List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum
-          facilisis leo vel. Risus at ultrices mi tempus imperdiet. Semper risus in hendrerit
-          gravida rutrum quisque non tellus. Convallis convallis tellus id interdum velit laoreet id
-          donec ultrices. Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-          adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra nibh cras.
-          Metus vulputate eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo quis
-          imperdiet massa tincidunt. Cras tincidunt lobortis feugiat vivamus at augue. At augue eget
-          arcu dictum varius duis at consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem
-          donec massa sapien faucibus et molestie ac.
-        </Typography>
-        <Typography paragraph>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper eget nulla
-          facilisi etiam dignissim diam. Pulvinar elementum integer enim neque volutpat ac
-          tincidunt. Ornare suspendisse sed nisi lacus sed viverra tellus. Purus sit amet volutpat
-          consequat mauris. Elementum eu facilisis sed odio morbi. Euismod lacinia at quis risus sed
-          vulputate odio. Morbi tincidunt ornare massa eget egestas purus viverra accumsan in. In
-          hendrerit gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem et
-          tortor. Habitant morbi tristique senectus et. Adipiscing elit duis tristique sollicitudin
-          nibh sit. Ornare aenean euismod elementum nisi quis eleifend. Commodo viverra maecenas
-          accumsan lacus vel facilisis. Nulla posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
+        <TabPanel value={value} index={0}>
+          {children}
+        </TabPanel>
+        {wards.map((el, i) => {
+          return (
+            <TabPanel value={value} index={i}>
+              {el}
+            </TabPanel>
+          );
+        })}
+        {/* <TabPanel value={value} index={2}>
+          Item Three
+        </TabPanel> */}
       </main>
     </div>
   );
