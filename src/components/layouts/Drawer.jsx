@@ -33,8 +33,9 @@ import {
   Settings,
   Home,
   AccountCircle,
+  DesktopWindows
 } from "@material-ui/icons";
-import TabPanel from "../utils/tab/TabPanel";
+import TabPanel from "../utils/components/tab/TabPanel";
 
 const drawerWidth = 300;
 
@@ -114,7 +115,7 @@ export default function MiniDrawer(props) {
     { name: "HOME", link: "home" },
     { name: "PATIENT REGISTRATION", link: "register" },
     { name: "PATIENT LIST", link: "list" },
-    { name: "MONITORING REPORTS", link: "report" },
+    { name: "MONITORING SETTINGS", link: "report" },
     { name: "SETTINGS", link: "settings" },
   ]);
   const [wards] = useState(["Ward 1", "Ward 2", "Ward 3"]);
@@ -122,7 +123,7 @@ export default function MiniDrawer(props) {
     <Home />,
     <AccountBox />,
     <Assignment />,
-    <ShowChart />,
+    <DesktopWindows />,
     <Settings />,
   ]);
   const [menuAnchor, setMenuAnchor] = React.useState(null);
@@ -168,15 +169,15 @@ export default function MiniDrawer(props) {
           >
             <MenuIcon />
           </IconButton>
-          {/* <Typography variant="h6" noWrap>
-            Mini variant drawer
-          </Typography> */}
-          <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+          <Typography variant="h6" noWrap>
+            WARD 1
+          </Typography>
+          {/* <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
             <Tab label="HOME" style={{ minHeight: "64px" }} />
             {wards.map((el) => {
               return <Tab label={el} style={{ minHeight: "64px" }} />;
             })}
-          </Tabs>
+          </Tabs> */}
           <div className={classes.grow} />
           <div>
             <IconButton
@@ -273,39 +274,13 @@ export default function MiniDrawer(props) {
               </Link>
             );
           })}
-          <ListItem button key={"uunique"}>
-            {!open ? (
-              <ListItemIcon>
-                <Search />
-              </ListItemIcon>
-            ) : (
-              ""
-            )}
-            <ListItemText
-              primary={() => {
-                return (
-                  <TextField
-                    className={classes.margin}
-                    id="input-with-icon-textfield"
-                    // label="Search"
-                    variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Search />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                );
-              }}
-            />
-          </ListItem>
+
         </List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <TabPanel value={value} index={0}>
+        {children}
+        {/* <TabPanel value={value} index={0}>
           {children}
         </TabPanel>
         {wards.map((el, i) => {
@@ -314,10 +289,7 @@ export default function MiniDrawer(props) {
               {el}
             </TabPanel>
           );
-        })}
-        {/* <TabPanel value={value} index={2}>
-          Item Three
-        </TabPanel> */}
+        })} */}
       </main>
     </div>
   );

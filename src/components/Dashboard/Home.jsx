@@ -1,7 +1,11 @@
 import React from "react";
-import { Grid, Paper, Typography } from "@material-ui/core";
+import { Grid, Paper, Typography, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
+import { Doughnut } from "react-chartjs-2";
+import PieChart from "../utils/components/charts/PieChart";
+import LineChart from "../utils/components/charts/LineChart";
+import BarChart from "../utils/components/charts/BarChart";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,22 +67,64 @@ const Home = () => {
               <Typography variant="h2">200</Typography>DEATHS
             </Paper>
           </Grid>
+          {/* long graph */}
           <Grid item xs={12}>
-            <Paper className={classes.paper}><h1>GRAPH</h1></Paper>
+            <Paper className={classes.paper} style={{ height: "600px" }}>
+              {/* <h1>GRAPH</h1> */}
+              <LineChart />
+            </Paper>
           </Grid>
+          {/* long graph */}
           <Grid item xs={12}>
-            <Paper className={classes.paper}><h1>GRAPH</h1></Paper>
+            <Paper className={classes.paper} style={{ height: "600px" }}>
+              {/* <h1>GRAPH</h1> */}
+              <BarChart />
+            </Paper>
           </Grid>
         </Grid>
+        {/* right panel */}
         <Grid container item xs={4} spacing={4}>
           <Grid item xs={12}>
-            <Paper className={classes.paper}><h1>GRAPH</h1></Paper>
+            <Paper className={classes.paper} style={{ height: "600px" }}>
+              <Typography component="span" variant="h4">
+                TOTAL AVAILABLE BEDS
+              </Typography>
+              <Divider variant="middle" />
+              <PieChart />
+            </Paper>
           </Grid>
           <Grid item xs={12}>
-            <Paper className={classes.paper}><h1>GRAPH</h1></Paper>
+            <Paper className={classes.paper} style={{ height: "600px" }}>
+              {/* <h1>GRAPH</h1> */}
+              <Typography component="span" variant="h4">
+                GENDER
+              </Typography>
+              <Divider variant="middle" />
+              <PieChart />
+            </Paper>
           </Grid>
           <Grid item xs={12}>
-            <Paper className={classes.paper}><h1>GRAPH</h1></Paper>
+            <Paper className={classes.paper} style={{ height: "600px" }}>
+              {/* <h1>GRAPH</h1> */}
+              <Typography component="span" variant="h4">
+                TOTAL ADMINISTERED TESTS
+              </Typography>
+              <Divider variant="middle" />
+              <PieChart />
+              {/* <Doughnut
+                data={{
+                  datasets: [
+                    {
+                      data: [10, 20],
+                      backgroundColor: ["rgb(70, 179, 230)", "rgb(81, 90, 109)"],
+                    },
+                  ],
+                  labels: ["Male", "Female"],
+
+                  // These labels appear in the legend and in the tooltips when hovering different arcs
+                }}
+              /> */}
+            </Paper>
           </Grid>
         </Grid>
       </Grid>
