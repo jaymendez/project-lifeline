@@ -347,13 +347,12 @@ const PatientList = () => {
   };
 
   const onDragEnd = (result) => {
-    console.log(result);
     const response = {
       success: 0,
       errors: [],
     };
     const { source, destination, draggableId } = result;
-    let patientId = draggableId;
+    let patientId = parseInt(draggableId, 10);
     if (!destination) {
       return;
     }
@@ -363,7 +362,7 @@ const PatientList = () => {
     let { droppableId: sourceMonitorId } = source;
     let { droppableId: destinationMonitorId } = destination;
     if (sourceMonitorId.indexOf("-") >= 0) {
-      sourceMonitorId = sourceMonitorId.slice(sourceMonitorId.indexOf("-") + 1);
+      sourceMonitorId = parseInt(sourceMonitorId.slice(sourceMonitorId.indexOf("-") + 1), 10);
     }
     if (destinationMonitorId.indexOf("-") >= 0) {
       destinationMonitorId = parseInt(destinationMonitorId.slice(destinationMonitorId.indexOf("-") + 1), 10);
@@ -371,9 +370,8 @@ const PatientList = () => {
     if (draggableId.indexOf("-") >= 0) {
       patientId = parseInt(draggableId.slice(draggableId.indexOf("-") + 1), 10);
     }
-
-    const updateMonitors = _.cloneDeep(monitors);
-
+    // const updateMonitors = _.cloneDeep(monitors);
+    const updateMonitors = [...monitors];
     const sourceIndex = _.findIndex(updateMonitors, function (o) {
       return o.id === sourceMonitorId;
     });
@@ -399,17 +397,19 @@ const PatientList = () => {
       destinationMonitor.patientIds.push(patientId);
     }
     else {
-      /* Move patient to other monitors */
-      const patientindex = sourceMonitor.patientIds.indexOf(patientId);
-      sourceMonitor.patientIds.splice(patientindex, 1);
-
-      if (destinationMonitor.patientSlot !== destinationMonitor.patientIds.length + 1) {
+      if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
         response.errors.push("Monitor destination has no slot left.");
+        return;
       }
       if (destinationMonitor.patientIds.length > 6) {
         response.errors.push("Monitor destination is full.");
+        return;
       }
+      /* Move patient to other monitors */
+      const patientindex = sourceMonitor.patientIds.indexOf(patientId);
+      sourceMonitor.patientIds.splice(patientindex, 1);
       destinationMonitor.patientIds.push(patientId);
+
     }
     if (response.errors.length === 0) {
       setMonitors(updateMonitors);
@@ -525,87 +525,6 @@ const PatientList = () => {
       </DragDropContext>
     </>
   );
-
-  // return (
-  //   <>
-  //     <Grid
-  //       container
-  //       direction="row"
-  //       justify="center"
-  //       alignItems="center"
-  //       className={classes.root}
-  //       spacing={3}
-  //     >
-  //       <Grid container justify="center" alignItems="center" item spacing={4} xs={7}>
-  //
-  //         <Grid item container justify="center" alignItems="center" xs={12}>
-  //           <Grid item xs={10}>
-  //             <Typography style={{ float: "left", paddingLeft: "16px" }} variant="h5">
-  //               PHILIPPINE GENERAL HOSPITAL: COVID 19 PATIENT LIST
-  //             </Typography>
-  //           </Grid>
-  //           <Grid item xs={2}>
-  //             <IconButton style={{ float: "right" }} aria-label="settings">
-  //               <Settings />
-  //             </IconButton>
-  //           </Grid>
-  //         </Grid>
-  //         <Grid item xs={12}>
-  //           {/* TABLE */}
-  //           <TableContainer component={Paper}>
-  //             <Table className={classes.table} aria-label="simple table">
-  //               <TableHead>
-  //                 <TableRow>
-  //                   <TableCell>Name</TableCell>
-  //                   <TableCell align="center">Date Admitted</TableCell>
-  //                   <TableCell align="center">Time Admitted</TableCell>
-  //                   <TableCell align="center">Location</TableCell>
-  //                   <TableCell align="center">Device</TableCell>
-  //                   <TableCell align="center">Actions</TableCell>
-  //                 </TableRow>
-  //               </TableHead>
-  //               <TableBody>
-  //                 {rows.map((row) => (
-  //                   <TableRow key={row.name}>
-  //                     <TableCell component="th" scope="row">
-  //                       {row.name}
-  //                     </TableCell>
-  //                     <TableCell align="center">{row.calories}</TableCell>
-  //                     <TableCell align="center">{row.fat}</TableCell>
-  //                     <TableCell align="center">{row.carbs}</TableCell>
-  //                     <TableCell align="center">
-  //                       <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
-  //                     </TableCell>
-  //                     <TableCell align="center">
-  //                       <IconButton style={{ float: "right" }} aria-label="options">
-  //                         <MoreVert />
-  //                       </IconButton>
-  //                     </TableCell>
-  //                   </TableRow>
-  //                 ))}
-  //               </TableBody>
-  //             </Table>
-  //           </TableContainer>
-  //           {/* <Paper className={classes.paper}>
-  //             <h1>GRAPH</h1>
-  //           </Paper> */}
-  //         </Grid>
-  //       </Grid>
-  //       <Grid container justify="center" alignItems="center" item spacing={1} xs={5}>
-  //         <Grid item xs={12}>
-  //           <Paper className={classes.paper}>
-  //             <h1>GRAPH</h1>
-  //           </Paper>
-  //         </Grid>
-  //         <Grid item xs={12}>
-  //           <Paper className={classes.paper}>
-  //             <h1>GRAPH</h1>
-  //           </Paper>
-  //         </Grid>
-  //       </Grid>
-  //     </Grid>
-  //   </>
-  // );
 };
 
 export default PatientList;
