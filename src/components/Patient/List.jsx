@@ -75,15 +75,9 @@ function createData(id, name, calories, fat, carbs, protein) {
   return { id, name, calories, fat, carbs, protein };
 }
 
-const rows = [
-  createData(1, "Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData(2, "Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData(3, "Eclair", 262, 16.0, 24, 6.0),
-  createData(4, "Cupcake", 305, 3.7, 67, 4.3),
-  createData(5, "Gingerbread", 356, 16.0, 49, 3.9),
-];
 
 const PatientList = () => {
+  const classes = useStyles();
   const [ward, setWard] = useState("UP-PGH WARD 1");
   const [maximumSlots] = useState(6);
   const [monitors, setMonitors] = useState([
@@ -140,7 +134,142 @@ const PatientList = () => {
       monitorSection: 2,
     },
   ]);
-  const classes = useStyles();
+
+  const addMonitor = () => {
+    const updateMonitors = [...monitors];
+    const newMonitor = {
+      id: 0,
+      patients: [],
+      patientIds: [],
+      patientSlot: 0,
+    };
+    const highestId = Math.max.apply(
+      Math,
+      updateMonitors.map(function (o) {
+        return o.id;
+      })
+    );
+    newMonitor.id = highestId + 1;
+    updateMonitors.push(newMonitor);
+    setMonitors(updateMonitors);
+  };
+
+  const deleteMonitor = (monitorId) => {
+    const updateMonitors = [...monitors];
+    const index = _.findIndex(updateMonitors, function (o) {
+      return o.id === monitorId;
+    });
+    updateMonitors.splice(index, 1);
+    setMonitors(updateMonitors);
+  };
+
+  const addPatientSlot = (monitorId) => {
+    const updateMonitors = _.cloneDeep(monitors);
+    const index = _.findIndex(updateMonitors, function (o) {
+      return o.id === monitorId;
+    });
+    const monitor = updateMonitors[index];
+    if (monitor.patientSlot < 6) {
+      monitor.patientSlot++;
+    } else {
+      /* maximum patient slot */
+    }
+    console.log(updateMonitors);
+    setMonitors(updateMonitors);
+  };
+
+  const deletePatientSlot = (monitorId, patientId) => {
+    /*
+      if patientId exists, user deleted an occupied slot
+      if patientId is null, user deleted an empty patient slot
+    */
+    const updateMonitors = _.cloneDeep(monitors);
+    const index = _.findIndex(updateMonitors, function (o) {
+      return o.id === monitorId;
+    });
+    if (index >= 0) {
+      const { patientIds } = updateMonitors[index];
+      if (patientId) {
+        const patientIndex = patientIds.indexOf(patientId);
+        if (patientIndex >= 0) {
+          patientIds.splice(patientIndex, 1);
+        }
+      } else {
+        updateMonitors[index].patientSlot--;
+      }
+    }
+    setMonitors(updateMonitors);
+  };
+
+  const onDragEnd = (result) => {
+    const response = {
+      success: 0,
+      errors: [],
+    };
+    const { source, destination, draggableId } = result;
+    let patientId = parseInt(draggableId, 10);
+    if (!destination) {
+      return;
+    }
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+    let { droppableId: sourceMonitorId } = source;
+    let { droppableId: destinationMonitorId } = destination;
+    if (sourceMonitorId.indexOf("-") >= 0) {
+      sourceMonitorId = parseInt(sourceMonitorId.slice(sourceMonitorId.indexOf("-") + 1), 10);
+    }
+    if (destinationMonitorId.indexOf("-") >= 0) {
+      destinationMonitorId = parseInt(destinationMonitorId.slice(destinationMonitorId.indexOf("-") + 1), 10);
+    }
+    if (draggableId.indexOf("-") >= 0) {
+      patientId = parseInt(draggableId.slice(draggableId.indexOf("-") + 1), 10);
+    }
+    // const updateMonitors = _.cloneDeep(monitors);
+    const updateMonitors = [...monitors];
+    const sourceIndex = _.findIndex(updateMonitors, function (o) {
+      return o.id === sourceMonitorId;
+    });
+    const sourceMonitor = updateMonitors[sourceIndex];
+
+    const destinationIndex = _.findIndex(updateMonitors, function (o) {
+      return o.id === destinationMonitorId;
+    });
+    const destinationMonitor = updateMonitors[destinationIndex];
+
+    if (source.droppableId === destination.droppableId) {
+      // Do nothing, no reorder.
+      return;
+    } else if (destination.droppableId === "drop-table") {
+      // Move to table
+      const patientIndex = sourceMonitor.patientIds.indexOf(patientId);
+        if (patientIndex >= 0) {
+          sourceMonitor.patientIds.splice(patientIndex, 1);
+        }
+    } else if (source.droppableId === "drop-table") {
+      // Move from table
+      // will push patient_id to monitor.patientIds
+      destinationMonitor.patientIds.push(patientId);
+    }
+    else {
+      if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
+        response.errors.push("Monitor destination has no slot left.");
+        return;
+      }
+      if (destinationMonitor.patientIds.length > 6) {
+        response.errors.push("Monitor destination is full.");
+        return;
+      }
+      /* Move patient to other monitors */
+      const patientindex = sourceMonitor.patientIds.indexOf(patientId);
+      sourceMonitor.patientIds.splice(patientindex, 1);
+      destinationMonitor.patientIds.push(patientId);
+
+    }
+    if (response.errors.length === 0) {
+      setMonitors(updateMonitors);
+    }
+  };
 
   const renderPatients = (monitorIndex) => {
     const { patientSlot, id: monitorId } = monitors[monitorIndex];
@@ -280,141 +409,7 @@ const PatientList = () => {
     });
   };
 
-  const addMonitor = () => {
-    const updateMonitors = [...monitors];
-    const newMonitor = {
-      id: 0,
-      patients: [],
-      patientIds: [],
-      patientSlot: 0,
-    };
-    const highestId = Math.max.apply(
-      Math,
-      updateMonitors.map(function (o) {
-        return o.id;
-      })
-    );
-    newMonitor.id = highestId + 1;
-    updateMonitors.push(newMonitor);
-    setMonitors(updateMonitors);
-  };
 
-  const deleteMonitor = (monitorId) => {
-    const updateMonitors = [...monitors];
-    const index = _.findIndex(updateMonitors, function (o) {
-      return o.id === monitorId;
-    });
-    updateMonitors.splice(index, 1);
-    setMonitors(updateMonitors);
-  };
-
-  const addPatientSlot = (monitorId) => {
-    const updateMonitors = _.cloneDeep(monitors);
-    const index = _.findIndex(updateMonitors, function (o) {
-      return o.id === monitorId;
-    });
-    const monitor = updateMonitors[index];
-    if (monitor.patientSlot < 6) {
-      monitor.patientSlot++;
-    } else {
-      /* maximum patient slot */
-    }
-    console.log(updateMonitors);
-    setMonitors(updateMonitors);
-  };
-
-  const deletePatientSlot = (monitorId, patientId) => {
-    /*
-      if patientId exists, user deleted an occupied slot
-      if patientId is null, user deleted an empty patient slot
-    */
-    const updateMonitors = _.cloneDeep(monitors);
-    const index = _.findIndex(updateMonitors, function (o) {
-      return o.id === monitorId;
-    });
-    if (index >= 0) {
-      const { patientIds } = updateMonitors[index];
-      if (patientId) {
-        const patientIndex = patientIds.indexOf(patientId);
-        if (patientIndex >= 0) {
-          patientIds.splice(patientIndex, 1);
-        }
-      } else {
-        updateMonitors[index].patientSlot--;
-      }
-    }
-    setMonitors(updateMonitors);
-  };
-
-  const onDragEnd = (result) => {
-    const response = {
-      success: 0,
-      errors: [],
-    };
-    const { source, destination, draggableId } = result;
-    let patientId = parseInt(draggableId, 10);
-    if (!destination) {
-      return;
-    }
-    if (source.droppableId === destination.droppableId && source.index === destination.index) {
-      return;
-    }
-    let { droppableId: sourceMonitorId } = source;
-    let { droppableId: destinationMonitorId } = destination;
-    if (sourceMonitorId.indexOf("-") >= 0) {
-      sourceMonitorId = parseInt(sourceMonitorId.slice(sourceMonitorId.indexOf("-") + 1), 10);
-    }
-    if (destinationMonitorId.indexOf("-") >= 0) {
-      destinationMonitorId = parseInt(destinationMonitorId.slice(destinationMonitorId.indexOf("-") + 1), 10);
-    }
-    if (draggableId.indexOf("-") >= 0) {
-      patientId = parseInt(draggableId.slice(draggableId.indexOf("-") + 1), 10);
-    }
-    // const updateMonitors = _.cloneDeep(monitors);
-    const updateMonitors = [...monitors];
-    const sourceIndex = _.findIndex(updateMonitors, function (o) {
-      return o.id === sourceMonitorId;
-    });
-    const sourceMonitor = updateMonitors[sourceIndex];
-
-    const destinationIndex = _.findIndex(updateMonitors, function (o) {
-      return o.id === destinationMonitorId;
-    });
-    const destinationMonitor = updateMonitors[destinationIndex];
-
-    if (source.droppableId === destination.droppableId) {
-      // Do nothing, no reorder.
-      return;
-    } else if (destination.droppableId === "drop-table") {
-      // Move to table
-      const patientIndex = sourceMonitor.patientIds.indexOf(patientId);
-        if (patientIndex >= 0) {
-          sourceMonitor.patientIds.splice(patientIndex, 1);
-        }
-    } else if (source.droppableId === "drop-table") {
-      // Move from table
-      // will push patient_id to monitor.patientIds
-      destinationMonitor.patientIds.push(patientId);
-    }
-    else {
-      if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
-        response.errors.push("Monitor destination has no slot left.");
-        return;
-      }
-      if (destinationMonitor.patientIds.length > 6) {
-        response.errors.push("Monitor destination is full.");
-        return;
-      }
-      /* Move patient to other monitors */
-      const patientindex = sourceMonitor.patientIds.indexOf(patientId);
-      sourceMonitor.patientIds.splice(patientindex, 1);
-      destinationMonitor.patientIds.push(patientId);
-
-    }
-    if (response.errors.length === 0) {
-      setMonitors(updateMonitors);
-    }
-  };
 
   return (
     <>
