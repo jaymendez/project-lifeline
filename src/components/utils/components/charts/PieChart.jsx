@@ -122,7 +122,7 @@ const PieChart = () => {
         {
           anchor: "top",
           direction: "row",
-          translateY: -20,
+          translateY: -40,
           itemWidth: 100,
           itemHeight: 18,
           itemTextColor: "#999",

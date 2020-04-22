@@ -33,7 +33,7 @@ import {
   Settings,
   Home,
   AccountCircle,
-  DesktopWindows
+  DesktopWindows,
 } from "@material-ui/icons";
 import TabPanel from "../utils/components/tab/TabPanel";
 
@@ -115,7 +115,7 @@ export default function MiniDrawer(props) {
     { name: "HOME", link: "home" },
     { name: "PATIENT REGISTRATION", link: "register" },
     { name: "PATIENT LIST", link: "list" },
-    { name: "MONITORING SETTINGS", link: "report" },
+    { name: "MONITORING SETTINGS", link: "monitor/setup" },
     { name: "SETTINGS", link: "settings" },
   ]);
   const [wards] = useState(["Ward 1", "Ward 2", "Ward 3"]);
@@ -180,7 +180,10 @@ export default function MiniDrawer(props) {
           </Tabs> */}
           <div className={classes.grow} />
           <div>
-            <IconButton
+            <Typography variant="h5" noWrap>
+              PROJECT LIFELINE
+            </Typography>
+            {/* <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
@@ -206,7 +209,7 @@ export default function MiniDrawer(props) {
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
-            </Menu>
+            </Menu> */}
           </div>
         </Toolbar>
       </AppBar>
@@ -274,7 +277,6 @@ export default function MiniDrawer(props) {
               </Link>
             );
           })}
-
         </List>
       </Drawer>
       <main className={classes.content}>

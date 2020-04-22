@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import clsx from 'clsx';
+import clsx from "clsx";
 import {
   Grid,
   Paper,
@@ -24,7 +24,7 @@ import {
   FormControl,
   OutlinedInput,
   InputAdornment,
-  FormHelperText
+  FormHelperText,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -35,7 +35,7 @@ import {
   Person,
   LibraryAdd,
   Close,
-  Search
+  Search,
 } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
   textField: {
-    width: '25ch',
+    width: "25ch",
   },
 }));
 
@@ -516,9 +516,9 @@ const PatientList = () => {
       <DateTimePatientCards className={classes.row} />
       <Typography className={classes.row} align="left" variant="h4">
         {ward}: COVID-19 PATIENT LIST
-        {/* <IconButton aria-label="options" onClick={addMonitor}>
+        <IconButton aria-label="options" onClick={addMonitor}>
           <LibraryAdd />
-        </IconButton> */}
+        </IconButton>
       </Typography>
       <DragDropContext onDragEnd={onDragEnd}>
         <Grid
@@ -529,7 +529,7 @@ const PatientList = () => {
           className={classes.root}
           spacing={3}
         >
-          {/* {renderMonitors()} */}
+          {renderMonitors()}
         </Grid>
         <Grid
           container
@@ -538,7 +538,7 @@ const PatientList = () => {
           alignItems="center"
           className={classes.root}
           spacing={3}
-          style={{marginTop: "20px"}}
+          style={{ marginTop: "20px" }}
         >
           <Grid item xs={12}>
             {/* TABLE */}
@@ -570,25 +570,29 @@ const PatientList = () => {
               </Grid>
               <Grid xs={7} item />
               <Grid align="right" xs={3} item>
-              <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
-                <OutlinedInput
-                  id="search-table"
-                  value={filter.search}
-                  onChange={(e) => {
-                    const data = { ...filter };
-                    data[e.target.name] = e.target.value;
-                    setFilter(data);
-                  }}
-                  name="search"
-                  endAdornment={<InputAdornment position="end"><Search/></InputAdornment>}
-                  aria-describedby="search-table"
-                  inputProps={{
-                    'aria-label': 'search',
-                  }}
-                  labelWidth={0}
-                  fullWidth
-                />
-              </FormControl>
+                <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
+                  <OutlinedInput
+                    id="search-table"
+                    value={filter.search}
+                    onChange={(e) => {
+                      const data = { ...filter };
+                      data[e.target.name] = e.target.value;
+                      setFilter(data);
+                    }}
+                    name="search"
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <Search />
+                      </InputAdornment>
+                    }
+                    aria-describedby="search-table"
+                    inputProps={{
+                      "aria-label": "search",
+                    }}
+                    labelWidth={0}
+                    fullWidth
+                  />
+                </FormControl>
                 {/* <TextField
                   id="search-table"
                   name="search"
