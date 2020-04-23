@@ -41,6 +41,7 @@ import moment from "moment";
 import _ from "lodash";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
+import AuthDialog from "../utils/components/dialog/AuthDialog";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -513,6 +514,7 @@ const PatientList = () => {
 
   return (
     <>
+      <AuthDialog />
       <DateTimePatientCards className={classes.row} />
       <Typography className={classes.row} align="left" variant="h4">
         {ward}: COVID-19 PATIENT LIST
@@ -593,18 +595,6 @@ const PatientList = () => {
                     fullWidth
                   />
                 </FormControl>
-                {/* <TextField
-                  id="search-table"
-                  name="search"
-                  label="Search"
-                  variant="outlined"
-                  onChange={(e) => {
-                    const data = { ...filter };
-                    data[e.target.name] = e.target.value;
-                    setFilter(data);
-                  }}
-                  value={filter.search}
-                /> */}
               </Grid>
             </Grid>
             {renderTable()}
