@@ -61,7 +61,7 @@ const TelemetryDashboard = () => {
   const pusherOptions = {
     cluster: "eu",
     // options below are needed for pusher local dev server
-    encrypted: true,
+    encrypted: false,
     httpHost: "206.189.87.169",
     httpPort: "57003",
     wsHost: "206.189.87.169",
