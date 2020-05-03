@@ -29,7 +29,7 @@ class RealTimeChart extends Component {
     this.state = {
       dataA: range(100).map((i) => ({
         x: time.timeMinute.offset(date, i * 30),
-        y: 10 + Math.round(Math.random() * 20),
+        y: 30 + Math.round(Math.random() * 20),
       })),
       // dataB: range(100).map((i) => ({
       //   x: time.timeMinute.offset(date, i * 30),
@@ -56,7 +56,7 @@ class RealTimeChart extends Component {
     const dataA = this.state.dataA.slice(1);
     dataA.push({
       x: time.timeMinute.offset(last(dataA).x, 30),
-      y: 10 + Math.round(Math.random() * 20),
+      y: 10 + Math.round(Math.random() * 60),
     });
     // const dataB = this.state.dataB.slice(1);
     // dataB.push({

@@ -10,6 +10,7 @@ import CreateMonitor from "./components/Monitor/Create";
 import SetupMonitor from "./components/Monitor/Setup";
 import PatientList from "./components/Patient/List";
 import PatientRegister from "./components/Patient/Register";
+import PatientDetails from "./components/Patient/Details";
 import Testing from "./components/utils/components/testing";
 
 const theme = createMuiTheme({
@@ -38,13 +39,17 @@ function App() {
         <Switch>
           <Route exact path="/testing" component={Testing} />
           <Route path="/monitors" component={TelemetryDashboard} />
+          <Route path="/telemetry/:id" component={TelemetryDashboard} />
           <MiniDrawer>
             <Route path="/home" component={Home} />
-            <Route path="/list" component={PatientList} />
-            <Route path="/register" component={PatientRegister} />
+            <Route path="/patient/details/:id" component={PatientDetails} />
+            <Route path="/patient/list" component={PatientList} />
+            <Route path="/patient/register" component={PatientRegister} />
             <Route path="/monitor/setup" component={SetupMonitor} />
             <Route path="/monitor/list" component={ListMonitor} />
-            <Route path="/monitor/create" component={CreateMonitor} />
+            {/* <Route path="/monitor/create" component={CreateMonitor} /> */}
+            {/* <Route path="/telemetry/:id" component={TelemetryDashboard} /> */}
+            {/* <Route path="/patient/:id" component={CreateMonitor} /> */}
             {/* <Route path="/monitor/setup" component={MonitorSetup} /> */}
           </MiniDrawer>
         </Switch>

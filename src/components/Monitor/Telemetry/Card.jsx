@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect }from "react";
 import {
   Grid,
   Paper,
@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
+import clsx from "clsx";
 import Chart from "./RTChart";
 
 const useStyles = makeStyles((theme) => ({
@@ -30,14 +31,27 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 650,
   },
   bordered: {
-    border: "solid 2px white",
+    borderBottom: "solid 2px white",
   },
+  ecg: {
+    color: "#76db3d"
+  },
+  spo2: {
+    color: "#17eaf1"
+  },
+  resp: {
+    color: "#f6f830"
+  },
+  TelemetryCard: {
+    border: "2px solid white"
+  }
 }));
 
 const TelemetryCard = () => {
   const classes = useStyles();
+
   return (
-    <Paper className={classes.paper}>
+    <Paper className={clsx(classes.paper, classes.TelemetryCard)}>
       <Grid container className={classes.bordered}>
         <Grid item xs={4} align="left">
           <Typography variant="h5">DELA CRUZ, JUAN F.</Typography>
@@ -53,7 +67,7 @@ const TelemetryCard = () => {
         <Grid item xs={8} style={{ height: "100px" }}>
           <Chart />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={2} className={classes.ecg}>
           <Typography align="left" variant="subtitle2">
             ECG (BPM)
           </Typography>
@@ -75,7 +89,7 @@ const TelemetryCard = () => {
         <Grid item xs={8} style={{ height: "100px" }}>
           <Chart />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={2} className={classes.spo2}>
           <Typography align="left" variant="subtitle2">
             SpO2 (%)
           </Typography>
@@ -97,7 +111,7 @@ const TelemetryCard = () => {
         <Grid item xs={8} style={{ height: "100px" }}>
           <Chart />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={2}  className={classes.resp}>
           <Typography align="left" variant="subtitle2">
             RESP (RPM)
           </Typography>

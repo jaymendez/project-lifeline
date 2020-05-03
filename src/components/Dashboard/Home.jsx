@@ -6,6 +6,8 @@ import { Doughnut } from "react-chartjs-2";
 import PieChart from "../utils/components/charts/PieChart";
 import LineChart from "../utils/components/charts/LineChart";
 import BarChart from "../utils/components/charts/BarChart";
+import dummyPatients from "../utils/components/charts/patients-data.json";
+import dummyCases from "../utils/components/charts/bar-cases.json";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -113,7 +115,8 @@ const Home = () => {
                 <Typography className={classes.row} align="left" variant="h4">
                   PHILIPPINE GENERAL HOSPITAL: COVID-19 CASES
                 </Typography>
-                <LineChart />
+                {/* <LineChart /> */}
+                <BarChart data={dummyCases} />
               </Paper>
             </Grid>
           </Grid>
@@ -124,7 +127,7 @@ const Home = () => {
                 <Typography className={classes.row} align="left" variant="h4">
                   CLASSIFIED COVID-19 PATIENTS
                 </Typography>
-                <BarChart />
+                <BarChart data={dummyPatients} />
               </Paper>
             </Grid>
           </Grid>

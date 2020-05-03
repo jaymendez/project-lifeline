@@ -22,6 +22,7 @@ import { Save as SaveIcon, Add, MoreVert } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -37,7 +38,6 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: "25px 0px",
     float: "right",
-
   },
 }));
 
@@ -76,13 +76,13 @@ const Create = () => {
         spacing={3}
       >
         <Grid item xs={10}>
-          <Typography variant="h4" style={{ float: "left",  margin: "10px 15px" }}>
+          <Typography variant="h4" style={{ float: "left", margin: "10px 15px" }}>
             Create Monitor
           </Typography>
         </Grid>
         <Grid item xs={2}></Grid>
       </Grid>
-      <Divider st/>
+      <Divider st />
       <Container maxWidth="md">
         <Card style={{ margin: "10px 15px", padding: "25px" }}>
           <Grid
