@@ -201,10 +201,10 @@ const PatientRegister = (props) => {
       emcontactname: data.emergency_name,
       emcontactnumber: data.emergency_contact_number,
       emrelationship: data.emergency_relationship,
-      ward: data.ward_id,
+      ward: data.ward_id || 0,
       patientid: data.patientid,
-      patientmname: data.middlename,
-      patientstatus: data.patientstatus,
+      patientmname: data.middlename || "",
+      patientstatus: data.patientstatus || "",
     };
     return response;
   };
@@ -214,13 +214,16 @@ const PatientRegister = (props) => {
     const payload = validateInputs({ ...data });
     const formData = new FormData();
 
-    // for (let [key, value] of Object.entries(payload)) {
-    //   formData.append(key, value);
-    // }
-    console.log(data);
-    for (var key in payload) {
-      formData.append(key, payload[key]);
+    for (let [key, value] of Object.entries(payload)) {
+      if (typeof value === "undefined") {
+        value = "";
+      }
+      formData.append(key, value);
     }
+    console.log(data);
+    // for (var key in payload) {
+    //   formData.append(key, payload[key]);
+    // }
     if (patientid) {
       console.log("uopdate");
       await PatientRepository.updatePatient(formData)

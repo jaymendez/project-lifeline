@@ -41,8 +41,8 @@ import {
 import moment from "moment";
 // import MaterialTable from "material-table";
 import _ from "lodash";
-import Swal from 'sweetalert2'
-import withReactContent from 'sweetalert2-react-content'
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import MaterialTable from "../utils/components/table/MaterialTable";
 import { MTableToolbar } from "material-table";
@@ -142,24 +142,24 @@ const PatientList = () => {
   const deleteHandler = () => {
     closeOptions();
     Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
     }).then((result) => {
       if (result.value) {
         // deletePatient()
       }
-    })
+    });
   };
 
   const deletePatient = async (id) => {
     const query = await PatientRepository.deletePatient(id);
     console.log(query);
-  }
+  };
 
   const renderTable = () => {
     return (
@@ -216,18 +216,26 @@ const PatientList = () => {
   const columns = [
     {
       title: "Name",
-      field: "name",
+      field: "rpi_patientlname",
       render: (rowData) => `${rowData.rpi_patientfname} ${rowData.rpi_patientlname}`,
+      customFilterAndSearch: (value, rowData) => {
+        if (
+          rowData.rpi_patientfname.toLowerCase().includes(value.toLowerCase()) ||
+          rowData.rpi_patientlname.toLowerCase().includes(value.toLowerCase())
+        ) {
+          return rowData;
+        }
+      },
     },
     {
       title: "Date Admitted",
       field: "rpi_date_admitted",
-      render: (rowData) => `${rowData.rpi_date_admitted}`,
+      render: (rowData) => `${rowData.rpi_date_admitted.slice(0, 10)}`,
     },
     {
       title: "Time Admitted",
       field: "rpi_date_admitted",
-      render: (rowData) => `${rowData.rpi_date_admitted}`,
+      render: (rowData) => `${rowData.rpi_date_admitted.slice(11)}`,
     },
     {
       title: "Bed No.",
@@ -243,7 +251,11 @@ const PatientList = () => {
       title: "Actions",
       field: "tabledata.id",
       render: (rowData) => (
-        <IconButton style={{ float: "" }} aria-label="options" onClick={e => toggleOptions(e, rowData)}>
+        <IconButton
+          style={{ float: "" }}
+          aria-label="options"
+          onClick={(e) => toggleOptions(e, rowData)}
+        >
           <MoreVert />
         </IconButton>
       ),
@@ -258,7 +270,7 @@ const PatientList = () => {
         }}
         columns={columns}
         data={filteredPatients(patients)}
-        title={(
+        title={
           <FormControl variant="outlined" className={classes.formControl}>
             <InputLabel id="patient-status-label">Patient Status</InputLabel>
             <Select
@@ -284,7 +296,7 @@ const PatientList = () => {
               <MenuItem value={"ARDS"}>ARDS</MenuItem>
             </Select>
           </FormControl>
-        )}
+        }
       />
     );
   };

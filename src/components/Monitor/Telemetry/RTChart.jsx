@@ -8,15 +8,15 @@ import { area, curveMonotoneX } from 'd3-shape'
 import * as time from 'd3-time'
 import { timeFormat } from 'd3-time-format'
 const data = generateDrinkStats(18)
+
 const commonProperties = {
   width: 550,
-  height: 100,
+  height: 80,
   // margin: { top: 20, right: 20, bottom: 60, left: 80 },
   data,
   animate: true,
   enableSlices: 'x',
 }
-
 class RealTimeChart extends Component {
   constructor(props) {
     super(props);

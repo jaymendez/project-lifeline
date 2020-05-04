@@ -20,6 +20,8 @@ const useStyles = makeStyles((theme) => ({
   },
   TelemetryDashboard: {
     backgroundColor: "#222222",
+    width: "100%",
+    height: "100%"
   },
 }));
 
@@ -83,7 +85,7 @@ const TelemetryDashboard = () => {
       console.log(JSON.parse(data));
 
       // for (key in data) {
-      //   var value = data[key];
+      //   var value = data[key];z
       //   console.log(data);
       //   document.getElementById("notification").innerHTML = data;
       // }

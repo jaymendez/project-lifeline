@@ -1,4 +1,4 @@
-import React, { useEffect }from "react";
+import React, { useEffect, useState }from "react";
 import {
   Grid,
   Paper,
@@ -11,10 +11,22 @@ import {
   TableBody,
   IconButton,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, createMuiTheme, responsiveFontSizes, ThemeProvider } from "@material-ui/core/styles";
 import _ from "lodash";
 import clsx from "clsx";
 import Chart from "./RTChart";
+
+let theme = createMuiTheme({
+  // typography: {
+  //   h2: {
+  //     fontSize: '3rem',
+  //     '@media (min-width:600px)': {
+  //       fontSize: '3.75rem',
+  //     },
+  //   }
+  // },
+});
+theme = responsiveFontSizes(theme);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,8 +61,9 @@ const useStyles = makeStyles((theme) => ({
 
 const TelemetryCard = () => {
   const classes = useStyles();
-
+  const [chartHeight] = useState("80px");
   return (
+    <ThemeProvider theme={theme}>
     <Paper className={clsx(classes.paper, classes.TelemetryCard)}>
       <Grid container className={classes.bordered}>
         <Grid item xs={4} align="left">
@@ -62,10 +75,10 @@ const TelemetryCard = () => {
           <Typography variant="subtitle2">Bed No. #</Typography>
         </Grid>
       </Grid>
-      <Grid container>
-        {/* ECG Row */}
-        <Grid item xs={8} style={{ height: "100px" }}>
-          <Chart />
+      {/* ECG Row */}
+      <Grid container style={{ height: chartHeight }}>
+        <Grid item xs={8}>
+          {/* <Chart height={chartHeight} /> */}
         </Grid>
         <Grid item xs={2} className={classes.ecg}>
           <Typography align="left" variant="subtitle2">
@@ -75,19 +88,19 @@ const TelemetryCard = () => {
             67
           </Typography>
         </Grid>
-        <Grid item xs={2}>
-          <Typography align="left" variant="subtitle2">
-            NIBP @8:15 mmhg
+        <Grid item xs={2} className={classes.spo2}>
+          <Typography align="right" variant="subtitle2">
+            PR
           </Typography>
           <Typography align="right" variant="h3">
-            110/70
+            65
           </Typography>
         </Grid>
       </Grid>
-      <Grid container>
-        {/* SpO Row */}
-        <Grid item xs={8} style={{ height: "100px" }}>
-          <Chart />
+      {/* SpO Row */}
+      <Grid container style={{ height: chartHeight }}>
+        <Grid item xs={8}>
+          {/* <Chart height={chartHeight} /> */}
         </Grid>
         <Grid item xs={2} className={classes.spo2}>
           <Typography align="left" variant="subtitle2">
@@ -99,17 +112,17 @@ const TelemetryCard = () => {
         </Grid>
         <Grid item xs={2}>
           <Typography align="left" variant="subtitle2">
-            TEMP C
+            NIBP @8:15 mmhg
           </Typography>
-          <Typography align="right" variant="h2">
-            37.1
+          <Typography align="right" variant="h3">
+            110/70
           </Typography>
         </Grid>
       </Grid>
-      <Grid container>
-        {/* RESP Row */}
-        <Grid item xs={8} style={{ height: "100px" }}>
-          <Chart />
+      {/* RESP Row */}
+      <Grid container style={{ height: chartHeight }}>
+        <Grid item xs={8} >
+          {/* <Chart height={chartHeight} /> */}
         </Grid>
         <Grid item xs={2}  className={classes.resp}>
           <Typography align="left" variant="subtitle2">
@@ -119,9 +132,18 @@ const TelemetryCard = () => {
             28
           </Typography>
         </Grid>
-        <Grid item xs={2}></Grid>
+
+        <Grid item xs={2}>
+          <Typography align="left" variant="subtitle2">
+            TEMP C
+          </Typography>
+          <Typography align="right" variant="h3">
+            37.1
+          </Typography>
+        </Grid>
       </Grid>
     </Paper>
+    </ThemeProvider>
   );
 };
 
