@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Typography,
@@ -18,7 +18,8 @@ import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import moment from "moment";
 import MomentUtils from "@date-io/moment";
 import _ from "lodash";
-import { useForm } from "react-hook-form";
+import { Route, Switch, withRouter, Redirect } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
@@ -72,10 +73,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const PatientRegister = () => {
+const PatientRegister = (props) => {
   const classes = useStyles();
-  const { register, handleSubmit, watch, errors } = useForm();
+  const { match, history } = props;
+  const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({
+    date_admitted: "",
     lastname: "",
     firstname: "",
     birthdate: null,
@@ -91,27 +94,33 @@ const PatientRegister = () => {
     sss_gsis_number: "",
     philhealth_number: "",
     hmo: "",
-  });
-  const [emergencyContact, setEmergencyContact] = useState({
     emergency_name: "",
     emergency_relationship: "",
     emergency_contact_number: "",
   });
 
+  useEffect(() => {
+    getPatient();
+  }, []);
+
   const patientHandler = (e, modifiedVal = null) => {
     const data = { ...patient };
     if (e) {
       data[e.target.name] = e.target.value;
+      setValue(e.target.name, e.target.value);
     } else {
       const { key, value } = modifiedVal;
       switch (key) {
         case "birthdate":
           data[key] = value ? moment(value).format("YYYY-MM-DD HH:mm:ss") : null;
+          setValue(key, moment(value).format("YYYY-MM-DD HH:mm:ss"));
+
           let diffInYears = moment().diff(moment(value), "years");
           if (diffInYears === 0) {
             diffInYears = moment().diff(moment(value), "years", true).toFixed(3);
           }
           data.age = diffInYears || "";
+          setValue("age", diffInYears);
           break;
         default:
           break;
@@ -120,16 +129,60 @@ const PatientRegister = () => {
     setPatient(data);
   };
 
-  const emergencyContactHandler = (e) => {
-    const data = { ...emergencyContact };
-    data[e.target.name] = e.target.value;
-    setEmergencyContact(data);
+  const getPatient = async () => {
+    if (!_.isEmpty(match.params)) {
+      const res = await PatientRepository.getPatient(match.params.id);
+      if (!_.isEmpty(res.data.PatientData_report)) {
+        const patient = res.data.PatientData_report[0];
+        await parsePatientData(patient);
+        console.log(patient);
+      } else {
+        alert("no patient data");
+      }
+    }
+  };
+
+  const parsePatientData = (data) => {
+    /* new fields from update
+      id
+      middlename
+      patientstatus
+      ward_id
+    */
+    const updatedData = { ...patient };
+    updatedData.address = data.rpi_address;
+    updatedData.age = data.rpi_age;
+    updatedData.birthdate = data.rpi_birthday;
+    updatedData.city = data.rpi_city;
+    updatedData.contact_number = data.rpi_contact;
+    updatedData.emergency_name = data.rpi_contact_name;
+    updatedData.emergency_contact_number = data.rpi_contact_number;
+    updatedData.emergency_relationship = data.rpi_contact_relationship;
+    updatedData.country = data.rpi_country;
+    updatedData.covid19_case = data.rpi_covid19;
+    updatedData.date_admitted = data.rpi_date_admitted;
+    updatedData.date_admitted = data.rpi_dateregistered;
+    updatedData.email = data.rpi_email_add;
+    updatedData.gender = data.rpi_gender;
+    updatedData.hmo = data.rpi_hmo;
+    updatedData.patientid = data.rpi_patiendid;
+    updatedData.firstname = data.rpi_patientfname;
+    updatedData.lastname = data.rpi_patientlname;
+    updatedData.middlename = data.rpi_patientmname;
+    updatedData.patientstatus = data.rpi_patientstatus;
+    updatedData.philhealth_number = data.rpi_philhealth_number;
+    updatedData.remarks = data.rpi_remarks;
+    updatedData.sss_gsis_number = data.rpi_sss_gsis_number;
+    updatedData.ward_id = data.rpi_ward_id;
+    setPatient(updatedData);
+    for (let [key, value] of Object.entries(updatedData)) {
+      setValue(key, value);
+    }
   };
 
   const validateInputs = (data) => {
     const response = {
       patientfname: data.firstname,
-      patientmname: "",
       patientlname: data.lastname,
       remarks: data.remarks,
       birthday: data.birthdate,
@@ -144,38 +197,65 @@ const PatientRegister = () => {
       sss_gsis: data.sss_gsis_number,
       philhealth: data.philhealth_number,
       hmo: data.hmo,
-      admission: data.date_admitted,
-      ward: "1",
+      admission: moment().format("YYYY-MM-DD HH:mm:ss"),
       emcontactname: data.emergency_name,
       emcontactnumber: data.emergency_contact_number,
       emrelationship: data.emergency_relationship,
+      ward: data.ward_id,
+      patientid: data.patientid,
+      patientmname: data.middlename,
+      patientstatus: data.patientstatus,
     };
     return response;
   };
 
   const onSubmit = async (data) => {
+    const { patientid } = data;
     const payload = validateInputs({ ...data });
     const formData = new FormData();
 
     // for (let [key, value] of Object.entries(payload)) {
     //   formData.append(key, value);
     // }
-
+    console.log(data);
     for (var key in payload) {
       formData.append(key, payload[key]);
     }
-
-    const result = await PatientRepository.createPatient(formData)
-      .then((res) => {
-        console.log(res);
-        if (res.data.addpatient_report) {
-          alert("success");
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (patientid) {
+      console.log("uopdate");
+      await PatientRepository.updatePatient(formData)
+        .then((res) => {
+          if (res.data.updatepatient_report) {
+            alert("Updated patient successfully");
+            history.push({ pathname: `/patient/details/${patientid}`, state: "" });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      await PatientRepository.createPatient(formData)
+        .then((res) => {
+          console.log(res);
+          if (res.data.addpatient_report) {
+            alert("Added patient successfully");
+            history.push({ pathname: `/patient/list`, state: "" });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   };
+
+  useEffect(() => {
+    register({ name: "covid19_case" }); // custom register react-select
+    register({ name: "gender" }); // custom register antd input
+    register({ name: "patientid" }); // custom register antd input
+    register({ name: "middlename" }); // custom register antd input
+    register({ name: "patientstatus" }); // custom register antd input
+    register({ name: "ward_id" }); // custom register antd input
+  }, [register]);
 
   return (
     <>
@@ -278,13 +358,14 @@ const PatientRegister = () => {
                   <Grid item xs={2} align="left">
                     <FormControl margin="dense" variant="outlined" className={classes.formControl}>
                       {/* <InputLabel htmlFor="grouped-select">Grouping</InputLabel> */}
+
                       <Select
                         id="grouped-select"
-                        labelId="covid-case"
-                        // value={patient.gender}
-                        // onChange={patientHandler}
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
                         name="gender"
-                        inputRef={register({ required: true })}
+                        // inputRef={register({ required: true })}
                       >
                         <MenuItem value="Male">Male</MenuItem>
                         <MenuItem value="Female">Female</MenuItem>
@@ -300,14 +381,14 @@ const PatientRegister = () => {
                   </Grid>
                   <Grid item xs={3} align="left">
                     <FormControl margin="dense" variant="outlined" className={classes.formControl}>
-                      {/* <InputLabel htmlFor="grouped-select">Grouping</InputLabel> */}
                       <Select
-                        id="grouped-select"
+                        error={errors.covid19_case}
+                        id="case-select"
                         labelId="covid-case"
-                        // value={patient.covid19_case}
-                        // onChange={patientHandler}
+                        value={patient.covid19_case || ""}
+                        onChange={patientHandler}
                         name="covid19_case"
-                        inputRef={register}
+                        // inputRef={register({ required: true })}
                       >
                         <ListSubheader>Confirmed Covid-19 Case</ListSubheader>
                         <MenuItem value="Stable or No Co-morbid">Stable or No Co-morbid</MenuItem>
@@ -322,13 +403,6 @@ const PatientRegister = () => {
                         <MenuItem value="Suspect">Suspect</MenuItem>
                       </Select>
                     </FormControl>
-
-                    {/* <TextField
-                    margin="dense"
-                    variant="outlined"
-
-
-                  /> */}
                   </Grid>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
@@ -434,7 +508,7 @@ const PatientRegister = () => {
                     <TextField
                       margin="dense"
                       variant="outlined"
-                      name="email_address"
+                      name="email"
                       // value={patient.email_address}
                       // onChange={patientHandler}
                       inputRef={register}

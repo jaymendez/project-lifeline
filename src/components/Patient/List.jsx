@@ -25,6 +25,7 @@ import {
   OutlinedInput,
   InputAdornment,
   FormHelperText,
+  Menu,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -40,12 +41,15 @@ import {
 import moment from "moment";
 // import MaterialTable from "material-table";
 import _ from "lodash";
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import MaterialTable from "../utils/components/table/MaterialTable";
 import { MTableToolbar } from "material-table";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const PatientRepository = RepositoryFactory.get("patient");
+const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -96,10 +100,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, name, calories, fat, carbs, protein) {
-  return { id, name, calories, fat, carbs, protein };
-}
-
 const PatientList = () => {
   const classes = useStyles();
   const [filter, setFilter] = useState({
@@ -107,18 +107,18 @@ const PatientList = () => {
     patientStatus: "",
   });
   const [ward, setWard] = useState("UP-PGH WARD 1");
-  const [maximumSlots] = useState(6);
-  const [monitors, setMonitors] = useState([
-    {
-      id: 1,
-      patients: [],
-      patientIds: [1, 2],
-      patientSlot: 5,
-    },
-    { id: 3, patients: [], patientIds: [4, 5], patientSlot: 3 },
-    { id: 5, patients: [], patientIds: [3], patientSlot: 3 },
-  ]);
   const [patients, setPatients] = useState([]);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [chosenPatient, setChosenPatient] = useState();
+
+  const toggleOptions = (event, patient) => {
+    setAnchorEl(event.currentTarget);
+    setChosenPatient(patient);
+  };
+
+  const closeOptions = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     const getPatients = async () => {
@@ -138,6 +138,28 @@ const PatientList = () => {
     }
     return data;
   };
+
+  const deleteHandler = () => {
+    closeOptions();
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes'
+    }).then((result) => {
+      if (result.value) {
+        // deletePatient()
+      }
+    })
+  };
+
+  const deletePatient = async (id) => {
+    const query = await PatientRepository.deletePatient(id);
+    console.log(query);
+  }
 
   const renderTable = () => {
     return (
@@ -174,7 +196,11 @@ const PatientList = () => {
                     <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
                   </TableCell> */}
                   <TableCell align="center">
-                    <IconButton style={{ float: "right" }} aria-label="options">
+                    <IconButton
+                      style={{ float: "right" }}
+                      aria-label="options"
+                      onClick={toggleOptions}
+                    >
                       <MoreVert />
                     </IconButton>
                   </TableCell>
@@ -186,6 +212,7 @@ const PatientList = () => {
       </TableContainer>
     );
   };
+
   const columns = [
     {
       title: "Name",
@@ -216,7 +243,7 @@ const PatientList = () => {
       title: "Actions",
       field: "tabledata.id",
       render: (rowData) => (
-        <IconButton style={{ float: "" }} aria-label="options">
+        <IconButton style={{ float: "" }} aria-label="options" onClick={e => toggleOptions(e, rowData)}>
           <MoreVert />
         </IconButton>
       ),
@@ -348,6 +375,16 @@ const PatientList = () => {
           {renderTable2()}
         </Grid>
       </Grid>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={closeOptions}
+      >
+        <MenuItem onClick={closeOptions}>Edit</MenuItem>
+        <MenuItem onClick={deleteHandler}>Delete</MenuItem>
+      </Menu>
     </>
   );
 };

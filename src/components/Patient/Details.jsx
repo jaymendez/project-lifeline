@@ -80,12 +80,7 @@ const PatientDetails = (props) => {
       /* Query to get patient */
       try {
         const { data } = await PatientRepository.getPatient(id);
-        console.log(data);
-        const index = data.search("<br>");
-        const parsedData = data.slice(0, index);
-        const jsonData = JSON.parse(parsedData);
-        setPatient(jsonData.PatientData_report[0]);
-        console.log(jsonData);
+        setPatient(data.PatientData_report[0]);
       } catch (e) {
         alert("no patient with that id");
         console.log(e);
@@ -125,7 +120,7 @@ const PatientDetails = (props) => {
                       Bed #:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.bed_number || 20}
+                      {patient.bed_number || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} align="left">
@@ -139,7 +134,7 @@ const PatientDetails = (props) => {
                       DATE ADMITTED:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_date_admitted || "1999/20/21"}
+                      {patient.rpi_date_admitted || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} align="left">
@@ -153,7 +148,7 @@ const PatientDetails = (props) => {
                       TIME ADMITTED:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_date_admitted || "04:43:45 PM"}
+                      {patient.rpi_date_admitted || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -170,7 +165,9 @@ const PatientDetails = (props) => {
                       NAME:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {`${patient.rpi_patientfname} ${patient.rpi_patientlname}` || "Cardo Dalisay"}
+                      {`${patient.rpi_patientfname || "----"} ${
+                        patient.rpi_patientlname || "----"
+                      }`}
                     </Typography>
                   </Grid>
                   <Grid item xs={2} />
@@ -185,7 +182,7 @@ const PatientDetails = (props) => {
                       GENDER:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_gender || "Male"}
+                      {patient.rpi_gender || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -202,7 +199,7 @@ const PatientDetails = (props) => {
                       DOB:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_birthday || "Sept. 21, 2001"}
+                      {patient.rpi_birthday || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} align="left">
@@ -216,7 +213,7 @@ const PatientDetails = (props) => {
                       AGE:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_age || 99}
+                      {patient.rpi_age || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={3} align="left">
@@ -230,7 +227,7 @@ const PatientDetails = (props) => {
                       CIVIL STATUS:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_civil_status || "Single"}
+                      {patient.rpi_civil_status || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -248,7 +245,7 @@ const PatientDetails = (props) => {
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
                       {patient.rpi_address ||
-                        "Unit 706 Pacific Grand Suites, Santander St., Dapitan, Manila Philippines"}
+                        "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -265,7 +262,7 @@ const PatientDetails = (props) => {
                       EMERGENCY CONTACT:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_contact_name || "Asawa ni Dalisay"}
+                      {patient.rpi_contact_name || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={2} />
@@ -280,7 +277,7 @@ const PatientDetails = (props) => {
                       RELATIONSHIP:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_contact_relationship || "Wife"}
+                      {patient.rpi_contact_relationship || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -321,26 +318,26 @@ const PatientDetails = (props) => {
               <Grid item xs={4}>
                 {/* 1st row */}
                 <Grid container>
-                  <Grid item xs={12} style={{marginBottom: 15}}>
+                  <Grid item xs={12} style={{ marginBottom: 15 }}>
                     <Grid container spacing={3}>
                       <Grid item xs>
                         <div style={{ backgroundColor: "#f66464", padding: "5px", color: "white" }}>
                           <Typography display="inline" variant="body1" color="inherit">
-                            {patient.rpi_covid19 || "CONFIRMED"}
+                            {patient.rpi_covid19 || "----"}
                           </Typography>
                         </div>
                       </Grid>
                       <Grid item xs>
                         <div style={{ backgroundColor: "#72b4ee", padding: "5px", color: "white" }}>
                           <Typography display="inline" variant="body1" color="inherit">
-                            {patient.rpi_covid19 || "Stable or no co morbid"}
+                            {patient.rpi_covid19 || "----"}
                           </Typography>
                         </div>
                       </Grid>
                       <Grid item xs>
                         <div style={{ backgroundColor: "#ebebeb", padding: "5px" }}>
                           <Typography display="inline" variant="body1" color="inherit">
-                            {patient.rpi_covid19 || "RxBOX sku 1234"}
+                            {patient.rpi_covid19 || "----"}
                           </Typography>
                         </div>
                       </Grid>
@@ -357,7 +354,7 @@ const PatientDetails = (props) => {
                       CONTACT NOS:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_contact || "0916123456"}
+                      {patient.rpi_contact || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} align="left">

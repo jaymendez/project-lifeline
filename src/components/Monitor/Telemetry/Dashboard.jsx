@@ -72,11 +72,16 @@ const TelemetryDashboard = () => {
   var channel = "mya";
   var event = "mya";
 
+
   useEffect(() => {
+    // var pusher = new Pusher(pusherKey, pusherOptions);
+    // console.log(pusher)
+
     var pusher = new Pusher(pusherKey, pusherOptions);
     // start listening for events
     pusher.subscribe("mya").bind(event, function (data) {
-      console.log(data);
+      console.log(JSON.parse(data));
+
       // for (key in data) {
       //   var value = data[key];
       //   console.log(data);

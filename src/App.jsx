@@ -45,6 +45,7 @@ function App() {
             <Route path="/patient/details/:id" component={PatientDetails} />
             <Route path="/patient/list" component={PatientList} />
             <Route path="/patient/register" component={PatientRegister} />
+            <Route path="/patient/update/:id" component={PatientRegister} />
             <Route path="/monitor/setup" component={SetupMonitor} />
             <Route path="/monitor/list" component={ListMonitor} />
             {/* <Route path="/monitor/create" component={CreateMonitor} /> */}
