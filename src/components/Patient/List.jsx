@@ -148,7 +148,7 @@ const PatientList = props => {
 
   const deleteHandler = () => {
     closeOptions();
-    Swal.fire({
+    MySwal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
@@ -169,7 +169,7 @@ const PatientList = props => {
     const { data } = await PatientRepository.deletePatient(id);
     if (data.deletepatient_report[0].deletepatient_report === "deleted") {
       // success
-      Swal.fire({
+      MySwal.fire({
         icon: 'success',
         title: 'Patient removed.',
         showConfirmButton: true,

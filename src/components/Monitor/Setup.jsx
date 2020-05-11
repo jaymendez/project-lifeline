@@ -98,6 +98,7 @@ function createData(id, name, calories, fat, carbs, protein) {
 
 const PatientList = () => {
   const classes = useStyles();
+  const rowRef = useRef();
   const [filter, setFilter] = useState({
     search: "",
     patientStatus: "",

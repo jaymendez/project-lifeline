@@ -19,6 +19,7 @@ import moment from "moment";
 import MomentUtils from "@date-io/moment";
 import _ from "lodash";
 import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
