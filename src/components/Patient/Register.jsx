@@ -18,12 +18,14 @@ import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
 import moment from "moment";
 import MomentUtils from "@date-io/moment";
 import _ from "lodash";
+import Swal from "sweetalert2";
 import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const PatientRepository = RepositoryFactory.get("patient");
+const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -165,7 +167,7 @@ const PatientRegister = (props) => {
     updatedData.email = data.rpi_email_add;
     updatedData.gender = data.rpi_gender;
     updatedData.hmo = data.rpi_hmo;
-    updatedData.patientid = data.rpi_patiendid;
+    updatedData.patientid = data.rpi_patientid;
     updatedData.firstname = data.rpi_patientfname;
     updatedData.lastname = data.rpi_patientlname;
     updatedData.middlename = data.rpi_patientmname;
@@ -229,8 +231,12 @@ const PatientRegister = (props) => {
       await PatientRepository.updatePatient(formData)
         .then((res) => {
           if (res.data.updatepatient_report) {
-            alert("Updated patient successfully");
-            history.push({ pathname: `/patient/details/${patientid}`, state: "" });
+            Swal.fire({
+              icon: "success",
+              title: "Patient updated",
+              showConfirmButton: true,
+              onClose: () => history.push({ pathname: `/patient/details/${patientid}`, state: "" }),
+            });
           }
         })
         .catch((err) => {
@@ -241,8 +247,12 @@ const PatientRegister = (props) => {
         .then((res) => {
           console.log(res);
           if (res.data.addpatient_report) {
-            alert("Added patient successfully");
-            history.push({ pathname: `/patient/list`, state: "" });
+            Swal.fire({
+              icon: "success",
+              title: "Patient added",
+              showConfirmButton: true,
+              onClose: () => history.push({ pathname: `/patient/list`, state: "" }),
+            });
           }
         })
         .catch((err) => {

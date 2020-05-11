@@ -100,7 +100,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const PatientList = () => {
+const PatientList = props => {
+  const { history } = props;
   const classes = useStyles();
   const [filter, setFilter] = useState({
     search: "",
@@ -114,18 +115,19 @@ const PatientList = () => {
   const toggleOptions = (event, patient) => {
     setAnchorEl(event.currentTarget);
     setChosenPatient(patient);
+    console.log(patient);
   };
 
   const closeOptions = () => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    const getPatients = async () => {
-      const result = await PatientRepository.getPatients();
-      setPatients(result.data.getpatientlist_report);
-    };
+  const getPatients = async () => {
+    const result = await PatientRepository.getPatients();
+    setPatients(result.data.getpatientlist_report);
+  };
 
+  useEffect(() => {
     getPatients();
   }, []);
 
@@ -137,6 +139,11 @@ const PatientList = () => {
       });
     }
     return data;
+  };
+
+  const updateHandler = () => {
+    const { rpi_patientid: id } = chosenPatient;
+    history.push({ pathname: `/patient/update/${id}`, state: "" });
   };
 
   const deleteHandler = () => {
@@ -152,13 +159,23 @@ const PatientList = () => {
     }).then((result) => {
       if (result.value) {
         // deletePatient()
+        const { rpi_patientid: id } = chosenPatient;
+        deletePatient(id);
       }
     });
   };
 
   const deletePatient = async (id) => {
-    const query = await PatientRepository.deletePatient(id);
-    console.log(query);
+    const { data } = await PatientRepository.deletePatient(id);
+    if (data.deletepatient_report[0].deletepatient_report === "deleted") {
+      // success
+      Swal.fire({
+        icon: 'success',
+        title: 'Patient removed.',
+        showConfirmButton: true,
+        onClose: () => getPatients(),
+      })
+    }
   };
 
   const renderTable = () => {
@@ -394,7 +411,7 @@ const PatientList = () => {
         open={Boolean(anchorEl)}
         onClose={closeOptions}
       >
-        <MenuItem onClick={closeOptions}>Edit</MenuItem>
+        <MenuItem onClick={updateHandler}>Edit</MenuItem>
         <MenuItem onClick={deleteHandler}>Delete</MenuItem>
       </Menu>
     </>

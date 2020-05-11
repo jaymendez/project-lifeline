@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import {
   Grid,
@@ -402,25 +402,33 @@ const PatientList = () => {
             Monitor
             {el.id}
           </Typography>
-          <Card className={classes.paper} style={{ backgroundColor: "#5c5c5c" }}>
-            <Grid alignItems="center" container>
-              <Grid align="left" item xs>
-                <IconButton aria-label="options" onClick={() => addPatientSlot(el.id)}>
-                  <LibraryAdd className={classes.whiteText} />
-                </IconButton>
-              </Grid>
-              <Grid align="right" item xs>
-                <IconButton aria-label="options" onClick={() => deleteMonitor(el.id)}>
-                  <Close className={classes.whiteText} onClick={() => deleteMonitor(el.id)} />
-                </IconButton>
-              </Grid>
-            </Grid>
-            <CardContent>
-              <Droppable droppableId={`monitor-${el.id}`}>
-                {(provided) => (
+          <Droppable droppableId={`monitor-${el.id}`}>
+            {(provided, snapshot) => (
+              <Card
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className={classes.paper}
+                style={
+                  snapshot.isDraggingOver
+                    ? { backgroundColor: "skyblue" }
+                    : { backgroundColor: "#5c5c5c" }
+                }
+              >
+                <Grid alignItems="center" container>
+                  <Grid align="left" item xs>
+                    <IconButton aria-label="options" onClick={() => addPatientSlot(el.id)}>
+                      <LibraryAdd className={classes.whiteText} />
+                    </IconButton>
+                  </Grid>
+                  <Grid align="right" item xs>
+                    <IconButton aria-label="options" onClick={() => deleteMonitor(el.id)}>
+                      <Close className={classes.whiteText} onClick={() => deleteMonitor(el.id)} />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+                <CardContent>
                   <Grid
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
+
                     spacing={1}
                     alignItems="center"
                     container
@@ -428,34 +436,57 @@ const PatientList = () => {
                     {renderPatients(i)}
                     {provided.placeholder}
                   </Grid>
-                )}
-              </Droppable>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            )}
+          </Droppable>
         </Grid>
       );
     });
   };
+  const filterPatients = () => {
+    let patientIds = monitors.map(el => {
+      return el.patientIds;
+    });
+    patientIds = patientIds.flat();
+    const filteredPatients = patients.filter(el => {
+      if (patientIds.indexOf(el.id) >= 0) {
+
+      }  else {
+        return el;
+      }
+    });
+    return filteredPatients;
+  };
 
   const renderTable = () => {
+    const filteredPatients = filterPatients();
+    console.log(filteredPatients);
     return (
       <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="center">Date Admitted</TableCell>
-              <TableCell align="center">Time Admitted</TableCell>
-              <TableCell align="center">Location</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Device</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <Droppable droppableId="drop-table">
-            {(provided) => (
-              <TableBody {...provided.droppableProps} ref={provided.innerRef}>
-                {patients.map((row, index) => (
+        <Droppable droppableId="drop-table">
+          {(provided, snapshot) => (
+            <Table
+              style={snapshot.isDraggingOver ? { backgroundColor: "skyblue" } : {}}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className={classes.table}
+              aria-label="simple table"
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell align="center">Date Admitted</TableCell>
+                  <TableCell align="center">Time Admitted</TableCell>
+                  <TableCell align="center">Location</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Device</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {filteredPatients.map((row, index) => (
                   <Draggable
                     // key={"draggableKey-" + index}
                     key={`key-${row.id}`}
@@ -471,13 +502,26 @@ const PatientList = () => {
                         {...draggableProvided.dragHandleProps}
                         key={row.name}
                       >
+                        {console.log(draggableProvided.innerRef)}
                         {draggableSnapshot.isDragging ? (
-                          <TableCell component="th" scope="row">
-                            {row.name}
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            ref={rowRef}
+                            style={{ border: "1px solid #4ba2e7", backgroundColor: "#4ba2e7" }}
+                          >
+                            <Grid alignItems="center" container>
+                              <Grid item xs={3}>
+                                <Person style={{ marginRight: 15, color: "white" }} />
+                              </Grid>
+                              <Grid item xs>
+                                <Typography style={{ color: "white" }}>{row.name}</Typography>
+                              </Grid>
+                            </Grid>
                           </TableCell>
                         ) : (
                           <>
-                            <TableCell component="th" scope="row">
+                            <TableCell ref={rowRef} component="th" scope="row">
                               {row.name}
                             </TableCell>
                             <TableCell align="center">SAMPLE DATE</TableCell>
@@ -505,12 +549,18 @@ const PatientList = () => {
                 ))}
                 {provided.placeholder}
               </TableBody>
-            )}
-          </Droppable>
-        </Table>
+            </Table>
+          )}
+        </Droppable>
       </TableContainer>
     );
   };
+  let isDrag = false;
+  const onBeforeCapture = event => {
+    // document.body.style.color = "orange";
+    // document.body.style.width = "200px";
+    isDrag = true;
+  }
 
   return (
     <>
@@ -522,7 +572,7 @@ const PatientList = () => {
           <LibraryAdd />
         </IconButton>
       </Typography>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onBeforeCapture={onBeforeCapture} onDragEnd={onDragEnd}>
         <Grid
           container
           direction="row"
