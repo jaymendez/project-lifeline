@@ -38,7 +38,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <Switch>
           <Route exact path="/testing" component={Testing} />
-          <Route path="/monitors" component={TelemetryDashboard} />
+          {/* <Route path="/monitors" component={TelemetryDashboard} /> */}
           <Route path="/telemetry/:id" component={TelemetryDashboard} />
           <MiniDrawer>
             <Route path="/home" component={Home} />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Paper, Typography, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
@@ -29,6 +29,18 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = () => {
   const classes = useStyles();
+  const [time, setTime] = useState();
+
+  const clock = () => {
+    setInterval(() => {
+      const timeString = new Date().toLocaleTimeString("en-US");
+      setTime(timeString);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    clock();
+  });
 
   const dateTime = () => {
     return (
@@ -50,7 +62,8 @@ const Home = () => {
               TIME:
             </Typography>
             <Typography align="left" variant="h5">
-              {moment().format("HH:mm:ss")}
+              {/* {moment().format("HH:mm:ss")} */}
+              {time}
             </Typography>
           </Paper>
         </Grid>

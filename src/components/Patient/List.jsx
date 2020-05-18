@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import clsx from "clsx";
 import {
   Grid,
@@ -45,7 +46,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import MaterialTable from "../utils/components/table/MaterialTable";
-import { MTableToolbar } from "material-table";
+import { MTableToolbar, MTableBodyRow } from "material-table";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const PatientRepository = RepositoryFactory.get("patient");
@@ -100,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const PatientList = props => {
+const PatientList = (props) => {
   const { history } = props;
   const classes = useStyles();
   const [filter, setFilter] = useState({
@@ -110,12 +111,12 @@ const PatientList = props => {
   const [ward, setWard] = useState("UP-PGH WARD 1");
   const [patients, setPatients] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [chosenPatient, setChosenPatient] = useState();
+  const [chosenPatient, setChosenPatient] = useState({});
 
   const toggleOptions = (event, patient) => {
     setAnchorEl(event.currentTarget);
     setChosenPatient(patient);
-    console.log(patient);
+    // console.log(patient);
   };
 
   const closeOptions = () => {
@@ -156,6 +157,9 @@ const PatientList = props => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes",
+      onClose: () => {
+        setChosenPatient({});
+      }
     }).then((result) => {
       if (result.value) {
         // deletePatient()
@@ -170,11 +174,11 @@ const PatientList = props => {
     if (data.deletepatient_report[0].deletepatient_report === "deleted") {
       // success
       MySwal.fire({
-        icon: 'success',
-        title: 'Patient removed.',
+        icon: "success",
+        title: "Patient removed.",
         showConfirmButton: true,
         onClose: () => getPatients(),
-      })
+      });
     }
   };
 
@@ -234,7 +238,17 @@ const PatientList = props => {
     {
       title: "Name",
       field: "rpi_patientlname",
-      render: (rowData) => `${rowData.rpi_patientfname} ${rowData.rpi_patientlname}`,
+      render: (rowData) => (
+        <Link
+          to={{
+            pathname: `/patient/details/${rowData.rpi_patientid}`,
+            state: {},
+          }}
+        >
+          {rowData.rpi_patientfname}
+          {rowData.rpi_patientlname}
+        </Link>
+      ),
       customFilterAndSearch: (value, rowData) => {
         if (
           rowData.rpi_patientfname.toLowerCase().includes(value.toLowerCase()) ||
@@ -276,12 +290,16 @@ const PatientList = props => {
           <MoreVert />
         </IconButton>
       ),
+      disableClick: true,
     },
   ];
 
   const renderTable2 = () => {
     return (
       <MaterialTable
+        onRowClick={(event, rowData) => {
+          history.push({ pathname: `/patient/details/${rowData.rpi_patientid}`, state: "" })
+        }}
         options={{
           search: true,
         }}

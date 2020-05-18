@@ -25,6 +25,7 @@ import {
   OutlinedInput,
   InputAdornment,
   FormHelperText,
+  CircularProgress
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -36,12 +37,19 @@ import {
   LibraryAdd,
   Close,
   Search,
+  DragIndicator,
 } from "@material-ui/icons";
 import moment from "moment";
 import _ from "lodash";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
+import Progress from "../utils/components/feedback/Progress";
 import AuthDialog from "../utils/components/dialog/AuthDialog";
+import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
+
+const MonitorRepository = RepositoryFactory.get("monitor");
+const PatientRepository = RepositoryFactory.get("patient");
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -96,9 +104,12 @@ function createData(id, name, calories, fat, carbs, protein) {
   return { id, name, calories, fat, carbs, protein };
 }
 
-const PatientList = () => {
+const MonitorSetup = () => {
   const classes = useStyles();
-  const rowRef = useRef();
+  const rowRef = useRef(null);
+  const dragRef = useRef(null);
+
+  const [monitorLoader, setMonitorLoader] = useState(true);
   const [filter, setFilter] = useState({
     search: "",
     patientStatus: "",
@@ -106,104 +117,158 @@ const PatientList = () => {
   const [ward, setWard] = useState("UP-PGH WARD 1");
   const [maximumSlots] = useState(6);
   const [monitors, setMonitors] = useState([
-    {
-      id: 1,
-      patients: [],
-      patientIds: [1, 2],
-      patientSlot: 5,
-    },
-    { id: 3, patients: [], patientIds: [4, 5], patientSlot: 3 },
-    { id: 5, patients: [], patientIds: [3], patientSlot: 3 },
+    // {
+    //   id: 1,
+    //   patients: [],
+    //   patientIds: [1, 2],
+    //   patientSlot: 5,
+    // },
+    // { id: 3, patients: [], patientIds: [4, 5], patientSlot: 3 },
+    // { id: 5, patients: [], patientIds: [3], patientSlot: 3 },
   ]);
   const [patients, setPatients] = useState([
-    {
-      id: 1,
-      name: "Patient 1",
-      monitor: 1,
-      monitorSection: 6,
-    },
-    {
-      id: 2,
-      name: "Patient 2",
-      monitor: 1,
-      monitorSection: 4,
-    },
-    {
-      id: 4,
-      name: "Fourth Pateint",
-      monitor: 1,
-      monitorSection: 1,
-    },
-    {
-      id: 5,
-      name: "Fifth Patient",
-      monitor: 1,
-      monitorSection: 2,
-    },
-    {
-      id: 3,
-      name: "Third boii",
-      monitor: 1,
-      monitorSection: 2,
-    },
-    {
-      id: 10,
-      name: "the tenth",
-      monitor: 1,
-      monitorSection: 2,
-    },
-    {
-      id: 11,
-      name: "X1 Boys",
-      monitor: 1,
-      monitorSection: 2,
-    },
+    // {
+    //   id: 1,
+    //   name: "Patient 1",
+    //   monitor: 1,
+    //   monitorSection: 6,
+    // },
+    // {
+    //   id: 2,
+    //   name: "Patient 2",
+    //   monitor: 1,
+    //   monitorSection: 4,
+    // },
+    // {
+    //   id: 4,
+    //   name: "Fourth Pateint",
+    //   monitor: 1,
+    //   monitorSection: 1,
+    // },
+    // {
+    //   id: 5,
+    //   name: "Fifth Patient",
+    //   monitor: 1,
+    //   monitorSection: 2,
+    // },
+    // {
+    //   id: 3,
+    //   name: "Third boii",
+    //   monitor: 1,
+    //   monitorSection: 2,
+    // },
+    // {
+    //   id: 10,
+    //   name: "the tenth",
+    //   monitor: 1,
+    //   monitorSection: 2,
+    // },
+    // {
+    //   id: 11,
+    //   name: "X1 Boys",
+    //   monitor: 1,
+    //   monitorSection: 2,
+    // },
   ]);
 
-  const addMonitor = () => {
-    const updateMonitors = [...monitors];
-    const newMonitor = {
-      id: 0,
-      patients: [],
-      patientIds: [],
-      patientSlot: 0,
-    };
-    const highestId = Math.max.apply(
-      Math,
-      updateMonitors.map(function (o) {
-        return o.id;
-      })
-    );
-    newMonitor.id = highestId + 1;
-    updateMonitors.push(newMonitor);
-    setMonitors(updateMonitors);
-  };
+  useEffect(() => {
+    getMonitorWithPatient();
+    getPatients();
+  }, [])
 
-  const deleteMonitor = (monitorId) => {
-    const updateMonitors = [...monitors];
-    const index = _.findIndex(updateMonitors, function (o) {
-      return o.id === monitorId;
+  // useEffect(() => {
+  //   getMonitorWithPatient();
+  //   getPatients();
+  // }, [monitors, patients])
+
+  const getMonitorWithPatient = async () => {
+    setMonitorLoader(true);
+    const { data } = await MonitorRepository.getMonitorsWithPatient();
+    const updatedMonitor = data.map(el => {
+      let { patientIds, ...data } = el;
+      if (_.isEmpty(patientIds)) {
+        patientIds = [];
+      } else {
+        patientIds = JSON.parse(patientIds);
+      }
+      return {
+        ...data,
+        patientIds
+      };
     });
-    updateMonitors.splice(index, 1);
-    setMonitors(updateMonitors);
+    setMonitors(updatedMonitor);
+    setMonitorLoader(false);
+    // console.log(updatedMonitor);
+  }
+
+  const getPatients = async () => {
+    const { data } = await PatientRepository.getPatients();
+    const parsedData = data.getpatientlist_report.map(el => {
+      const { rpi_patientid: id, ...patient } = el;
+      const name = `${patient.rpi_patientfname} ${patient.rpi_patientlname}`;
+      return {
+        id,
+        name,
+        ...patient
+      }
+    });
+    // console.log(parsedData);
+    setPatients(parsedData);
   };
 
-  const addPatientSlot = (monitorId) => {
+  const addMonitor = async () => {
+    // const updateMonitors = [...monitors];
+    // const newMonitor = {
+    //   id: 0,
+    //   patients: [],
+    //   patientIds: [],
+    //   patientSlot: 0,
+    // };
+    // const highestId = Math.max.apply(
+    //   Math,
+    //   updateMonitors.map(function (o) {
+    //     return o.id;
+    //   })
+    // );
+    // newMonitor.id = highestId + 1;
+    // updateMonitors.push(newMonitor);
+    // setMonitors(updateMonitors);
+    const res = await MonitorRepository.addMonitor();
+    getMonitorWithPatient();
+
+  };
+
+  const deleteMonitor = async (monitorId) => {
+    // const updateMonitors = [...monitors];
+    // const index = _.findIndex(updateMonitors, function (o) {
+    //   return o.id === monitorId;
+    // });
+    // updateMonitors.splice(index, 1);
+    // setMonitors(updateMonitors);
+    const res = await MonitorRepository.deleteMonitor(monitorId);
+    getMonitorWithPatient();
+
+  };
+
+  const addPatientSlot = async (monitorId) => {
     const updateMonitors = _.cloneDeep(monitors);
     const index = _.findIndex(updateMonitors, function (o) {
       return o.id === monitorId;
     });
     const monitor = updateMonitors[index];
     if (monitor.patientSlot < 6) {
-      monitor.patientSlot++;
+      // monitor.patientSlot++;
     } else {
       /* maximum patient slot */
+      return;
     }
-    console.log(updateMonitors);
-    setMonitors(updateMonitors);
+    // console.log(updateMonitors);
+    // setMonitors(updateMonitors);
+    const res = await MonitorRepository.incrementPatientSlot(monitor);
+    getMonitorWithPatient();
   };
 
-  const deletePatientSlot = (monitorId, patientId) => {
+  const deletePatientSlot = async (monitorId, patientId) => {
     /*
       if patientId exists, user deleted an occupied slot
       if patientId is null, user deleted an empty patient slot
@@ -217,16 +282,31 @@ const PatientList = () => {
       if (patientId) {
         const patientIndex = patientIds.indexOf(patientId);
         if (patientIndex >= 0) {
-          patientIds.splice(patientIndex, 1);
+          // remove patient at monitor join
+
+          // patientIds.splice(patientIndex, 1);
+          await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
         }
       } else {
-        updateMonitors[index].patientSlot--;
+        // Deduct patientSlot
+        // updateMonitors[index].patientSlot--;
+        await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
       }
     }
-    setMonitors(updateMonitors);
+    getMonitorWithPatient();
+    // setMonitors(updateMonitors);
   };
 
-  const onDragEnd = (result) => {
+  const onDragEnd = async (result) => {
+    setMonitorLoader(true);
+    const el = rowRef.current;
+    if (!el) {
+      return;
+    }
+    console.log('on dragend')
+    el.style.width = "5%";
+    // el.style.border = "";
+    // console.log(el);
     const response = {
       success: 0,
       errors: [],
@@ -269,15 +349,28 @@ const PatientList = () => {
       // Do nothing, no reorder.
       return;
     } else if (destination.droppableId === "drop-table") {
-      // Move to table
+      // Move to table, from monitor
+      /* remove from monitor */
       const patientIndex = sourceMonitor.patientIds.indexOf(patientId);
       if (patientIndex >= 0) {
-        sourceMonitor.patientIds.splice(patientIndex, 1);
+        // sourceMonitor.patientIds.splice(patientIndex, 1);
+        await MonitorRepository.removePatientFromMonitor(patientId, sourceMonitorId);
       }
     } else if (source.droppableId === "drop-table") {
-      // Move from table
+      // Move from table, to monitor
+      /* add to monitor */
       // will push patient_id to monitor.patientIds
-      destinationMonitor.patientIds.push(patientId);
+      // destinationMonitor.patientIds.push(patientId);
+      if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
+        response.errors.push("Monitor destination has no slot left.");
+        return;
+      }
+      if (destinationMonitor.patientIds.length > 6) {
+        response.errors.push("Monitor destination is full.");
+        return;
+      }
+      await MonitorRepository.addPatientToMonitor(patientId, destinationMonitorId);
+
     } else {
       if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
         response.errors.push("Monitor destination has no slot left.");
@@ -288,13 +381,20 @@ const PatientList = () => {
         return;
       }
       /* Move patient to other monitors */
-      const patientindex = sourceMonitor.patientIds.indexOf(patientId);
-      sourceMonitor.patientIds.splice(patientindex, 1);
-      destinationMonitor.patientIds.push(patientId);
+      /* add to monitor destination, remove from monitor source */
+      await MonitorRepository.addPatientToMonitor(patientId, destinationMonitorId);
+      await MonitorRepository.removePatientFromMonitor(patientId, sourceMonitorId);
+      // const patientindex = sourceMonitor.patientIds.indexOf(patientId);
+      // sourceMonitor.patientIds.splice(patientindex, 1);
+      // destinationMonitor.patientIds.push(patientId);
     }
     if (response.errors.length === 0) {
-      setMonitors(updateMonitors);
+      // await MonitorRepository.addPatientToMonitor(patientId, destinationMonitorId);
+      // setMonitors(updateMonitors);
     }
+    await getMonitorWithPatient();
+    setMonitorLoader(false);
+
   };
 
   const renderPatients = (monitorIndex) => {
@@ -303,7 +403,13 @@ const PatientList = () => {
     const patientsComponent = [];
     for (let i = 0; i <= patientSlot - 1; i++) {
       // const patient = monitors[monitorIndex]["patients"][i];
+      // if (_.isEmpty(monitors[monitorIndex].patientIds)) continue;
+
       const patientId = monitors[monitorIndex].patientIds[i];
+      // if (_.isEmpty(patientId)) {
+      //   continue;
+      // }
+      // console.log(patientId);
       const patientIndex = _.findIndex(patients, function (o) {
         return o.id === patientId;
       });
@@ -376,6 +482,7 @@ const PatientList = () => {
       }
     }
     const emptySlots = maximumSlots - patientSlot;
+    // console.log(emptySlots);
     for (let i = 0; i <= emptySlots - 1; i++) {
       patientsComponent.push(
         <Grid item xs="6" className={classes.invisible}>
@@ -386,7 +493,7 @@ const PatientList = () => {
               </Grid>
             </Grid>
             <CardContent className={classes.cardContent}>
-              <Typography className={classes.whiteText}>ADD PATIENT</Typography>
+              <Typography className={classes.whiteText}>ADD PATIENT--</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -396,7 +503,10 @@ const PatientList = () => {
   };
 
   const renderMonitors = () => {
-    return monitors.map((el, i) => {
+    let monitorsData = [...monitors];
+    monitorsData = monitorsData.filter(el => el.patientSlot <= 6);
+    return monitorsData.map((el, i) => {
+      const { patientSlot } = el;
       return (
         <Grid item xs={4}>
           <Typography align="left" variant="h5">
@@ -423,17 +533,12 @@ const PatientList = () => {
                   </Grid>
                   <Grid align="right" item xs>
                     <IconButton aria-label="options" onClick={() => deleteMonitor(el.id)}>
-                      <Close className={classes.whiteText} onClick={() => deleteMonitor(el.id)} />
+                      <Close className={classes.whiteText} />
                     </IconButton>
                   </Grid>
                 </Grid>
                 <CardContent>
-                  <Grid
-
-                    spacing={1}
-                    alignItems="center"
-                    container
-                  >
+                  <Grid spacing={1} alignItems="center" container>
                     {renderPatients(i)}
                     {provided.placeholder}
                   </Grid>
@@ -445,15 +550,15 @@ const PatientList = () => {
       );
     });
   };
+
   const filterPatients = () => {
-    let patientIds = monitors.map(el => {
+    let patientIds = monitors.map((el) => {
       return el.patientIds;
     });
     patientIds = patientIds.flat();
-    const filteredPatients = patients.filter(el => {
+    const filteredPatients = patients.filter((el) => {
       if (patientIds.indexOf(el.id) >= 0) {
-
-      }  else {
+      } else {
         return el;
       }
     });
@@ -476,6 +581,7 @@ const PatientList = () => {
             >
               <TableHead>
                 <TableRow>
+                  <TableCell></TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell align="center">Date Admitted</TableCell>
                   <TableCell align="center">Time Admitted</TableCell>
@@ -488,65 +594,67 @@ const PatientList = () => {
 
               <TableBody>
                 {filteredPatients.map((row, index) => (
-                  <Draggable
-                    // key={"draggableKey-" + index}
-                    key={`key-${row.id}`}
-                    draggableId={`table-${row.id}`}
-                    // draggableId={row.id}
-                    // index={`table-${row.id}`}
-                    index={row.id}
-                  >
-                    {(draggableProvided, draggableSnapshot) => (
-                      <TableRow
-                        ref={draggableProvided.innerRef}
-                        {...draggableProvided.draggableProps}
-                        {...draggableProvided.dragHandleProps}
-                        key={row.name}
-                      >
-                        {console.log(draggableProvided.innerRef)}
-                        {draggableSnapshot.isDragging ? (
+                  /* sol 1 */
+                  <TableRow key={row.name}>
+                    <Draggable
+                      // key={"draggableKey-" + index}
+                      key={`key-${row.id}`}
+                      draggableId={`table-${row.id}`}
+                      // draggableId={row.id}
+                      // index={`table-${row.id}`}
+                      index={row.id}
+                    >
+                      {(draggableProvided, draggableSnapshot) => (
+                        <>
                           <TableCell
-                            component="th"
+                            ref={node => {
+                              rowRef.current = node;
+                              draggableProvided.innerRef(node);
+                            }}
+                            {...draggableProvided.draggableProps}
+                            {...draggableProvided.dragHandleProps}
                             scope="row"
-                            ref={rowRef}
-                            style={{ border: "1px solid #4ba2e7", backgroundColor: "#4ba2e7" }}
                           >
-                            <Grid alignItems="center" container>
-                              <Grid item xs={3}>
-                                <Person style={{ marginRight: 15, color: "white" }} />
-                              </Grid>
-                              <Grid item xs>
-                                <Typography style={{ color: "white" }}>{row.name}</Typography>
-                              </Grid>
-                            </Grid>
+                            {draggableSnapshot.isDragging ? (
+                              <TableCell
+                                // ref={rowRef}
+                                scope="row"
+                                style={{ border: "1px solid #4ba2e7", backgroundColor: "#4ba2e7", width: "inherit"}}
+                              >
+                                <Grid alignItems="center" container style={{width: "300px"}}>
+                                  <Grid item xs={3}>
+                                    <Person style={{ marginRight: 15, color: "white"}} />
+                                  </Grid>
+                                  <Grid item xs>
+                                    <Typography style={{ color: "white" }}>{row.name}</Typography>
+                                  </Grid>
+                                </Grid>
+                              </TableCell>
+                            ) : (
+                              <DragIndicator />
+                            )}
                           </TableCell>
-                        ) : (
-                          <>
-                            <TableCell ref={rowRef} component="th" scope="row">
-                              {row.name}
-                            </TableCell>
-                            <TableCell align="center">SAMPLE DATE</TableCell>
-                            <TableCell align="center">SAMPLE TIME</TableCell>
-                            <TableCell align="center">SAMPLE Location</TableCell>
-                            <TableCell align="center">
-                              <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>
-                                STABLE
-                              </div>
-                            </TableCell>
-                            <TableCell align="center">
-                              <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
-                            </TableCell>
-                            <TableCell align="center">
-                              <IconButton style={{ float: "right" }} aria-label="options">
-                                <MoreVert />
-                              </IconButton>
-                            </TableCell>
-                          </>
-                        )}
-                      </TableRow>
-                      // </div>
-                    )}
-                  </Draggable>
+                        </>
+                      )}
+                    </Draggable>
+                    <TableCell component="th">{row.name}</TableCell>
+
+                    <TableCell align="center">SAMPLE DATE</TableCell>
+                    <TableCell align="center">SAMPLE TIME</TableCell>
+                    <TableCell align="center">SAMPLE Location</TableCell>
+                    <TableCell align="center">
+                      <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>STABLE</div>
+                    </TableCell>
+                    <TableCell align="center">
+                      <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton style={{ float: "right" }} aria-label="options">
+                        <MoreVert />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                  /* end sol 1 */
                 ))}
                 {provided.placeholder}
               </TableBody>
@@ -556,16 +664,19 @@ const PatientList = () => {
       </TableContainer>
     );
   };
-  let isDrag = false;
-  const onBeforeCapture = event => {
-    // document.body.style.color = "orange";
-    // document.body.style.width = "200px";
-    isDrag = true;
-  }
+  const onBeforeCapture = (event) => {
+    const el = rowRef.current;
+    el.style.border = 0;
+    if (!el) {
+      return;
+    }
+    // el.style.width = "10%";
+    // el.style.width = "500px";
+  };
 
   return (
     <>
-      <AuthDialog />
+      {/* <AuthDialog /> */}
       <DateTimePatientCards className={classes.row} />
       <Typography className={classes.row} align="left" variant="h4">
         {ward}: COVID-19 PATIENT LIST
@@ -581,7 +692,12 @@ const PatientList = () => {
           alignItems="center"
           className={classes.root}
           spacing={3}
+          style={{display: "relative"}}
         >
+          {/* <Progress open={true}/> */}
+          <CircularProgress style={ monitorLoader ? {display: "absolute", zIndex: "999"} : {display: "none"}}/>
+          {/* <CircularProgress /> */}
+          {/* {!monitorLoader ? renderMonitors() : null} */}
           {renderMonitors()}
         </Grid>
         <Grid
@@ -656,4 +772,4 @@ const PatientList = () => {
   );
 };
 
-export default PatientList;
+export default MonitorSetup;

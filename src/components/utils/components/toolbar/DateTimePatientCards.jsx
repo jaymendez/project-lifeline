@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Typography, Card, CardContent } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DateRange, Alarm, Person } from "@material-ui/icons";
@@ -23,7 +23,17 @@ const useStyles = makeStyles((theme) => ({
 
 const DateTimePatientCards = () => {
   const classes = useStyles();
+  const [time, setTime] = useState();
 
+  const clock = () => {
+    setInterval(() => {
+      const timeString = new Date().toLocaleTimeString("en-US");
+      setTime(timeString);
+    }, 1000);
+  };
+  useEffect(() => {
+    clock();
+  });
   return (
     <div>
       <Grid container direction="row" className={classes.root} spacing={1}>
@@ -60,7 +70,7 @@ const DateTimePatientCards = () => {
                   </Typography>
                   <Typography align="left" variant="h5">
                     {" "}
-                    {moment().format("HH:mm:ss")}
+                    {time}
                   </Typography>
                 </Grid>
                 <Grid item xs>
