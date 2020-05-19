@@ -6,6 +6,11 @@ export default {
   getMonitor(monitorId) {
 
   },
+
+  getMonitorWithPatient(patientId) {
+    return Repository.get(`/monitorWithPatient/${patientId}`);
+  },
+
   getMonitorsWithPatient() {
     return Repository.post("/get_monitor");
   },

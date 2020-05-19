@@ -172,16 +172,16 @@ const MonitorSetup = () => {
   ]);
 
   useEffect(() => {
-    getMonitorWithPatient();
+    getMonitorsWithPatient();
     getPatients();
   }, [])
 
   // useEffect(() => {
-  //   getMonitorWithPatient();
+  //   getMonitorsWithPatient();
   //   getPatients();
   // }, [monitors, patients])
 
-  const getMonitorWithPatient = async () => {
+  const getMonitorsWithPatient = async () => {
     setMonitorLoader(true);
     const { data } = await MonitorRepository.getMonitorsWithPatient();
     const updatedMonitor = data.map(el => {
@@ -234,7 +234,7 @@ const MonitorSetup = () => {
     // updateMonitors.push(newMonitor);
     // setMonitors(updateMonitors);
     const res = await MonitorRepository.addMonitor();
-    getMonitorWithPatient();
+    getMonitorsWithPatient();
 
   };
 
@@ -246,7 +246,7 @@ const MonitorSetup = () => {
     // updateMonitors.splice(index, 1);
     // setMonitors(updateMonitors);
     const res = await MonitorRepository.deleteMonitor(monitorId);
-    getMonitorWithPatient();
+    getMonitorsWithPatient();
 
   };
 
@@ -265,7 +265,7 @@ const MonitorSetup = () => {
     // console.log(updateMonitors);
     // setMonitors(updateMonitors);
     const res = await MonitorRepository.incrementPatientSlot(monitor);
-    getMonitorWithPatient();
+    getMonitorsWithPatient();
   };
 
   const deletePatientSlot = async (monitorId, patientId) => {
@@ -285,6 +285,7 @@ const MonitorSetup = () => {
           // remove patient at monitor join
 
           // patientIds.splice(patientIndex, 1);
+          console.log(patientId);
           await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
         }
       } else {
@@ -293,7 +294,7 @@ const MonitorSetup = () => {
         await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
       }
     }
-    getMonitorWithPatient();
+    getMonitorsWithPatient();
     // setMonitors(updateMonitors);
   };
 
@@ -392,7 +393,7 @@ const MonitorSetup = () => {
       // await MonitorRepository.addPatientToMonitor(patientId, destinationMonitorId);
       // setMonitors(updateMonitors);
     }
-    await getMonitorWithPatient();
+    await getMonitorsWithPatient();
     setMonitorLoader(false);
 
   };

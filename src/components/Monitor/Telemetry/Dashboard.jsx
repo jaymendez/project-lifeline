@@ -5,6 +5,9 @@ import clsx from "clsx";
 import Pusher from "pusher-js";
 import _ from "lodash";
 import TelemetryCard from "./Card";
+import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
+
+const MonitorRepository = RepositoryFactory.get("monitor");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TelemetryDashboard = () => {
+const TelemetryDashboard = props => {
+  const { match } = props;
   const classes = useStyles();
   const [patients, setPatients] = useState([
     {
@@ -54,6 +58,27 @@ const TelemetryDashboard = () => {
       monitorSection: 2,
     },
   ]);
+  const [monitor, setMonitor] = useState({});
+
+  const getMonitorWithPatientId = async () => {
+    if (!_.isEmpty(match.params)) {
+
+      const { data } = await MonitorRepository.getMonitorWithPatient(match.params.id);
+      const updatedMonitor = data.map(el => {
+        let { patientIds, ...data } = el;
+        if (_.isEmpty(patientIds)) {
+          patientIds = [];
+        } else {
+          patientIds = JSON.parse(patientIds);
+        }
+        return {
+          ...data,
+          patientIds
+        };
+      });
+      setMonitor(updatedMonitor[0]);
+    }
+  };
 
   const parsePatientsOrder = () => {
     const data = [...patients];
@@ -65,24 +90,20 @@ const TelemetryDashboard = () => {
     parsePatientsOrder();
   }, []);
 
-  const pusherOptions = {
-    cluster: "eu",
-    // options below are needed for pusher local dev server
-    encrypted: false,
-    httpHost: "206.189.87.169",
-    httpPort: "57003",
-    wsHost: "206.189.87.169",
-    wsPort: "57004",
-  };
-  const pusherKey = "22222222222222222222";
+  const initPusher = () => {
+    const pusherOptions = {
+      cluster: "eu",
+      // options below are needed for pusher local dev server
+      encrypted: false,
+      httpHost: "206.189.87.169",
+      httpPort: "57003",
+      wsHost: "206.189.87.169",
+      wsPort: "57004",
+    };
+    const pusherKey = "22222222222222222222";
 
-  var channel = "mya";
-  var event = "mya";
-
-
-  useEffect(() => {
-    // var pusher = new Pusher(pusherKey, pusherOptions);
-    // console.log(pusher)
+    var channel = "mya";
+    var event = "mya";
 
     var pusher = new Pusher(pusherKey, pusherOptions);
     // start listening for events
@@ -95,6 +116,14 @@ const TelemetryDashboard = () => {
       //   document.getElementById("notification").innerHTML = data;
       // }
     });
+  }
+
+
+
+  useEffect(() => {
+    initPusher();
+
+    getMonitorWithPatientId();
   }, []);
 
   const placedMonitors = () => {

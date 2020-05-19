@@ -238,17 +238,7 @@ const PatientList = (props) => {
     {
       title: "Name",
       field: "rpi_patientlname",
-      render: (rowData) => (
-        <Link
-          to={{
-            pathname: `/patient/details/${rowData.rpi_patientid}`,
-            state: {},
-          }}
-        >
-          {rowData.rpi_patientfname}
-          {rowData.rpi_patientlname}
-        </Link>
-      ),
+      render: (rowData) => `${rowData.rpi_patientfname} ${rowData.rpi_patientlname}`,
       customFilterAndSearch: (value, rowData) => {
         if (
           rowData.rpi_patientfname.toLowerCase().includes(value.toLowerCase()) ||
