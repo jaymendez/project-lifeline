@@ -33,38 +33,37 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TelemetryDashboard = props => {
+const TelemetryDashboard = (props) => {
   const { match } = props;
   const classes = useStyles();
   const [patients, setPatients] = useState([
-    {
-      name: "Sample Name",
-      monitor: 1,
-      monitorSection: 6,
-    },
-    {
-      name: "Sample Name",
-      monitor: 1,
-      monitorSection: 4,
-    },
-    {
-      name: "Sample Name",
-      monitor: 1,
-      monitorSection: 1,
-    },
-    {
-      name: "Sample Name",
-      monitor: 1,
-      monitorSection: 2,
-    },
+    // {
+    //   name: "Sample Name",
+    //   monitor: 1,
+    //   monitorSection: 6,
+    // },
+    // {
+    //   name: "Sample Name",
+    //   monitor: 1,
+    //   monitorSection: 4,
+    // },
+    // {
+    //   name: "Sample Name",
+    //   monitor: 1,
+    //   monitorSection: 1,
+    // },
+    // {
+    //   name: "Sample Name",
+    //   monitor: 1,
+    //   monitorSection: 2,
+    // },
   ]);
   const [monitor, setMonitor] = useState({});
 
   const getMonitorWithPatientId = async () => {
     if (!_.isEmpty(match.params)) {
-
       const { data } = await MonitorRepository.getMonitorWithPatient(match.params.id);
-      const updatedMonitor = data.map(el => {
+      const updatedMonitor = data.map((el) => {
         let { patientIds, ...data } = el;
         if (_.isEmpty(patientIds)) {
           patientIds = [];
@@ -73,7 +72,7 @@ const TelemetryDashboard = props => {
         }
         return {
           ...data,
-          patientIds
+          patientIds,
         };
       });
       setMonitor(updatedMonitor[0]);
@@ -116,9 +115,7 @@ const TelemetryDashboard = props => {
       //   document.getElementById("notification").innerHTML = data;
       // }
     });
-  }
-
-
+  };
 
   useEffect(() => {
     initPusher();
@@ -145,6 +142,15 @@ const TelemetryDashboard = props => {
     return monitors;
   };
 
+  const renderPatients = () => {
+    if (!_.isEmpty(monitor)) {
+      const { patientIds } = monitor;
+      return patientIds.map((el) => {
+        return <TelemetryCard />;
+      });
+    }
+  };
+
   return (
     <>
       <Grid
@@ -155,7 +161,8 @@ const TelemetryDashboard = props => {
         className={clsx(classes.root, classes.TelemetryDashboard)}
         spacing={3}
       >
-        {placedMonitors()}
+        {renderPatients()}
+        {/* {placedMonitors()} */}
       </Grid>
     </>
   );
