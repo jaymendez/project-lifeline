@@ -75,6 +75,7 @@ const PatientDetails = (props) => {
   const { match } = props;
   const [ward] = useState("UP-PGH WARD 1");
   const [patient, setPatient] = useState({});
+
   const getPatient = async (id) => {
     if (id) {
       /* Query to get patient */

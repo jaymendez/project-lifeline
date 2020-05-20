@@ -8,6 +8,7 @@ import TelemetryCard from "./Card";
 import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 
 const MonitorRepository = RepositoryFactory.get("monitor");
+const PatientRepository = RepositoryFactory.get("patient");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
 const TelemetryDashboard = (props) => {
   const { match } = props;
   const classes = useStyles();
+  const [rxboxData, setRxboxData] = useState([]);
   const [patients, setPatients] = useState([
     // {
     //   name: "Sample Name",
@@ -79,15 +81,67 @@ const TelemetryDashboard = (props) => {
     }
   };
 
+  const getPatient = async (id) => {
+    const result = {
+      success: 0,
+      data: "",
+      error: "",
+    };
+    if (id) {
+      /* Query to get patient */
+      try {
+        const { data } = await PatientRepository.getPatient(id);
+        // setPatient(data.PatientData_report[0]);
+        return data.PatientData_report[0];
+        // result.success = 1;
+        // result.data = data;
+      } catch (e) {
+        // alert("no patient with that id");
+        result.error = e;
+        // console.log(e);
+      }
+    } else {
+      result.error = "Missing id argument";
+    }
+    // return result;
+  };
+
+  const getPatients = async () => {
+    if (!_.isEmpty(monitor)) {
+      const { patientIds } = monitor;
+      if (patientIds.length) {
+        const patientsData = await Promise.all(
+          patientIds.map((el) => {
+            const patient = getPatient(el);
+            return patient;
+          })
+        );
+        setPatients(patientsData);
+      }
+    }
+  };
+
+  const getPatientRxboxData = (patientId) => {
+    const data = [...rxboxData];
+    if (data.length) {
+      const rxbox = data.filter(el => {
+        if (Array.isArray(patientId)) {
+          if (patientId.indexOf(el.tpo_subject) >= 0) {
+            return el;
+          }
+        } else if (el.tpo_subject === patientId) {
+          return el;
+        }
+      });
+      return rxbox;
+    }
+  };
+
   const parsePatientsOrder = () => {
     const data = [...patients];
     const sortedData = _.sortBy(data, ["monitorSection"]);
     setPatients(sortedData);
   };
-
-  React.useEffect(() => {
-    parsePatientsOrder();
-  }, []);
 
   const initPusher = () => {
     const pusherOptions = {
@@ -109,6 +163,18 @@ const TelemetryDashboard = (props) => {
     pusher.subscribe("mya").bind(event, function (data) {
       console.log(JSON.parse(data));
 
+      const parsedData = JSON.parse(data).map((el) => {
+        const { tpo_subject, tpo_code, tpo_value, tpo_dataerror, ...restData } = el;
+        const parsedSubject = parseInt(tpo_subject.slice(tpo_subject.search("/") + 1), 10);
+        return {
+          tpo_subject: parsedSubject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+        };
+      });
+      setRxboxData(parsedData);
+
       // for (key in data) {
       //   var value = data[key];z
       //   console.log(data);
@@ -119,9 +185,17 @@ const TelemetryDashboard = (props) => {
 
   useEffect(() => {
     initPusher();
-
     getMonitorWithPatientId();
   }, []);
+
+  useEffect(() => {
+    getPatients();
+  }, [monitor]);
+
+
+  useEffect(() => {
+    getPatientRxboxData([8, 9]);
+  }, [rxboxData]);
 
   const placedMonitors = () => {
     const monitors = [];
@@ -143,12 +217,31 @@ const TelemetryDashboard = (props) => {
   };
 
   const renderPatients = () => {
+    const patientCards = [];
     if (!_.isEmpty(monitor)) {
       const { patientIds } = monitor;
-      return patientIds.map((el) => {
-        return <TelemetryCard />;
-      });
+      if (patientIds.length) {
+        for (let index = 0; index < 6; index++) {
+          let paper = "";
+          const patientId = patientIds[index];
+          const patientIndex = _.findIndex(patients, function (e) {
+            return e.rpi_patientid === patientId;
+          });
+          const patient = patients[patientIndex];
+          // console.log(patient);
+          const rxboxData = getPatientRxboxData(patientId);
+          if (!_.isEmpty(patient)) {
+            paper = <TelemetryCard patient={patient} rxbox={rxboxData} />;
+          }
+          patientCards.push(
+            <Grid item xs={6}>
+              {paper}
+            </Grid>
+          );
+        }
+      }
     }
+    return patientCards;
   };
 
   return (
