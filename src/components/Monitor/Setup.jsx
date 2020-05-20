@@ -25,7 +25,8 @@ import {
   OutlinedInput,
   InputAdornment,
   FormHelperText,
-  CircularProgress
+  CircularProgress,
+  TablePagination
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -109,6 +110,9 @@ const MonitorSetup = () => {
   const rowRef = useRef(null);
   const dragRef = useRef(null);
 
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [monitorLoader, setMonitorLoader] = useState(true);
   const [filter, setFilter] = useState({
     search: "",
@@ -176,11 +180,15 @@ const MonitorSetup = () => {
     getPatients();
   }, [])
 
-  // useEffect(() => {
-  //   getMonitorsWithPatient();
-  //   getPatients();
-  // }, [monitors, patients])
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const getMonitorsWithPatient = async () => {
     setMonitorLoader(true);
     const { data } = await MonitorRepository.getMonitorsWithPatient();
@@ -553,13 +561,22 @@ const MonitorSetup = () => {
   };
 
   const filterPatients = () => {
+    const keyword = filter.search;
     let patientIds = monitors.map((el) => {
       return el.patientIds;
     });
     patientIds = patientIds.flat();
-    const filteredPatients = patients.filter((el) => {
+    let filteredPatients = patients.filter((el) => {
       if (patientIds.indexOf(el.id) >= 0) {
       } else {
+        return el;
+      }
+    });
+    filteredPatients = filteredPatients.filter((el) => {
+      if (el.rpi_patientfname.toLowerCase().includes(keyword)) {
+        return el;
+      }
+      if (el.rpi_patientlname.toLowerCase().includes(keyword)) {
         return el;
       }
     });
@@ -567,7 +584,8 @@ const MonitorSetup = () => {
   };
 
   const renderTable = () => {
-    const filteredPatients = filterPatients();
+    let filteredPatients = filterPatients();
+    filteredPatients = filteredPatients.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     console.log(filteredPatients);
     return (
       <TableContainer component={Paper}>
@@ -640,11 +658,17 @@ const MonitorSetup = () => {
                     </Draggable>
                     <TableCell component="th">{row.name}</TableCell>
 
-                    <TableCell align="center">SAMPLE DATE</TableCell>
-                    <TableCell align="center">SAMPLE TIME</TableCell>
+                    <TableCell align="center">{row.rpi_date_admitted.slice(0, 10)}</TableCell>
+                    <TableCell align="center">{row.rpi_date_admitted.slice(11)}</TableCell>
                     <TableCell align="center">SAMPLE Location</TableCell>
                     <TableCell align="center">
-                      <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>STABLE</div>
+                      <div
+                        // style={{ backgroundColor: "#4ba2e7", color: "white" }}
+                      >
+                        {row.rpi_covid19 ? (<span style={{ backgroundColor: "#4ba2e7", color: "white", padding: 8 }}>
+                      {row.rpi_covid19}
+                        </span>) : ""}
+                      </div>
                     </TableCell>
                     <TableCell align="center">
                       <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
@@ -769,8 +793,18 @@ const MonitorSetup = () => {
           </Grid>
         </Grid>
       </DragDropContext>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={patients.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
     </>
   );
 };
+
 
 export default MonitorSetup;
