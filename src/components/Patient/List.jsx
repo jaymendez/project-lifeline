@@ -50,6 +50,7 @@ import { MTableToolbar, MTableBodyRow } from "material-table";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const PatientRepository = RepositoryFactory.get("patient");
+const StatuscodesRepository = RepositoryFactory.get("statuscodes");
 const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
@@ -112,6 +113,7 @@ const PatientList = (props) => {
   const [patients, setPatients] = useState([]);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [chosenPatient, setChosenPatient] = useState({});
+  const [patientStatus, setPatientStatus] = useState([]);
 
   const toggleOptions = (event, patient) => {
     setAnchorEl(event.currentTarget);
@@ -123,6 +125,11 @@ const PatientList = (props) => {
     setAnchorEl(null);
   };
 
+  const getStatuscodes = async () => {
+    const { data } = await StatuscodesRepository.getPatientCovidCase();
+    setPatientStatus(data.filter_statuscode_report);
+  };
+
   const getPatients = async () => {
     const result = await PatientRepository.getPatients();
     setPatients(result.data.getpatientlist_report);
@@ -130,6 +137,7 @@ const PatientList = (props) => {
 
   useEffect(() => {
     getPatients();
+    getStatuscodes();
   }, []);
 
   const filteredPatients = () => {
@@ -159,7 +167,7 @@ const PatientList = (props) => {
       confirmButtonText: "Yes",
       onClose: () => {
         setChosenPatient({});
-      }
+      },
     }).then((result) => {
       if (result.value) {
         // deletePatient()
@@ -182,57 +190,57 @@ const PatientList = (props) => {
     }
   };
 
-  const renderTable = () => {
-    return (
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="center">Date Admitted</TableCell>
-              <TableCell align="center">Time Admitted</TableCell>
-              <TableCell align="center">Location</TableCell>
-              <TableCell align="center">Status</TableCell>
-              {/* <TableCell align="center">Device</TableCell> */}
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {patients.map((row, index) => (
-              <TableRow key={row.name}>
-                <>
-                  <TableCell component="th" scope="row">
-                    {row.rpi_patientfname}
-                    {row.rpi_patientlname}
-                  </TableCell>
-                  <TableCell align="center">{row.rpi_date_admitted}</TableCell>
-                  <TableCell align="center">{row.rpi_date_admitted}</TableCell>
-                  <TableCell align="center">WARD #</TableCell>
-                  <TableCell align="center">
-                    <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>
-                      {row.rpi_covid19}
-                    </div>
-                  </TableCell>
-                  {/* <TableCell align="center">
-                    <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
-                  </TableCell> */}
-                  <TableCell align="center">
-                    <IconButton
-                      style={{ float: "right" }}
-                      aria-label="options"
-                      onClick={toggleOptions}
-                    >
-                      <MoreVert />
-                    </IconButton>
-                  </TableCell>
-                </>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
-  };
+  // const renderTable = () => {
+  //   return (
+  //     <TableContainer component={Paper}>
+  //       <Table className={classes.table} aria-label="simple table">
+  //         <TableHead>
+  //           <TableRow>
+  //             <TableCell>Name</TableCell>
+  //             <TableCell align="center">Date Admitted</TableCell>
+  //             <TableCell align="center">Time Admitted</TableCell>
+  //             <TableCell align="center">Location</TableCell>
+  //             <TableCell align="center">Status</TableCell>
+  //             {/* <TableCell align="center">Device</TableCell> */}
+  //             <TableCell align="center">Actions</TableCell>
+  //           </TableRow>
+  //         </TableHead>
+  //         <TableBody>
+  //           {patients.map((row, index) => (
+  //             <TableRow key={row.name}>
+  //               <>
+  //                 <TableCell component="th" scope="row">
+  //                   {row.rpi_patientfname}
+  //                   {row.rpi_patientlname}
+  //                 </TableCell>
+  //                 <TableCell align="center">{row.rpi_date_admitted}</TableCell>
+  //                 <TableCell align="center">{row.rpi_date_admitted}</TableCell>
+  //                 <TableCell align="center">WARD #</TableCell>
+  //                 <TableCell align="center">
+  //                   <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>
+  //                     {row.rpi_covid19}
+  //                   </div>
+  //                 </TableCell>
+  //                 {/* <TableCell align="center">
+  //                   <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
+  //                 </TableCell> */}
+  //                 <TableCell align="center">
+  //                   <IconButton
+  //                     style={{ float: "right" }}
+  //                     aria-label="options"
+  //                     onClick={toggleOptions}
+  //                   >
+  //                     <MoreVert />
+  //                   </IconButton>
+  //                 </TableCell>
+  //               </>
+  //             </TableRow>
+  //           ))}
+  //         </TableBody>
+  //       </Table>
+  //     </TableContainer>
+  //   );
+  // };
 
   const columns = [
     {
@@ -284,11 +292,11 @@ const PatientList = (props) => {
     },
   ];
 
-  const renderTable2 = () => {
+  const renderTable = () => {
     return (
       <MaterialTable
         onRowClick={(event, rowData) => {
-          history.push({ pathname: `/patient/details/${rowData.rpi_patientid}`, state: "" })
+          history.push({ pathname: `/patient/details/${rowData.rpi_patientid}`, state: "" });
         }}
         options={{
           search: true,
@@ -313,12 +321,9 @@ const PatientList = (props) => {
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              <MenuItem value={"Stable or No co morbid"}>Stable or No co morbid</MenuItem>
-              <MenuItem value={"Stable or unstable co morbid"}>
-                Stable or unstable co morbid
-              </MenuItem>
-              <MenuItem value={"CAP-HR, sepsis, or shock"}>CAP-HR, sepsis, or shock</MenuItem>
-              <MenuItem value={"ARDS"}>ARDS</MenuItem>
+              {
+                patientStatus.map(el => <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>)
+              }
             </Select>
           </FormControl>
         }
@@ -409,7 +414,7 @@ const PatientList = (props) => {
               </FormControl> */}
             </Grid>
           </Grid>
-          {renderTable2()}
+          {renderTable()}
         </Grid>
       </Grid>
       <Menu

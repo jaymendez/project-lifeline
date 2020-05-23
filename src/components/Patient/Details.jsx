@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  TextField,
-  Divider,
-  FormControl,
-  MenuItem,
-  Select,
-  ListSubheader,
-  Paper,
-} from "@material-ui/core";
+import { Grid, Typography, TextField, Divider, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
+import Progress from "../utils/components/feedback/Progress";
 
 const PatientRepository = RepositoryFactory.get("patient");
 
@@ -75,6 +63,7 @@ const PatientDetails = (props) => {
   const { match } = props;
   const [ward] = useState("UP-PGH WARD 1");
   const [patient, setPatient] = useState({});
+  const [loader, setLoader] = useState(true);
 
   const getPatient = async (id) => {
     if (id) {
@@ -86,6 +75,7 @@ const PatientDetails = (props) => {
         alert("no patient with that id");
         console.log(e);
       }
+      setLoader(false);
     }
   };
 
@@ -95,6 +85,7 @@ const PatientDetails = (props) => {
 
   return (
     <>
+      <Progress open={loader} />
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography className={classes.row} align="left" variant="h4">
@@ -121,7 +112,7 @@ const PatientDetails = (props) => {
                       Bed #:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.bed_number || "----"}
+                      {patient.rpi_bednumber || "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} align="left">
@@ -135,7 +126,7 @@ const PatientDetails = (props) => {
                       DATE ADMITTED:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_date_admitted || "----"}
+                      {patient.rpi_date_admitted ? patient.rpi_date_admitted.slice(0, 10) : "----"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} align="left">
@@ -149,7 +140,7 @@ const PatientDetails = (props) => {
                       TIME ADMITTED:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_date_admitted || "----"}
+                      {patient.rpi_date_admitted ? patient.rpi_date_admitted.slice(10) : "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -228,7 +219,7 @@ const PatientDetails = (props) => {
                       CIVIL STATUS:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_civil_status || "----"}
+                      {patient.rpi_civilstatus || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -245,8 +236,7 @@ const PatientDetails = (props) => {
                       ADDRESS:
                     </Typography>
                     <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
-                      {patient.rpi_address ||
-                        "----"}
+                      {patient.rpi_address || "----"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -324,7 +314,7 @@ const PatientDetails = (props) => {
                       <Grid item xs>
                         <div style={{ backgroundColor: "#f66464", padding: "5px", color: "white" }}>
                           <Typography display="inline" variant="body1" color="inherit">
-                            {patient.rpi_covid19 || "----"}
+                            {patient.rpi_classification || "----"}
                           </Typography>
                         </div>
                       </Grid>
