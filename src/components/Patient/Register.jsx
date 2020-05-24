@@ -14,7 +14,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 // import { Close } from "@material-ui/icons";
-import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 import MomentUtils from "@date-io/moment";
 import _ from "lodash";
@@ -26,6 +26,8 @@ import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCar
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const PatientRepository = RepositoryFactory.get("patient");
+const StatuscodesRepository = RepositoryFactory.get("statuscodes");
+
 const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
@@ -74,6 +76,10 @@ const useStyles = makeStyles((theme) => ({
   formControl: {
     width: 200,
   },
+  smallFormControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
 }));
 
 const PatientRegister = (props) => {
@@ -101,10 +107,21 @@ const PatientRegister = (props) => {
     emergency_relationship: "",
     emergency_contact_number: "",
   });
+  const [patientStatus, setPatientStatus] = useState([]);
 
   useEffect(() => {
     getPatient();
+    getStatuscodes();
   }, []);
+
+  const getStatuscodes = async () => {
+    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
+    setPatientStatus([
+      ...covidStatus.filter_statuscode_report,
+      ...classificationStatus.filter_statuscode_report,
+    ]);
+  };
 
   const patientHandler = (e, modifiedVal = null) => {
     const data = { ...patient };
@@ -177,6 +194,9 @@ const PatientRegister = (props) => {
     updatedData.remarks = data.rpi_remarks;
     updatedData.sss_gsis_number = data.rpi_sss_gsis_number;
     updatedData.ward_id = data.rpi_ward_id;
+    updatedData.bed_number = data.rpi_bednumber;
+    updatedData.civil_status = data.rpi_civilstatus;
+    updatedData.patient_classification = data.rpi_classification;
     setPatient(updatedData);
     for (let [key, value] of Object.entries(updatedData)) {
       setValue(key, value);
@@ -208,12 +228,16 @@ const PatientRegister = (props) => {
       patientid: data.patientid,
       patientmname: data.middlename || "",
       patientstatus: data.patientstatus || "",
+      civil_status: data.civil_status,
+      bed_no: data.bed_number,
+      classification: data.patient_classification,
     };
     return response;
   };
 
   const onSubmit = async (data) => {
     const { patientid } = data;
+    console.log(data);
     const payload = validateInputs({ ...data });
     const formData = new FormData();
 
@@ -221,6 +245,7 @@ const PatientRegister = (props) => {
       if (typeof value === "undefined") {
         value = "";
       }
+      value = value.trim();
       formData.append(key, value);
     }
     console.log(data);
@@ -263,7 +288,9 @@ const PatientRegister = (props) => {
   };
 
   useEffect(() => {
-    register({ name: "covid19_case" }); // custom register react-select
+    register({ name: "covid19_case" }, { required: true }); // custom register react-select
+    register({ name: "patient_classification" }, { required: true }); // custom register react-select
+    register({ name: "civil_status" }, { required: true }); // custom register react-select
     register({ name: "gender" }); // custom register antd input
     register({ name: "patientid" }); // custom register antd input
     register({ name: "middlename" }); // custom register antd input
@@ -275,7 +302,9 @@ const PatientRegister = (props) => {
     <>
       <DateTimePatientCards className={classes.row} />
       <Typography align="left" variant="h4">
-        Register Patient
+        {/* Register Patient */}
+        {!_.isEmpty(match.params) ? "Update " : "Register "}
+        Patient
       </Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         {console.log(errors)}
@@ -302,7 +331,18 @@ const PatientRegister = (props) => {
                       name="lastname"
                       // value={patient.lastname}
                       // onChange={patientHandler}
-                      inputRef={register({ required: true })}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
                     />
                   </Grid>
                   <Grid item xs={2} align="left">
@@ -312,7 +352,8 @@ const PatientRegister = (props) => {
                   </Grid>
                   <Grid item xs={2} align="left">
                     <MuiPickersUtilsProvider utils={MomentUtils}>
-                      <DatePicker
+                      {/* <DatePicker
+                        margin="dense"
                         error={errors.birthdate}
                         inputVariant="outlined"
                         format="MM/DD/YYYY"
@@ -325,6 +366,25 @@ const PatientRegister = (props) => {
                           // setBirthdate(date.format("YYYY-MM-DD"));
                         }}
                         inputRef={register({ required: true })}
+                      /> */}
+                      <KeyboardDatePicker
+                        margin="dense"
+                        error={errors.birthdate}
+                        inputVariant="outlined"
+                        disableFuture
+                        clearable
+                        // value={selectedDate}
+                        // placeholder="10/10/2018"
+                        name="birthdate"
+                        value={patient.birthdate}
+                        onChange={(date) => {
+                          patientHandler(null, { key: "birthdate", value: date });
+                          // setBirthdate(date.format("YYYY-MM-DD"));
+                        }}
+                        inputRef={register({ required: true })}
+                        format="MM/DD/YYYY"
+                        // minDate={new Date()}
+                        // format="MM/dd/yyyy"
                       />
                     </MuiPickersUtilsProvider>
                   </Grid>
@@ -360,18 +420,91 @@ const PatientRegister = (props) => {
                       name="firstname"
                       // value={patient.firstname}
                       // onChange={patientHandler}
-                      inputRef={register({ required: true })}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
                     />
                   </Grid>
-
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                      Gender:
+                      Civil Status:
                     </Typography>
                   </Grid>
                   <Grid item xs={2} align="left">
                     <FormControl margin="dense" variant="outlined" className={classes.formControl}>
-                      {/* <InputLabel htmlFor="grouped-select">Grouping</InputLabel> */}
+                      <Select
+                        error={errors.civil_status}
+                        id="civilstatus-select"
+                        labelId="civil-status"
+                        value={patient.civil_status || ""}
+                        onChange={patientHandler}
+                        name="civil_status"
+                        // inputRef={register({ required: true })}
+                      >
+                        <MenuItem value={"Single"}>Single</MenuItem>
+                        <MenuItem value={"Married"}>Married</MenuItem>
+                        <MenuItem value={"Widowed"}>Widowed</MenuItem>
+                        <MenuItem value={"Others"}>Others</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography variant="body1" color="textSecondary" gutterBottom>
+                      Gender:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <FormControl
+                      margin="dense"
+                      className={classes.smallFormControl}
+                      variant="outlined"
+                    >
+                      <Select
+                        id="grouped-select"
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
+                        name="gender"
+                        // inputRef={register({ required: true })}
+                        autoWidth
+                      >
+                        <MenuItem value={"Male"}>Male</MenuItem>
+                        <MenuItem value={"Female"}>Female</MenuItem>
+                      </Select>
+                    </FormControl>
+                    {/* <FormControl className={classes.smallFormControl} variant="outlined">
+                      <Select
+                        labelId="demo-simple-select-autowidth-label"
+                        id="demo-simple-select-autowidth"
+                        value={patient.civil_status || ""}
+                        onChange={patientHandler}
+                        autoWidth
+                      >
+                        <MenuItem value="">
+                          <em>None</em>
+                        </MenuItem>
+                        <MenuItem value={10}>Ten</MenuItem>
+                        <MenuItem value={20}>Twenty</MenuItem>
+                        <MenuItem value={30}>Thirtyyyyyy</MenuItem>
+                      </Select>
+                    </FormControl> */}
+                  </Grid>
+                  {/* <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Civil Status:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
 
                       <Select
                         id="grouped-select"
@@ -385,6 +518,71 @@ const PatientRegister = (props) => {
                         <MenuItem value="Female">Female</MenuItem>
                       </Select>
                     </FormControl>
+                  </Grid> */}
+                  {/* <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Gender:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+
+                      <Select
+                        id="grouped-select"
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
+                        name="gender"
+                        // inputRef={register({ required: true })}
+                      >
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid> */}
+                </Grid>
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Classification:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.patient_classification}
+                        id="case-select"
+                        labelId="patient-classification"
+                        value={patient.patient_classification || ""}
+                        onChange={patientHandler}
+                        name="patient_classification"
+                        // inputRef={register({ required: true })}
+                      >
+                        {/* <ListSubheader>Classification</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "PATIENT CLASSIFICATION") {
+                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Note/s:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      rows={3}
+                      multiline
+                      name="remarks"
+                      // value={patient.remarks}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" className={classes.gridInputMargin}>
@@ -404,35 +602,40 @@ const PatientRegister = (props) => {
                         name="covid19_case"
                         // inputRef={register({ required: true })}
                       >
-                        <ListSubheader>Confirmed Covid-19 Case</ListSubheader>
-                        <MenuItem value="Stable or No Co-morbid">Stable or No Co-morbid</MenuItem>
-                        <MenuItem value="Stable or Unstable Co-morbid">
-                          Stable or Unstable Co-morbid
-                        </MenuItem>
-                        <MenuItem value="CAP-HR, Sepsis or Shock">CAP-HR, Sepsis or Shock</MenuItem>
-                        <MenuItem value="ARDS">ARDS</MenuItem>
-                        <ListSubheader>PUI</ListSubheader>
-                        <MenuItem value="Confirmed">Confirmed</MenuItem>
-                        <MenuItem value="Probable">Probable</MenuItem>
-                        <MenuItem value="Suspect">Suspect</MenuItem>
+                        {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "PATIENT COVID CASE") {
+                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
                       </Select>
                     </FormControl>
                   </Grid>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                      Note/s:
+                      Bed No.:
                     </Typography>
                   </Grid>
                   <Grid item xs={3} align="left">
                     <TextField
+                      error={errors.bed_number}
                       margin="dense"
                       variant="outlined"
-                      rows={3}
-                      multiline
-                      name="remarks"
+                      name="bed_number"
                       // value={patient.remarks}
                       // onChange={patientHandler}
-                      inputRef={register}
+                      inputRef={register({
+                        validate: {
+                          positive: (value) => parseInt(value, 10) > 0,
+                          InvalidInput: (value) => {
+                            if (!value.replace(/\s/g, '').length) {
+                              return "Input is empty or has only spaces";
+                            }
+                          },
+                        },
+                      })}
+
+                      // inputRef={register({ min: 1 })}
                     />
                   </Grid>
                 </Grid>
@@ -648,7 +851,9 @@ const PatientRegister = (props) => {
                   spacing={2}
                 >
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
-                    <Button color="secondary">Cancel</Button>
+                    <Button color="secondary" onClick={() => history.push("/patient/list")}>
+                      Cancel
+                    </Button>
                   </Grid>
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
                     <Button type="submit" variant="contained" color="primary">

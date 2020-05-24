@@ -50,7 +50,7 @@ import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
-
+const StatuscodesRepository = RepositoryFactory.get("statuscodes");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -101,15 +101,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function createData(id, name, calories, fat, carbs, protein) {
-  return { id, name, calories, fat, carbs, protein };
-}
 
 const MonitorSetup = () => {
   const classes = useStyles();
   const rowRef = useRef(null);
   const dragRef = useRef(null);
-
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -120,64 +116,14 @@ const MonitorSetup = () => {
   });
   const [ward, setWard] = useState("UP-PGH WARD 1");
   const [maximumSlots] = useState(6);
-  const [monitors, setMonitors] = useState([
-    // {
-    //   id: 1,
-    //   patients: [],
-    //   patientIds: [1, 2],
-    //   patientSlot: 5,
-    // },
-    // { id: 3, patients: [], patientIds: [4, 5], patientSlot: 3 },
-    // { id: 5, patients: [], patientIds: [3], patientSlot: 3 },
-  ]);
-  const [patients, setPatients] = useState([
-    // {
-    //   id: 1,
-    //   name: "Patient 1",
-    //   monitor: 1,
-    //   monitorSection: 6,
-    // },
-    // {
-    //   id: 2,
-    //   name: "Patient 2",
-    //   monitor: 1,
-    //   monitorSection: 4,
-    // },
-    // {
-    //   id: 4,
-    //   name: "Fourth Pateint",
-    //   monitor: 1,
-    //   monitorSection: 1,
-    // },
-    // {
-    //   id: 5,
-    //   name: "Fifth Patient",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-    // {
-    //   id: 3,
-    //   name: "Third boii",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-    // {
-    //   id: 10,
-    //   name: "the tenth",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-    // {
-    //   id: 11,
-    //   name: "X1 Boys",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-  ]);
+  const [monitors, setMonitors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [patientStatus, setPatientStatus] = useState([]);
 
   useEffect(() => {
     getMonitorsWithPatient();
     getPatients();
+    getStatuscodes();
   }, [])
 
 
@@ -189,6 +135,12 @@ const MonitorSetup = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const getStatuscodes = async () => {
+    const { data } = await StatuscodesRepository.getPatientCovidCase();
+    setPatientStatus(data.filter_statuscode_report);
+  }
+
   const getMonitorsWithPatient = async () => {
     setMonitorLoader(true);
     const { data } = await MonitorRepository.getMonitorsWithPatient();
@@ -755,10 +707,9 @@ const MonitorSetup = () => {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    <MenuItem value={10}>Stable or No co morbid</MenuItem>
-                    <MenuItem value={20}>Stable or unstable co morbid</MenuItem>
-                    <MenuItem value={30}>CAP-HR, sepsis, or shock</MenuItem>
-                    <MenuItem value={40}>ARDS</MenuItem>
+                    {
+                      patientStatus.map(el => <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>)
+                    }
                   </Select>
                 </FormControl>
               </Grid>
