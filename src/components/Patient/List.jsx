@@ -245,7 +245,7 @@ const PatientList = (props) => {
   const columns = [
     {
       title: "Name",
-      field: "rpi_patientlname",
+      field: "rpi_patientfname",
       render: (rowData) => `${rowData.rpi_patientfname} ${rowData.rpi_patientlname}`,
       customFilterAndSearch: (value, rowData) => {
         if (
@@ -268,17 +268,18 @@ const PatientList = (props) => {
     },
     {
       title: "Bed No.",
-      field: "name",
+      field: "rpi_bednumber",
       render: (rowData) => `${rowData.rpi_bednumber}`,
     },
     {
       title: "Status",
-      field: "name",
+      field: "rpi_covid19",
       render: (rowData) => `${rowData.rpi_covid19}`,
     },
     {
       title: "Actions",
       field: "tabledata.id",
+      sorting: false,
       render: (rowData) => (
         <IconButton
           style={{ float: "" }}
