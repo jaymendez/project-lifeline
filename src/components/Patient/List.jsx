@@ -269,7 +269,7 @@ const PatientList = (props) => {
     {
       title: "Bed No.",
       field: "name",
-      render: (rowData) => `2`,
+      render: (rowData) => `${rowData.rpi_bednumber}`,
     },
     {
       title: "Status",

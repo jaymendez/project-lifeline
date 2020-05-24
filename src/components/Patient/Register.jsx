@@ -14,7 +14,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 // import { Close } from "@material-ui/icons";
-import { MuiPickersUtilsProvider, DatePicker } from "@material-ui/pickers";
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 import MomentUtils from "@date-io/moment";
 import _ from "lodash";
@@ -245,6 +245,7 @@ const PatientRegister = (props) => {
       if (typeof value === "undefined") {
         value = "";
       }
+      value = value.trim();
       formData.append(key, value);
     }
     console.log(data);
@@ -288,8 +289,8 @@ const PatientRegister = (props) => {
 
   useEffect(() => {
     register({ name: "covid19_case" }, { required: true }); // custom register react-select
-    register({ name: "patient_classification"}, { required: true }); // custom register react-select
-    register({ name: "civil_status"}, { required: true }); // custom register react-select
+    register({ name: "patient_classification" }, { required: true }); // custom register react-select
+    register({ name: "civil_status" }, { required: true }); // custom register react-select
     register({ name: "gender" }); // custom register antd input
     register({ name: "patientid" }); // custom register antd input
     register({ name: "middlename" }); // custom register antd input
@@ -301,7 +302,9 @@ const PatientRegister = (props) => {
     <>
       <DateTimePatientCards className={classes.row} />
       <Typography align="left" variant="h4">
-        Register Patient
+        {/* Register Patient */}
+        {!_.isEmpty(match.params) ? "Update " : "Register "}
+        Patient
       </Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         {console.log(errors)}
@@ -328,7 +331,18 @@ const PatientRegister = (props) => {
                       name="lastname"
                       // value={patient.lastname}
                       // onChange={patientHandler}
-                      inputRef={register({ required: true })}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
                     />
                   </Grid>
                   <Grid item xs={2} align="left">
@@ -338,7 +352,7 @@ const PatientRegister = (props) => {
                   </Grid>
                   <Grid item xs={2} align="left">
                     <MuiPickersUtilsProvider utils={MomentUtils}>
-                      <DatePicker
+                      {/* <DatePicker
                         margin="dense"
                         error={errors.birthdate}
                         inputVariant="outlined"
@@ -352,6 +366,25 @@ const PatientRegister = (props) => {
                           // setBirthdate(date.format("YYYY-MM-DD"));
                         }}
                         inputRef={register({ required: true })}
+                      /> */}
+                      <KeyboardDatePicker
+                        margin="dense"
+                        error={errors.birthdate}
+                        inputVariant="outlined"
+                        disableFuture
+                        clearable
+                        // value={selectedDate}
+                        // placeholder="10/10/2018"
+                        name="birthdate"
+                        value={patient.birthdate}
+                        onChange={(date) => {
+                          patientHandler(null, { key: "birthdate", value: date });
+                          // setBirthdate(date.format("YYYY-MM-DD"));
+                        }}
+                        inputRef={register({ required: true })}
+                        format="MM/DD/YYYY"
+                        // minDate={new Date()}
+                        // format="MM/dd/yyyy"
                       />
                     </MuiPickersUtilsProvider>
                   </Grid>
@@ -387,7 +420,18 @@ const PatientRegister = (props) => {
                       name="firstname"
                       // value={patient.firstname}
                       // onChange={patientHandler}
-                      inputRef={register({ required: true })}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
                     />
                   </Grid>
                   <Grid item xs={2} align="left">
@@ -514,7 +558,7 @@ const PatientRegister = (props) => {
                         name="patient_classification"
                         // inputRef={register({ required: true })}
                       >
-                        <ListSubheader>Classification</ListSubheader>
+                        {/* <ListSubheader>Classification</ListSubheader> */}
                         {patientStatus.map((el) => {
                           if (el.rps_category === "PATIENT CLASSIFICATION") {
                             return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
@@ -558,7 +602,7 @@ const PatientRegister = (props) => {
                         name="covid19_case"
                         // inputRef={register({ required: true })}
                       >
-                        <ListSubheader>Confirmed Covid-19 Case</ListSubheader>
+                        {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
                         {patientStatus.map((el) => {
                           if (el.rps_category === "PATIENT COVID CASE") {
                             return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
@@ -583,6 +627,11 @@ const PatientRegister = (props) => {
                       inputRef={register({
                         validate: {
                           positive: (value) => parseInt(value, 10) > 0,
+                          InvalidInput: (value) => {
+                            if (!value.replace(/\s/g, '').length) {
+                              return "Input is empty or has only spaces";
+                            }
+                          },
                         },
                       })}
 
@@ -802,7 +851,9 @@ const PatientRegister = (props) => {
                   spacing={2}
                 >
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
-                    <Button color="secondary">Cancel</Button>
+                    <Button color="secondary" onClick={() => history.push("/patient/list")}>
+                      Cancel
+                    </Button>
                   </Grid>
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
                     <Button type="submit" variant="contained" color="primary">
