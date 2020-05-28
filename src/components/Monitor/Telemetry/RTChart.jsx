@@ -8,15 +8,15 @@ import { area, curveMonotoneX } from 'd3-shape'
 import * as time from 'd3-time'
 import { timeFormat } from 'd3-time-format'
 const data = generateDrinkStats(18)
+
 const commonProperties = {
   width: 550,
-  height: 100,
+  height: 80,
   // margin: { top: 20, right: 20, bottom: 60, left: 80 },
   data,
   animate: true,
   enableSlices: 'x',
 }
-
 class RealTimeChart extends Component {
   constructor(props) {
     super(props);
@@ -29,7 +29,7 @@ class RealTimeChart extends Component {
     this.state = {
       dataA: range(100).map((i) => ({
         x: time.timeMinute.offset(date, i * 30),
-        y: 10 + Math.round(Math.random() * 20),
+        y: 30 + Math.round(Math.random() * 20),
       })),
       // dataB: range(100).map((i) => ({
       //   x: time.timeMinute.offset(date, i * 30),
@@ -56,7 +56,7 @@ class RealTimeChart extends Component {
     const dataA = this.state.dataA.slice(1);
     dataA.push({
       x: time.timeMinute.offset(last(dataA).x, 30),
-      y: 10 + Math.round(Math.random() * 20),
+      y: 10 + Math.round(Math.random() * 60),
     });
     // const dataB = this.state.dataB.slice(1);
     // dataB.push({

@@ -1,13 +1,14 @@
 import React from "react";
 import { ResponsiveBar } from "@nivo/bar";
-import data from "./bar-data.json";
+import data from "./patients-data.json";
 
-const BarChart = () => {
+const BarChart = props => {
+  const { data } = props;
   return (
     <ResponsiveBar
-      data={data}
-      keys={["hot dog", "burger", "sandwich", "kebab", "fries", "donut"]}
-      indexBy="country"
+      data={data.data}
+      keys={data.keys}
+      indexBy={data.index}
       margin={{ top: 75, right: 130, bottom: 75, left: 60 }}
       padding={0.3}
       colors={{ scheme: "nivo" }}
@@ -53,7 +54,8 @@ const BarChart = () => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: "country",
+        // legend: "country",
+        legend: "",
         legendPosition: "middle",
         legendOffset: 32,
       }}
@@ -61,7 +63,8 @@ const BarChart = () => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: "food",
+        // legend: "patients",
+        legend: "",
         legendPosition: "middle",
         legendOffset: -40,
       }}
@@ -69,19 +72,20 @@ const BarChart = () => {
       labelSkipHeight={12}
       labelTextColor={{ from: "color", modifiers: [["darker", 1.6]] }}
       legends={[
+
         {
           dataFrom: "keys",
-          anchor: "bottom-right",
-          direction: "column",
+          anchor: "top",
+          direction: "row",
           justify: false,
-          translateX: 120,
-          translateY: 0,
-          itemsSpacing: 2,
-          itemWidth: 100,
-          itemHeight: 20,
+          translateX: 12,
+          translateY: -20,
+          itemsSpacing: 40,
+          itemWidth: 170,
+          itemHeight: 10,
           itemDirection: "left-to-right",
           itemOpacity: 0.85,
-          symbolSize: 20,
+          symbolSize: 25,
           effects: [
             {
               on: "hover",

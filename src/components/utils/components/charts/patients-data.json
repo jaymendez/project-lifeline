@@ -1,0 +1,88 @@
+{
+  "data": [
+    {
+      "date": "March 25",
+      "stable or no co-morbid": 193,
+      "stable or no co-morbidColor": "hsl(213, 70%, 50%)",
+      "stable or unstable co-morbid": 103,
+      "stable or unstable co-morbidColor": "hsl(239, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 162,
+      "CAP-HR, sepsis or shockColor": "hsl(57, 70%, 50%)",
+      "ARDS": 81,
+      "ARDSColor": "hsl(126, 70%, 50%)"
+    },
+    {
+      "date": "March 26",
+      "stable or no co-morbid": 7,
+      "stable or no co-morbidColor": "hsl(67, 70%, 50%)",
+      "stable or unstable co-morbid": 72,
+      "stable or unstable co-morbidColor": "hsl(147, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 24,
+      "CAP-HR, sepsis or shockColor": "hsl(259, 70%, 50%)",
+      "ARDS": 10,
+      "ARDSColor": "hsl(150, 70%, 50%)"
+    },
+    {
+      "date": "March 27",
+      "stable or no co-morbid": 5,
+      "stable or no co-morbidColor": "hsl(90, 70%, 50%)",
+      "stable or unstable co-morbid": 25,
+      "stable or unstable co-morbidColor": "hsl(357, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 109,
+      "CAP-HR, sepsis or shockColor": "hsl(331, 70%, 50%)",
+      "ARDS": 43,
+      "ARDSColor": "hsl(337, 70%, 50%)"
+    },
+    {
+      "date": "March 28",
+      "stable or no co-morbid": 173,
+      "stable or no co-morbidColor": "hsl(277, 70%, 50%)",
+      "stable or unstable co-morbid": 153,
+      "stable or unstable co-morbidColor": "hsl(33, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 137,
+      "CAP-HR, sepsis or shockColor": "hsl(19, 70%, 50%)",
+      "ARDS": 151,
+      "ARDSColor": "hsl(192, 70%, 50%)"
+    },
+    {
+      "date": "March 29",
+      "stable or no co-morbid": 162,
+      "stable or no co-morbidColor": "hsl(76, 70%, 50%)",
+      "stable or unstable co-morbid": 24,
+      "stable or unstable co-morbidColor": "hsl(72, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 0,
+      "CAP-HR, sepsis or shockColor": "hsl(191, 70%, 50%)",
+      "ARDS": 40,
+      "ARDSColor": "hsl(353, 70%, 50%)"
+    },
+    {
+      "date": "March 30",
+      "stable or no co-morbid": 188,
+      "stable or no co-morbidColor": "hsl(182, 70%, 50%)",
+      "stable or unstable co-morbid": 39,
+      "stable or unstable co-morbidColor": "hsl(308, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 27,
+      "CAP-HR, sepsis or shockColor": "hsl(193, 70%, 50%)",
+      "ARDS": 3,
+      "ARDSColor": "hsl(316, 70%, 50%)"
+    },
+    {
+      "date": "March 31",
+      "stable or no co-morbid": 88,
+      "stable or no co-morbidColor": "hsl(21, 70%, 50%)",
+      "stable or unstable co-morbid": 115,
+      "stable or unstable co-morbidColor": "hsl(221, 70%, 50%)",
+      "CAP-HR, sepsis or shock": 75,
+      "CAP-HR, sepsis or shockColor": "hsl(146, 70%, 50%)",
+      "ARDS": 153,
+      "ARDSColor": "hsl(213, 70%, 50%)"
+    }
+  ],
+  "keys": [
+    "stable or no co-morbid",
+    "stable or unstable co-morbid",
+    "CAP-HR, sepsis or shock",
+    "ARDS"
+  ],
+  "index": "date"
+}

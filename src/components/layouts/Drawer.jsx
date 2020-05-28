@@ -4,8 +4,6 @@ import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   AppBar,
-  Tab,
-  Tabs,
   Drawer,
   Toolbar,
   List,
@@ -16,11 +14,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Grid,
   TextField,
   InputAdornment,
-  Menu,
-  MenuItem,
 } from "@material-ui/core";
 import {
   Menu as MenuIcon,
@@ -29,13 +24,10 @@ import {
   Search,
   AccountBox,
   Assignment,
-  ShowChart,
   Settings,
   Home,
-  AccountCircle,
   DesktopWindows,
 } from "@material-ui/icons";
-import TabPanel from "../utils/components/tab/TabPanel";
 
 const drawerWidth = 300;
 
@@ -110,15 +102,13 @@ export default function MiniDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(0);
   const [menu] = useState([
     { name: "HOME", link: "home" },
-    { name: "PATIENT REGISTRATION", link: "register" },
-    { name: "PATIENT LIST", link: "list" },
+    { name: "PATIENT REGISTRATION", link: "patient/register" },
+    { name: "PATIENT LIST", link: "patient/list" },
     { name: "MONITORING SETTINGS", link: "monitor/setup" },
     { name: "SETTINGS", link: "settings" },
   ]);
-  const [wards] = useState(["Ward 1", "Ward 2", "Ward 3"]);
   const [menuIcons] = useState([
     <Home />,
     <AccountBox />,
@@ -128,9 +118,6 @@ export default function MiniDrawer(props) {
   ]);
   const [menuAnchor, setMenuAnchor] = React.useState(null);
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
 
   const handleDrawerOpen = () => {
     setOpen(true);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Paper, Typography, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import moment from "moment";
@@ -6,6 +6,8 @@ import { Doughnut } from "react-chartjs-2";
 import PieChart from "../utils/components/charts/PieChart";
 import LineChart from "../utils/components/charts/LineChart";
 import BarChart from "../utils/components/charts/BarChart";
+import dummyPatients from "../utils/components/charts/patients-data.json";
+import dummyCases from "../utils/components/charts/bar-cases.json";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,13 +29,26 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = () => {
   const classes = useStyles();
+  const [summaryCases, setSummaryCases] = useState([]);
+  const [time, setTime] = useState();
+
+  const clock = () => {
+    setInterval(() => {
+      const timeString = new Date().toLocaleTimeString("en-US");
+      setTime(timeString);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    clock();
+  });
 
   const dateTime = () => {
     return (
-      <Grid container>
+      <Grid container justify="center" alignItems="center" style={{ height: "100%" }}>
         <Grid item xs={12}>
           <Paper className={classes.paper} style={{ padding: "4px 10px" }}>
-            <Typography align="left" variant="h5">
+            <Typography align="left" variant="h5" style={{ fontWeight: 600 }}>
               DATE:
             </Typography>
             <Typography align="left" variant="h5">
@@ -44,11 +59,12 @@ const Home = () => {
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper} style={{ padding: "4px 10px" }}>
-            <Typography align="left" variant="h5">
+            <Typography align="left" variant="h5" style={{ fontWeight: 600 }}>
               TIME:
             </Typography>
             <Typography align="left" variant="h5">
-              {moment().format("HH:mm:ss")}
+              {/* {moment().format("HH:mm:ss")} */}
+              {time}
             </Typography>
           </Paper>
         </Grid>
@@ -70,7 +86,9 @@ const Home = () => {
                 className={classes.modPaper}
                 style={{ border: "solid 2px #e04040", color: "#f74e4e", height: "100%" }}
               >
-                <Typography variant="body1">CONFIRMED CASES</Typography>
+                <Typography variant="h5" style={{ fontWeight: 600 }}>
+                  CONFIRMED CASES
+                </Typography>
                 <Typography variant="h2">150</Typography>
               </Paper>
             </Grid>
@@ -79,7 +97,21 @@ const Home = () => {
                 className={classes.modPaper}
                 style={{ border: "solid 2px #1d5f98", color: "#1d5f98", height: "100%" }}
               >
-                <Typography variant="h5">PUI</Typography>
+                <Typography variant="h5" style={{ fontWeight: 600 }}>
+                  PROBABLE CASES
+                </Typography>
+
+                <Typography variant="h2">200</Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs>
+              <Paper
+                className={classes.modPaper}
+                style={{ border: "solid 2px #1d5f98", color: "#1d5f98", height: "100%" }}
+              >
+                <Typography variant="h5" style={{ fontWeight: 600 }}>
+                  SUSPECTED CASES
+                </Typography>
 
                 <Typography variant="h2">200</Typography>
               </Paper>
@@ -89,7 +121,9 @@ const Home = () => {
                 className={classes.modPaper}
                 style={{ border: "solid 2px #3d98e6", color: "#3d98e6", height: "100%" }}
               >
-                <Typography variant="h5">DISCHARGED</Typography>
+                <Typography variant="h5" style={{ fontWeight: 600 }}>
+                  DISCHARGED
+                </Typography>
 
                 <Typography variant="h2">75</Typography>
               </Paper>
@@ -99,7 +133,9 @@ const Home = () => {
                 className={classes.modPaper}
                 style={{ border: "solid 2px #000000", color: "#000000", height: "100%" }}
               >
-                <Typography variant="h5">DEATHS</Typography>
+                <Typography variant="h5" style={{ fontWeight: 600 }}>
+                  DEATHS
+                </Typography>
 
                 <Typography variant="h2">200</Typography>
               </Paper>
@@ -113,7 +149,8 @@ const Home = () => {
                 <Typography className={classes.row} align="left" variant="h4">
                   PHILIPPINE GENERAL HOSPITAL: COVID-19 CASES
                 </Typography>
-                <LineChart />
+                {/* <LineChart /> */}
+                <BarChart data={dummyCases} />
               </Paper>
             </Grid>
           </Grid>
@@ -124,7 +161,7 @@ const Home = () => {
                 <Typography className={classes.row} align="left" variant="h4">
                   CLASSIFIED COVID-19 PATIENTS
                 </Typography>
-                <BarChart />
+                <BarChart data={dummyPatients} />
               </Paper>
             </Grid>
           </Grid>

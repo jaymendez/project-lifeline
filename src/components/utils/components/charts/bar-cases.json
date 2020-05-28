@@ -1,0 +1,88 @@
+{
+  "data": [
+    {
+      "date": "March 25",
+      "Confirmed cases": 193,
+      "Confirmed casesColor": "hsl(213, 70%, 50%)",
+      "PUI": 103,
+      "PUIColor": "hsl(239, 70%, 50%)",
+      "Deaths": 162,
+      "DeathsColor": "hsl(57, 70%, 50%)",
+      "Discharged": 81,
+      "DischargedColor": "hsl(126, 70%, 50%)"
+    },
+    {
+      "date": "March 26",
+      "Confirmed cases": 7,
+      "Confirmed casesColor": "hsl(67, 70%, 50%)",
+      "PUI": 72,
+      "PUIColor": "hsl(147, 70%, 50%)",
+      "Deaths": 24,
+      "DeathsColor": "hsl(259, 70%, 50%)",
+      "Discharged": 10,
+      "DischargedColor": "hsl(150, 70%, 50%)"
+    },
+    {
+      "date": "March 27",
+      "Confirmed cases": 5,
+      "Confirmed casesColor": "hsl(90, 70%, 50%)",
+      "PUI": 25,
+      "PUIColor": "hsl(357, 70%, 50%)",
+      "Deaths": 109,
+      "DeathsColor": "hsl(331, 70%, 50%)",
+      "Discharged": 43,
+      "DischargedColor": "hsl(337, 70%, 50%)"
+    },
+    {
+      "date": "March 28",
+      "Confirmed cases": 173,
+      "Confirmed casesColor": "hsl(277, 70%, 50%)",
+      "PUI": 153,
+      "PUIColor": "hsl(33, 70%, 50%)",
+      "Deaths": 137,
+      "DeathsColor": "hsl(19, 70%, 50%)",
+      "Discharged": 151,
+      "DischargedColor": "hsl(192, 70%, 50%)"
+    },
+    {
+      "date": "March 29",
+      "Confirmed cases": 162,
+      "Confirmed casesColor": "hsl(76, 70%, 50%)",
+      "PUI": 24,
+      "PUIColor": "hsl(72, 70%, 50%)",
+      "Deaths": 0,
+      "DeathsColor": "hsl(191, 70%, 50%)",
+      "Discharged": 40,
+      "DischargedColor": "hsl(353, 70%, 50%)"
+    },
+    {
+      "date": "March 30",
+      "Confirmed cases": 188,
+      "Confirmed casesColor": "hsl(182, 70%, 50%)",
+      "PUI": 39,
+      "PUIColor": "hsl(308, 70%, 50%)",
+      "Deaths": 27,
+      "DeathsColor": "hsl(193, 70%, 50%)",
+      "Discharged": 3,
+      "DischargedColor": "hsl(316, 70%, 50%)"
+    },
+    {
+      "date": "March 31",
+      "Confirmed cases": 88,
+      "Confirmed casesColor": "hsl(21, 70%, 50%)",
+      "PUI": 115,
+      "PUIColor": "hsl(221, 70%, 50%)",
+      "Deaths": 75,
+      "DeathsColor": "hsl(146, 70%, 50%)",
+      "Discharged": 153,
+      "DischargedColor": "hsl(213, 70%, 50%)"
+    }
+  ],
+  "keys": [
+    "Confirmed cases",
+    "PUI",
+    "Deaths",
+    "Discharged"
+  ],
+  "index": "date"
+}

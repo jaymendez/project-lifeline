@@ -1,37 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
-  Paper,
   Typography,
-  TableContainer,
-  TableCell,
-  TableRow,
-  TableHead,
-  Table,
-  TableBody,
-  IconButton,
-  Box,
   Card,
   CardContent,
-  CardActions,
-  CardHeader,
   Button,
   TextField,
   Divider,
+  FormControl,
+  MenuItem,
+  Select,
+  ListSubheader,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Settings,
-  MoreVert,
-  DateRange,
-  Alarm,
-  Person,
-  LibraryAdd,
-  Close,
-} from "@material-ui/icons";
+// import { Close } from "@material-ui/icons";
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
+import MomentUtils from "@date-io/moment";
 import _ from "lodash";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { Route, Switch, withRouter, Redirect } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
+import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
+
+const PatientRepository = RepositoryFactory.get("patient");
+const StatuscodesRepository = RepositoryFactory.get("statuscodes");
+
+const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,14 +73,24 @@ const useStyles = makeStyles((theme) => ({
   gridInputMargin: {
     marginLeft: "15px",
   },
+  formControl: {
+    width: 200,
+  },
+  smallFormControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
 }));
 
-const PatientRegister = () => {
+const PatientRegister = (props) => {
   const classes = useStyles();
+  const { match, history } = props;
+  const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({
+    date_admitted: "",
     lastname: "",
     firstname: "",
-    birthdate: "",
+    birthdate: null,
     age: "",
     gender: "",
     covid19_case: "",
@@ -96,361 +103,769 @@ const PatientRegister = () => {
     sss_gsis_number: "",
     philhealth_number: "",
     hmo: "",
+    emergency_name: "",
+    emergency_relationship: "",
+    emergency_contact_number: "",
   });
-  const [emergencyContact, setEmergencyContact] = useState({
-    name: "",
-    relationship: "",
-    contact_number: "",
-  });
+  const [patientStatus, setPatientStatus] = useState([]);
 
-  const patientHandler = (e) => {
+  useEffect(() => {
+    getPatient();
+    getStatuscodes();
+  }, []);
+
+  const getStatuscodes = async () => {
+    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
+    setPatientStatus([
+      ...covidStatus.filter_statuscode_report,
+      ...classificationStatus.filter_statuscode_report,
+    ]);
+  };
+
+  const patientHandler = (e, modifiedVal = null) => {
     const data = { ...patient };
-    data[e.target.name] = e.target.value;
+    if (e) {
+      data[e.target.name] = e.target.value;
+      setValue(e.target.name, e.target.value);
+    } else {
+      const { key, value } = modifiedVal;
+      switch (key) {
+        case "birthdate":
+          data[key] = value ? moment(value).format("YYYY-MM-DD HH:mm:ss") : null;
+          setValue(key, moment(value).format("YYYY-MM-DD HH:mm:ss"));
+
+          let diffInYears = moment().diff(moment(value), "years");
+          if (diffInYears === 0) {
+            diffInYears = moment().diff(moment(value), "years", true).toFixed(3);
+          }
+          data.age = diffInYears || "";
+          setValue("age", diffInYears);
+          break;
+        default:
+          break;
+      }
+    }
     setPatient(data);
   };
 
-  const emergencyContactHandler = (e) => {
-    const data = { ...emergencyContact };
-    data[e.target.name] = e.target.value;
-    setEmergencyContact(data);
+  const getPatient = async () => {
+    if (!_.isEmpty(match.params)) {
+      const res = await PatientRepository.getPatient(match.params.id);
+      if (!_.isEmpty(res.data.PatientData_report)) {
+        const patient = res.data.PatientData_report[0];
+        await parsePatientData(patient);
+        console.log(patient);
+      } else {
+        alert("no patient data");
+      }
+    }
   };
+
+  const parsePatientData = (data) => {
+    /* new fields from update
+      id
+      middlename
+      patientstatus
+      ward_id
+    */
+    const updatedData = { ...patient };
+    updatedData.address = data.rpi_address;
+    updatedData.age = data.rpi_age;
+    updatedData.birthdate = data.rpi_birthday;
+    updatedData.city = data.rpi_city;
+    updatedData.contact_number = data.rpi_contact;
+    updatedData.emergency_name = data.rpi_contact_name;
+    updatedData.emergency_contact_number = data.rpi_contact_number;
+    updatedData.emergency_relationship = data.rpi_contact_relationship;
+    updatedData.country = data.rpi_country;
+    updatedData.covid19_case = data.rpi_covid19;
+    updatedData.date_admitted = data.rpi_date_admitted;
+    updatedData.date_admitted = data.rpi_dateregistered;
+    updatedData.email = data.rpi_email_add;
+    updatedData.gender = data.rpi_gender;
+    updatedData.hmo = data.rpi_hmo;
+    updatedData.patientid = data.rpi_patientid;
+    updatedData.firstname = data.rpi_patientfname;
+    updatedData.lastname = data.rpi_patientlname;
+    updatedData.middlename = data.rpi_patientmname;
+    updatedData.patientstatus = data.rpi_patientstatus;
+    updatedData.philhealth_number = data.rpi_philhealth_number;
+    updatedData.remarks = data.rpi_remarks;
+    updatedData.sss_gsis_number = data.rpi_sss_gsis_number;
+    updatedData.ward_id = data.rpi_ward_id;
+    updatedData.bed_number = data.rpi_bednumber;
+    updatedData.civil_status = data.rpi_civilstatus;
+    updatedData.patient_classification = data.rpi_classification;
+    setPatient(updatedData);
+    for (let [key, value] of Object.entries(updatedData)) {
+      setValue(key, value);
+    }
+  };
+
+  const validateInputs = (data) => {
+    const response = {
+      patientfname: data.firstname,
+      patientlname: data.lastname,
+      remarks: data.remarks,
+      birthday: data.birthdate,
+      gender: data.gender,
+      age: data.age,
+      covid19: data.covid19_case,
+      address: data.address,
+      city: data.city,
+      country: data.country,
+      contact: data.contact_number,
+      email: data.email,
+      sss_gsis: data.sss_gsis_number,
+      philhealth: data.philhealth_number,
+      hmo: data.hmo,
+      admission: moment().format("YYYY-MM-DD HH:mm:ss"),
+      emcontactname: data.emergency_name,
+      emcontactnumber: data.emergency_contact_number,
+      emrelationship: data.emergency_relationship,
+      ward: data.ward_id || 0,
+      patientid: data.patientid,
+      patientmname: data.middlename || "",
+      patientstatus: data.patientstatus || "",
+      civil_status: data.civil_status,
+      bed_no: data.bed_number,
+      classification: data.patient_classification,
+    };
+    return response;
+  };
+
+  const onSubmit = async (data) => {
+    const { patientid } = data;
+    console.log(data);
+    const payload = validateInputs({ ...data });
+    const formData = new FormData();
+
+    for (let [key, value] of Object.entries(payload)) {
+      if (typeof value === "undefined") {
+        value = "";
+      }
+      value = value.trim();
+      formData.append(key, value);
+    }
+    console.log(data);
+    // for (var key in payload) {
+    //   formData.append(key, payload[key]);
+    // }
+    if (patientid) {
+      console.log("uopdate");
+      await PatientRepository.updatePatient(formData)
+        .then((res) => {
+          if (res.data.updatepatient_report) {
+            Swal.fire({
+              icon: "success",
+              title: "Patient updated",
+              showConfirmButton: true,
+              onClose: () => history.push({ pathname: `/patient/details/${patientid}`, state: "" }),
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      await PatientRepository.createPatient(formData)
+        .then((res) => {
+          console.log(res);
+          if (res.data.addpatient_report) {
+            Swal.fire({
+              icon: "success",
+              title: "Patient added",
+              showConfirmButton: true,
+              onClose: () => history.push({ pathname: `/patient/list`, state: "" }),
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
+  useEffect(() => {
+    register({ name: "covid19_case" }, { required: true }); // custom register react-select
+    register({ name: "patient_classification" }, { required: true }); // custom register react-select
+    register({ name: "civil_status" }, { required: true }); // custom register react-select
+    register({ name: "gender" }); // custom register antd input
+    register({ name: "patientid" }); // custom register antd input
+    register({ name: "middlename" }); // custom register antd input
+    register({ name: "patientstatus" }); // custom register antd input
+    register({ name: "ward_id" }); // custom register antd input
+  }, [register]);
 
   return (
     <>
       <DateTimePatientCards className={classes.row} />
       <Typography align="left" variant="h4">
-        Register Patient
+        {/* Register Patient */}
+        {!_.isEmpty(match.params) ? "Update " : "Register "}
+        Patient
       </Typography>
-      <Grid container>
-        <Grid item xs={2} />
-        <Grid item align="" xs={8}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h5" align="left" color="textSecondary" gutterBottom>
-                Personal Information
-              </Typography>
-              <Divider light style={{ marginBottom: "15px" }} />
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Last Name:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="lastname"
-                    value={patient.lastname}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Date of Birth:
-                  </Typography>
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="birthdate"
-                    value={patient.birthdate}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Age:
-                  </Typography>
-                </Grid>
-                <Grid item xs={1}>
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="age"
-                    value={patient.age}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    First Name:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="firstname"
-                    value={patient.firstname}
-                    onChange={patientHandler}
-                  />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {console.log(errors)}
+        <Grid container>
+          <Grid item xs={2} />
+          <Grid item align="" xs={8}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h5" align="left" color="textSecondary" gutterBottom>
+                  Personal Information
+                </Typography>
+                <Divider light style={{ marginBottom: "15px" }} />
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Last Name:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      error={errors.lastname}
+                      margin="dense"
+                      variant="outlined"
+                      name="lastname"
+                      // value={patient.lastname}
+                      // onChange={patientHandler}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Date of Birth:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                      {/* <DatePicker
+                        margin="dense"
+                        error={errors.birthdate}
+                        inputVariant="outlined"
+                        format="MM/DD/YYYY"
+                        clearable
+                        disableFuture
+                        name="birthdate"
+                        value={patient.birthdate}
+                        onChange={(date) => {
+                          patientHandler(null, { key: "birthdate", value: date });
+                          // setBirthdate(date.format("YYYY-MM-DD"));
+                        }}
+                        inputRef={register({ required: true })}
+                      /> */}
+                      <KeyboardDatePicker
+                        margin="dense"
+                        error={errors.birthdate}
+                        inputVariant="outlined"
+                        disableFuture
+                        clearable
+                        // value={selectedDate}
+                        // placeholder="10/10/2018"
+                        name="birthdate"
+                        value={patient.birthdate}
+                        onChange={(date) => {
+                          patientHandler(null, { key: "birthdate", value: date });
+                          // setBirthdate(date.format("YYYY-MM-DD"));
+                        }}
+                        inputRef={register({ required: true })}
+                        format="MM/DD/YYYY"
+                        // minDate={new Date()}
+                        // format="MM/dd/yyyy"
+                      />
+                    </MuiPickersUtilsProvider>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography variant="body1" color="textSecondary" gutterBottom>
+                      Age:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="age"
+                      value={patient.age}
+                      // onChange={patientHandler}
+                      disabled
+                      inputRef={register({ required: true })}
+                    />
+                  </Grid>
                 </Grid>
 
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Gender:
-                  </Typography>
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      First Name:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      error={errors.firstname}
+                      margin="dense"
+                      variant="outlined"
+                      name="firstname"
+                      // value={patient.firstname}
+                      // onChange={patientHandler}
+                      inputRef={register(
+                        // { required: true },
+                        {
+                          validate: {
+                            InvalidInput: (value) => {
+                              if (!value.replace(/\s/g, '').length) {
+                                return "Input is empty or has only spaces";
+                              }
+                            },
+                          },
+                        }
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Civil Status:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.civil_status}
+                        id="civilstatus-select"
+                        labelId="civil-status"
+                        value={patient.civil_status || ""}
+                        onChange={patientHandler}
+                        name="civil_status"
+                        // inputRef={register({ required: true })}
+                      >
+                        <MenuItem value={"Single"}>Single</MenuItem>
+                        <MenuItem value={"Married"}>Married</MenuItem>
+                        <MenuItem value={"Widowed"}>Widowed</MenuItem>
+                        <MenuItem value={"Others"}>Others</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography variant="body1" color="textSecondary" gutterBottom>
+                      Gender:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <FormControl
+                      margin="dense"
+                      className={classes.smallFormControl}
+                      variant="outlined"
+                    >
+                      <Select
+                        id="grouped-select"
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
+                        name="gender"
+                        // inputRef={register({ required: true })}
+                        autoWidth
+                      >
+                        <MenuItem value={"Male"}>Male</MenuItem>
+                        <MenuItem value={"Female"}>Female</MenuItem>
+                      </Select>
+                    </FormControl>
+                    {/* <FormControl className={classes.smallFormControl} variant="outlined">
+                      <Select
+                        labelId="demo-simple-select-autowidth-label"
+                        id="demo-simple-select-autowidth"
+                        value={patient.civil_status || ""}
+                        onChange={patientHandler}
+                        autoWidth
+                      >
+                        <MenuItem value="">
+                          <em>None</em>
+                        </MenuItem>
+                        <MenuItem value={10}>Ten</MenuItem>
+                        <MenuItem value={20}>Twenty</MenuItem>
+                        <MenuItem value={30}>Thirtyyyyyy</MenuItem>
+                      </Select>
+                    </FormControl> */}
+                  </Grid>
+                  {/* <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Civil Status:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+
+                      <Select
+                        id="grouped-select"
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
+                        name="gender"
+                        // inputRef={register({ required: true })}
+                      >
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid> */}
+                  {/* <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Gender:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+
+                      <Select
+                        id="grouped-select"
+                        labelId="gender"
+                        onChange={patientHandler}
+                        value={patient.gender || ""}
+                        name="gender"
+                        // inputRef={register({ required: true })}
+                      >
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid> */}
                 </Grid>
-                <Grid item xs={2} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="gender"
-                    value={patient.gender}
-                    onChange={patientHandler}
-                  />
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Classification:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.patient_classification}
+                        id="case-select"
+                        labelId="patient-classification"
+                        value={patient.patient_classification || ""}
+                        onChange={patientHandler}
+                        name="patient_classification"
+                        // inputRef={register({ required: true })}
+                      >
+                        {/* <ListSubheader>Classification</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "PATIENT CLASSIFICATION") {
+                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Note/s:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      rows={3}
+                      multiline
+                      name="remarks"
+                      // value={patient.remarks}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    COVID-19 Case:
-                  </Typography>
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      COVID-19 Case:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.covid19_case}
+                        id="case-select"
+                        labelId="covid-case"
+                        value={patient.covid19_case || ""}
+                        onChange={patientHandler}
+                        name="covid19_case"
+                        // inputRef={register({ required: true })}
+                      >
+                        {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "PATIENT COVID CASE") {
+                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Bed No.:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      error={errors.bed_number}
+                      margin="dense"
+                      variant="outlined"
+                      name="bed_number"
+                      // value={patient.remarks}
+                      // onChange={patientHandler}
+                      inputRef={register({
+                        validate: {
+                          positive: (value) => parseInt(value, 10) > 0,
+                          InvalidInput: (value) => {
+                            if (!value.replace(/\s/g, '').length) {
+                              return "Input is empty or has only spaces";
+                            }
+                          },
+                        },
+                      })}
+
+                      // inputRef={register({ min: 1 })}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="covid19_case"
-                    value={patient.covid19_case}
-                    onChange={patientHandler}
-                  />
+                <Typography
+                  variant="h5"
+                  align="left"
+                  color="textSecondary"
+                  gutterBottom
+                  className={classes.row}
+                >
+                  Contact Information
+                </Typography>
+                <Divider light style={{ marginBottom: "15px" }} />
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Address:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <TextField
+                      fullWidth
+                      margin="dense"
+                      variant="outlined"
+                      multiline
+                      name="address"
+                      // value={patient.address}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      City:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <TextField
+                      fullWidth
+                      margin="dense"
+                      variant="outlined"
+                      multiline
+                      name="city"
+                      // value={patient.city}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Country/State:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <TextField
+                      fullWidth
+                      margin="dense"
+                      variant="outlined"
+                      multiline
+                      name="country"
+                      // value={patient.country}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Contact No.:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="contact_number"
+                      // value={patient.contact_number}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Email Address:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="email"
+                      // value={patient.email_address}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Note/s:
-                  </Typography>
+                <Grid container alignItems="center" style={{ margin: "15px" }}>
+                  <Grid item xs={4}>
+                    <Typography variant="h6" align="left" color="textSecondary" gutterBottom>
+                      Person to contact in case of Emergency
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    rows={3}
-                    multiline
-                    name="remarks"
-                    value={patient.remarks}
-                    onChange={patientHandler}
-                  />
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Name:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="emergency_name"
+                      // value={emergencyContact.emergency_name}
+                      // onChange={emergencyContactHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Contact No.:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="emergency_contact_number"
+                      // value={emergencyContact.emergency_contact_number}
+                      // onChange={emergencyContactHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} />
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Relationship:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="emergency_relationship"
+                      // value={emergencyContact.emergency_relationship}
+                      // onChange={emergencyContactHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
-              <Typography
-                variant="h5"
-                align="left"
-                color="textSecondary"
-                gutterBottom
-                className={classes.row}
-              >
-                Contact Information
-              </Typography>
-              <Divider light style={{ marginBottom: "15px" }} />
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Address:
-                  </Typography>
+                <Grid container alignItems="center" style={{ margin: "15px" }}>
+                  <Grid item xs={4}>
+                    <Typography variant="h6" align="left" color="textSecondary" gutterBottom>
+                      Other Information
+                    </Typography>
+                  </Grid>
                 </Grid>
-                <Grid item xs={9}>
-                  <TextField
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
-                    multiline
-                    name="address"
-                    value={patient.address}
-                    onChange={patientHandler}
-                  />
+                <Grid container alignItems="center" className={classes.gridInputMargin}>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      SSS/GSIS no.:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="sss_gsis_number"
+                      // value={patient.sss_gsis_number}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Philhealth no.:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="philhealth_number"
+                      // value={patient.philhealth_number}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
+                  <Grid item xs={2} />
+                  <Grid item xs={5} />
+                  <Grid item xs={2} align="left">
+                    <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      HMO:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3} align="left">
+                    <TextField
+                      margin="dense"
+                      variant="outlined"
+                      name="hmo"
+                      // value={patient.hmo}
+                      // onChange={patientHandler}
+                      inputRef={register}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    City:
-                  </Typography>
+                <Grid
+                  container
+                  alignItems="center"
+                  justify="flex-end"
+                  style={{ marginTop: "30px" }}
+                  spacing={2}
+                >
+                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                    <Button color="secondary" onClick={() => history.push("/patient/list")}>
+                      Cancel
+                    </Button>
+                  </Grid>
+                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                    <Button type="submit" variant="contained" color="primary">
+                      Register
+                    </Button>
+                  </Grid>
                 </Grid>
-                <Grid item xs={9}>
-                  <TextField
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
-                    multiline
-                    name="city"
-                    value={patient.city}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Country/State:
-                  </Typography>
-                </Grid>
-                <Grid item xs={9}>
-                  <TextField
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
-                    multiline
-                    name="country"
-                    value={patient.country}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Contact No.:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="contact_number"
-                    value={patient.contact_number}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Email Address:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="email_address"
-                    value={patient.email_address}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container alignItems="center" style={{ margin: "15px" }}>
-                <Grid item xs={4}>
-                  <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                    Person to contact in case of Emergency
-                  </Typography>
-                </Grid>
-              </Grid>
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Name:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="name"
-                    value={emergencyContact.name}
-                    onChange={emergencyContactHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Contact No.:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="contact_number"
-                    value={emergencyContact.contact_number}
-                    onChange={emergencyContactHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} />
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Relationship:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="relationship"
-                    value={emergencyContact.relationship}
-                    onChange={emergencyContactHandler}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container alignItems="center" style={{ margin: "15px" }}>
-                <Grid item xs={4}>
-                  <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                    Other Information
-                  </Typography>
-                </Grid>
-              </Grid>
-              <Grid container alignItems="center" className={classes.gridInputMargin}>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    SSS/GSIS no.:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="sss_gsis_number"
-                    value={patient.sss_gsis_number}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    Philhealth no.:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="philhealth_number"
-                    value={patient.philhealth_number}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-                <Grid item xs={2} />
-                <Grid item xs={5} />
-                <Grid item xs={2} align="left">
-                  <Typography variant="subtitle" align="left" color="textSecondary" gutterBottom>
-                    HMO:
-                  </Typography>
-                </Grid>
-                <Grid item xs={3} align="left">
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name="hmo"
-                    value={patient.hmo}
-                    onChange={patientHandler}
-                  />
-                </Grid>
-              </Grid>
-              <Grid
-                container
-                alignItems="center"
-                justify="flex-end"
-                style={{ marginTop: "30px" }}
-                spacing={2}
-              >
-                <Grid items xs={1} style={{ marginRight: "15px" }}>
-                  <Button color="secondary">Cancel</Button>
-                </Grid>
-                <Grid items xs={1} align="right">
-                  <Button variant="contained" color="primary">
-                    Register
-                  </Button>
-                </Grid>
-                <Grid items xs={1} />
-              </Grid>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      </form>
     </>
   );
 };

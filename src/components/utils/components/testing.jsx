@@ -32,12 +32,17 @@ const columnData = [
   {
     id: 1,
     title: "First column",
-    itemIds: [1, 2, 3],
+    itemIds: [1,],
   },
   {
     id: 2,
     title: "Second column",
     itemIds: [4, 6],
+  },
+  {
+    id: 3,
+    title: "3rd column",
+    itemIds: [2,3],
   },
 ];
 
@@ -196,6 +201,23 @@ const Testing = () => {
           );
         })}
       </Grid>
+      <br/>
+      <br/>
+      <Droppable droppableId={`drop-table`}>
+        {(provided, snapshot) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            style={{width: 1000}}
+
+          >
+            {itemData.map((item) => renderItem(item.id))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+
+
     </DragDropContext>
   );
 };

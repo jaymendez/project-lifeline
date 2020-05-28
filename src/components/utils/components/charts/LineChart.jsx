@@ -1,6 +1,6 @@
 import React from "react";
 import { ResponsiveLine } from "@nivo/line";
-import data from "./line-data.json";
+import data from "./cases-data.json";
 
 const LineChart = () => {
   return (
