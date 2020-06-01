@@ -61,6 +61,7 @@ const TelemetryDashboard = (props) => {
     // },
   ]);
   const [monitor, setMonitor] = useState({});
+  const [refreshInterval] = useState(60);
 
   const getMonitorWithPatientId = async () => {
     if (!_.isEmpty(match.params)) {
@@ -143,6 +144,12 @@ const TelemetryDashboard = (props) => {
     setPatients(sortedData);
   };
 
+  const autoRefresh = () => {
+    setTimeout(function() {
+      window.location.reload();
+    }, refreshInterval * 1000);
+  };
+
   const initPusher = () => {
     const pusherOptions = {
       cluster: "eu",
@@ -186,6 +193,7 @@ const TelemetryDashboard = (props) => {
   useEffect(() => {
     initPusher();
     getMonitorWithPatientId();
+    autoRefresh();
   }, []);
 
   useEffect(() => {

@@ -322,9 +322,9 @@ const PatientList = (props) => {
               <MenuItem value="">
                 <em>None</em>
               </MenuItem>
-              {
-                patientStatus.map(el => <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>)
-              }
+              {patientStatus.map((el) => (
+                <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+              ))}
             </Select>
           </FormControl>
         }
