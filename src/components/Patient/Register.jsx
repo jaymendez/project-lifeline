@@ -245,7 +245,9 @@ const PatientRegister = (props) => {
       if (typeof value === "undefined") {
         value = "";
       }
-      value = value.trim();
+      if (typeof value === "string") {
+        value = value.trim();
+      }
       formData.append(key, value);
     }
     console.log(data);

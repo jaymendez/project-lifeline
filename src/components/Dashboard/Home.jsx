@@ -31,6 +31,13 @@ const Home = () => {
   const classes = useStyles();
   const [summaryCases, setSummaryCases] = useState([]);
   const [time, setTime] = useState();
+  const [ dashboardData, setDashboardData] = useState({
+    confirmedCases: 0,
+    probableCases: 0,
+    suspectedCases: 0,
+    discharged: 0,
+    deaths: 0,
+  });
 
   const clock = () => {
     setInterval(() => {
@@ -89,7 +96,7 @@ const Home = () => {
                 <Typography variant="h5" style={{ fontWeight: 600 }}>
                   CONFIRMED CASES
                 </Typography>
-                <Typography variant="h2">150</Typography>
+                <Typography variant="h2">{dashboardData.confirmedCases}</Typography>
               </Paper>
             </Grid>
             <Grid item xs>
@@ -101,7 +108,7 @@ const Home = () => {
                   PROBABLE CASES
                 </Typography>
 
-                <Typography variant="h2">200</Typography>
+                <Typography variant="h2">{dashboardData.probableCases}</Typography>
               </Paper>
             </Grid>
             <Grid item xs>
@@ -113,7 +120,7 @@ const Home = () => {
                   SUSPECTED CASES
                 </Typography>
 
-                <Typography variant="h2">200</Typography>
+                <Typography variant="h2">{dashboardData.suspectedCases}</Typography>
               </Paper>
             </Grid>
             <Grid item xs>
@@ -125,7 +132,7 @@ const Home = () => {
                   DISCHARGED
                 </Typography>
 
-                <Typography variant="h2">75</Typography>
+                <Typography variant="h2">{dashboardData.discharged}</Typography>
               </Paper>
             </Grid>
             <Grid item xs>
@@ -137,7 +144,7 @@ const Home = () => {
                   DEATHS
                 </Typography>
 
-                <Typography variant="h2">200</Typography>
+                <Typography variant="h2">{dashboardData.deaths}</Typography>
               </Paper>
             </Grid>
           </Grid>
