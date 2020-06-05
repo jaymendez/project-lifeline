@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Typography, TextField, Divider, Paper } from "@material-ui/core";
+import {
+  Grid,
+  Typography,
+  TextField,
+  Divider,
+  Paper,
+  InputAdornment,
+  IconButton,
+  Button,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Create } from "@material-ui/icons";
+import { useForm, Controller } from "react-hook-form";
+import _ from "lodash";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
 
+const MySwal = withReactContent(Swal);
 const PatientRepository = RepositoryFactory.get("patient");
 
 const useStyles = makeStyles((theme) => ({
@@ -11,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   paper: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(4),
     textAlign: "center",
     color: theme.palette.text.secondary,
   },
@@ -51,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
   textField: {
-    width: "25ch",
+    width: "80%",
   },
   detailsKey: {
     marginRight: 20,
@@ -62,8 +77,12 @@ const PatientDetails = (props) => {
   const classes = useStyles();
   const { match } = props;
   const [ward] = useState("UP-PGH WARD 1");
+  const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({});
+  const [patientConfig, setPatientConfig] = useState({});
   const [loader, setLoader] = useState(true);
+  const [mode, setMode] = useState("READ");
+  console.log(errors);
 
   const getPatient = async (id) => {
     if (id) {
@@ -79,8 +98,60 @@ const PatientDetails = (props) => {
     }
   };
 
+  const getPatientConfig = async (id) => {
+    if (id) {
+      /* Query to get patient */
+      try {
+        const { data } = await PatientRepository.getPatientConfig(id);
+        setPatientConfig(data[0]);
+        for (let [key, value] of Object.entries(data[0])) {
+          key = key.slice(key.search("_") + 1);
+          setValue(key, value);
+        }
+      } catch (e) {
+        alert("no patient with that id");
+        console.log(e);
+      }
+      setLoader(false);
+    }
+  };
+
+  const updatePatientConfig = async (formData) => {
+    setLoader(true);
+    try {
+      const patientId = patient.rpi_patientid;
+      const response = await PatientRepository.addPatientConfig({
+        patientid: patientId,
+        ...formData,
+      });
+      getPatientConfig(patientId);
+      if (response) {
+        MySwal.fire({
+          icon: "success",
+          title: "Patient Config updated!",
+        });
+      }
+    } catch (e) {
+      if (e) {
+        // alert("no patient with that id");
+        console.log(e);
+        MySwal.fire({
+          icon: "error",
+          title: "Update failed.",
+        });
+      }
+    }
+    setMode("READ");
+    setLoader(false);
+  };
+
+  const onSubmit = (data) => {
+    updatePatientConfig(data);
+  };
+
   useEffect(() => {
     getPatient(match.params.id);
+    getPatientConfig(match.params.id);
   }, []);
 
   return (
@@ -89,7 +160,7 @@ const PatientDetails = (props) => {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography className={classes.row} align="left" variant="h4">
-            {ward}: COVID-19 PATIENT LIST
+            {`${ward}: COVID-19 PATIENT CHART`}
           </Typography>
         </Grid>
         <Divider />
@@ -303,7 +374,7 @@ const PatientDetails = (props) => {
                     />
                   </Grid>
                   <Grid item xs={3} />
-                  <Grid item xs={3} align=""></Grid>
+                  <Grid item xs={3} />
                 </Grid>
               </Grid>
               <Grid item xs={4}>
@@ -407,6 +478,697 @@ const PatientDetails = (props) => {
                 </Grid>
               </Grid>
             </Grid>
+            {/* PATIENT CONFIG */}
+            <Typography variant="h5" align="left" style={{ marginTop: 30 }}>
+              PARAMETER SETTINGS
+              <IconButton style={{ margin: 10 }} onClick={() => setMode("EDIT")}>
+                <Create />
+              </IconButton>
+            </Typography>
+            <Divider style={{ marginTop: 5 }} />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={1} style={{ padding: 30 }}>
+                <Grid item xs={3}>
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    ECG
+                  </Typography>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        ST:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // value={patientConfig.rpc_ecg_st_msec || 0}
+                        name="ecg_st_msec"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">msec</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        error={!_.isEmpty(errors.ecg_st_msec)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                        // inputRef={register({ required: true })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+
+                    {/* <FormControl variant="outlined">
+                    <OutlinedInput
+                      margin="dense"
+                      size="small"
+                      id="outlined-adornment-weight"
+                      value={123}
+                      // onChange={handleChange('weight')}
+                      endAdornment={<InputAdornment position="end">Kg</InputAdornment>}
+                      readOnly: mode === "READ",
+                      aria-describedby="outlined-weight-helper-text"
+                    />
+                  </FormControl> */}
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    HEART RATE
+                  </Typography>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="heartrate_upper_bpm"
+                        error={!_.isEmpty(errors.heartrate_upper_bpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="heartrate_lower_bpm"
+                        error={!_.isEmpty(errors.heartrate_lower_bpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    PULSE RATE
+                  </Typography>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="pulserate_upper_bpm"
+                        error={!_.isEmpty(errors.pulserate_upper_bpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="pulserate_lower_bpm"
+                        error={!_.isEmpty(errors.pulserate_lower_bpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  {/* START */}
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    OXYGEN SATURATION
+                  </Typography>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        id="standard-start-adornment"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="oxygen_upper_saturation"
+                        error={!_.isEmpty(errors.oxygen_upper_saturation)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="oxygen_lower_saturation"
+                        error={!_.isEmpty(errors.oxygen_lower_saturation)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  {/* START */}
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    RESPIRATORY RATE
+                  </Typography>
+                  <br />
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">rpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="respiratory_upper_rpm"
+                        error={!_.isEmpty(errors.respiratory_upper_rpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">rpm</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="respiratory_lower_rpm"
+                        error={!_.isEmpty(errors.respiratory_lower_rpm)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  {/* START */}
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    BLOOD PRESSURE
+                  </Typography>
+                  <Grid container alignItems="center" justify="space-evenly" direction="row">
+                    <Grid item xs={3}>
+                      <Typography variant="body1">Systolic</Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography variant="body1">Diastolic</Typography>
+                    </Grid>
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="bp_systolic_upper"
+                        error={!_.isEmpty(errors.bp_systolic_upper)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="bp_diastolic_upper"
+                        error={!_.isEmpty(errors.bp_diastolic_upper)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="bp_systolic_lower"
+                        error={!_.isEmpty(errors.bp_systolic_lower)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="bp_diastolic_lower"
+                        error={!_.isEmpty(errors.bp_diastolic_lower)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Time Frame:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">minutes</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="bp_time_frame"
+                        error={!_.isEmpty(errors.bp_time_frame)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={3}>
+                  {/* START */}
+                  <Typography variant="h6" align="left" style={{ marginBottom: 15 }}>
+                    TEMPERATURE
+                  </Typography>
+                  <br />
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Upper:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">C</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="temperature_upper"
+                        error={!_.isEmpty(errors.temperature_upper)}
+                        inputRef={register({
+                          validate: {
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                  <Grid container alignItems="center" justify="center" direction="row">
+                    <Grid item xs={1}>
+                      <Typography
+                        variant="subtitle2"
+                        display="initial"
+                        style={{ display: "initial", marginRight: 3 }}
+                      >
+                        Lower:
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <TextField
+                        variant="outlined"
+                        margin="dense"
+                        size="small"
+                        // className={clsx(classes.margin, classes.textField)}
+                        className={classes.textField}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">C</InputAdornment>,
+                          readOnly: mode === "READ",
+                        }}
+                        name="temperature_lower"
+                        error={!_.isEmpty(errors.temperature_lower)}
+                        inputRef={register({
+                          validate: {
+                            // integer: (value) =>
+                            //   parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0,
+                            integer: (value) => {
+                              if (typeof value === "string" && value.length === 0) {
+                                value = 0;
+                              }
+                              return parseInt(value, 10) >= 0 || parseInt(value, 10) <= 0;
+                            },
+                          },
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={6} />
+                  </Grid>
+                </Grid>
+                <Grid
+                  container
+                  alignItems="center"
+                  justify="flex-end"
+                  style={{ marginTop: "30px" }}
+                  spacing={2}
+                >
+                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => setMode("READ")}
+                    >
+                      Cancel
+                    </Button>
+                  </Grid>
+                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                    <Button
+                      fullWidth
+                      type="submit"
+                      disabled={mode === "READ"}
+                      variant="contained"
+                      color="primary"
+                    >
+                      SAVE
+                    </Button>
+                  </Grid>
+                </Grid>
+                {/* END PATIENT CONFIG */}
+              </Grid>
+            </form>
           </Paper>
         </Grid>
       </Grid>

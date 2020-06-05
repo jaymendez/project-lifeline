@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const baseDomain = "http://206.189.87.169";
+const baseDomain =
+  process.env.REACT_APP_ENV === "LOCAL"
+    ? process.env.REACT_APP_LOCAL
+    : process.env.REACT_APP_STAGING;
 const baseURL = `${baseDomain}`;
 
 export default axios.create({

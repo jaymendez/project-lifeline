@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 const DateTimePatientCards = () => {
   const classes = useStyles();
   const [time, setTime] = useState();
+  const [patientCount, setPatientCount] = useState(0);
 
   const clock = () => {
     setInterval(() => {
@@ -93,7 +94,7 @@ const DateTimePatientCards = () => {
                   </Typography>
                   <Typography align="left" variant="h5">
                     {" "}
-                    {150}
+                    {patientCount}
                   </Typography>
                 </Grid>
                 <Grid item xs>
