@@ -10,6 +10,11 @@ import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
 
+const DOMAIN =
+  process.env.REACT_APP_ENV === "LOCAL"
+    ? process.env.REACT_APP_LOCAL
+    : process.env.REACT_APP_STAGING;
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -125,7 +130,7 @@ const TelemetryDashboard = (props) => {
   const getPatientRxboxData = (patientId) => {
     const data = [...rxboxData];
     if (data.length) {
-      const rxbox = data.filter(el => {
+      const rxbox = data.filter((el) => {
         if (Array.isArray(patientId)) {
           if (patientId.indexOf(el.tpo_subject) >= 0) {
             return el;
@@ -145,7 +150,7 @@ const TelemetryDashboard = (props) => {
   };
 
   const autoRefresh = () => {
-    setTimeout(function() {
+    setTimeout(function () {
       window.location.reload();
     }, refreshInterval * 1000);
   };
@@ -155,21 +160,19 @@ const TelemetryDashboard = (props) => {
       cluster: "eu",
       // options below are needed for pusher local dev server
       encrypted: false,
-      httpHost: "206.189.87.169",
-      httpPort: "57003",
-      wsHost: "206.189.87.169",
-      wsPort: "57004",
+      httpHost: DOMAIN,
+      httpPort: process.env.REACT_APP_PUSHER_HTTP_PORT,
+      wsHost: DOMAIN,
+      wsPort: process.env.REACT_APP_PUSHER_WS_PORT,
     };
-    const pusherKey = "22222222222222222222";
+    const pusherKey = process.env.REACT_APP_PUSHER_KEY;
 
-    var channel = "mya";
-    var event = "mya";
+    var channel = process.env.REACT_APP_PUSHER_CHANNEL;
+    var event = process.env.REACT_APP_PUSHER_EVENT;
 
     var pusher = new Pusher(pusherKey, pusherOptions);
     // start listening for events
-    pusher.subscribe("mya").bind(event, function (data) {
-      console.log(JSON.parse(data));
-
+    pusher.subscribe(channel).bind(event, function (data) {
       const parsedData = JSON.parse(data).map((el) => {
         const { tpo_subject, tpo_code, tpo_value, tpo_dataerror, ...restData } = el;
         const parsedSubject = parseInt(tpo_subject.slice(tpo_subject.search("/") + 1), 10);
@@ -181,12 +184,6 @@ const TelemetryDashboard = (props) => {
         };
       });
       setRxboxData(parsedData);
-
-      // for (key in data) {
-      //   var value = data[key];z
-      //   console.log(data);
-      //   document.getElementById("notification").innerHTML = data;
-      // }
     });
   };
 
@@ -199,7 +196,6 @@ const TelemetryDashboard = (props) => {
   useEffect(() => {
     getPatients();
   }, [monitor]);
-
 
   useEffect(() => {
     getPatientRxboxData([8, 9]);

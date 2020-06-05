@@ -20,5 +20,21 @@ export default {
   },
   updatePatient(payload) {
     return Repository.post(`/updatePatient`, payload);
+  },
+  getPatientConfig(id) {
+    return Repository.get(`/PatientConfig/${id}`);
+  },
+  addPatientConfig(payload) {
+    const formData = new FormData();
+    for (let [key, value] of Object.entries(payload)) {
+      if (typeof value === "undefined") {
+        value = "";
+      }
+      if (typeof value === "string") {
+        value = value.trim();
+      }
+      formData.append(key, value);
+    }
+    return Repository.post(`/addPatientConfig`, formData);
   }
 };
