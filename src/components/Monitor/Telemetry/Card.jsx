@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Grid,
-  Paper,
-  Typography,
-  TableContainer,
-  TableCell,
-  TableRow,
-  TableHead,
-  Table,
-  TableBody,
-  IconButton,
-} from "@material-ui/core";
+import { Grid, Paper, Typography } from "@material-ui/core";
 import {
   makeStyles,
   createMuiTheme,
@@ -74,15 +63,32 @@ const TelemetryCard = (props) => {
   const classes = useStyles();
   const [chartHeight] = useState("80px");
   const [code] = useState({
-    ecg: "1000",
+    ecg: "76282-3",
     spo2: "59407-7",
-    rr: "76270-8",
+    primary_rr: "76270-8",
+    secondary_rr: "76171-8",
     temp: "8310-5",
     hr: "76282-3",
+    pr: "8889-8",
     bp: "131328",
+    systolic_bp: "8480-6",
+    diastolic_bp: "8462-4",
+    mean_arterial_pressure: "8478-0",
   });
+  // const generateFunctions = () => {
+  //   for (let [key, value] of Object.entries(code)) {
+  //     const arr = key.split("_");
+  //     const parsed = arr.reduce((acc, val) => {
+  //       const captAcc = acc.charAt(0).toUpperCase() + acc.slice(1);
+  //       const captVal = val.charAt(0).toUpperCase() + val.slice(1);
+  //       return captAcc + val;
+  //     });
+  //     const name = `get${parsed}`;
+  //   }
+  // }
 
   const getECG = () => {
+    // heart rate
     const index = _.findIndex(rxbox, function (o) {
       return o.tpo_code === code.ecg;
     });
@@ -90,29 +96,42 @@ const TelemetryCard = (props) => {
       return rxbox[index].tpo_value;
     }
     return null;
-
   };
 
-  const getBP = () => {
-    const index = _.findIndex(rxbox, function (o) {
-      return o.tpo_code === code.bp;
-    });
+  const getBP = (type) => {
+    let index;
+    switch (type) {
+      case "systolic":
+        index = _.findIndex(rxbox, function (o) {
+          return o.tpo_code === code.systolic_bp;
+        });
+        break;
+      case "diastolic":
+        index = _.findIndex(rxbox, function (o) {
+          return o.tpo_code === code.diastolic_bp;
+        });
+        break;
+      default:
+        return null;
+    }
+
     if (index >= 0) {
       return rxbox[index].tpo_value;
     }
     return null;
-
   };
-  const getHR = () => {
-    const index = _.findIndex(rxbox, function (o) {
-      return o.tpo_code === code.hr;
-    });
-    if (index >= 0) {
-      return rxbox[index].tpo_value;
-    }
-    return null;
 
-  };
+  // const getHR = () => {
+  //   const index = _.findIndex(rxbox, function (o) {
+  //     return o.tpo_code === code.hr;
+  //   });
+  //   if (index >= 0) {
+  //     return rxbox[index].tpo_value;
+  //   }
+  //   return null;
+
+  // };
+
   const getTemp = () => {
     const index = _.findIndex(rxbox, function (o) {
       return o.tpo_code === code.temp;
@@ -121,9 +140,9 @@ const TelemetryCard = (props) => {
       return rxbox[index].tpo_value;
     }
     return null;
-
   };
-  const getRR = () => {
+
+  const getRR = (type) => {
     const index = _.findIndex(rxbox, function (o) {
       return o.tpo_code === code.rr;
     });
@@ -131,8 +150,8 @@ const TelemetryCard = (props) => {
       return rxbox[index].tpo_value;
     }
     return null;
-
   };
+
   const getSpo2 = () => {
     const index = _.findIndex(rxbox, function (o) {
       return o.tpo_code === code.spo2;
@@ -141,7 +160,26 @@ const TelemetryCard = (props) => {
       return rxbox[index].tpo_value;
     }
     return null;
+  };
 
+  const getPulseRate = () => {
+    const index = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.spo2;
+    });
+    if (index >= 0) {
+      return rxbox[index].tpo_value;
+    }
+    return null;
+  };
+
+  const getMAP = () => {
+    const index = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.mean_arterial_pressure;
+    });
+    if (index >= 0) {
+      return rxbox[index].tpo_value;
+    }
+    return null;
   };
 
   const getNameDetails = () => {
@@ -186,21 +224,71 @@ const TelemetryCard = (props) => {
           <Grid item xs={8}>
             {/* <Chart height={chartHeight} /> */}
           </Grid>
-          <Grid item xs={2} className={classes.ecg}>
-            <Typography align="left" variant="subtitle2">
+          <Grid
+            item
+            xs={2}
+            className={classes.ecg}
+            style={getECG() ? {} : { margin: "auto", color: "#a9a99d" }}
+          >
+            {!getECG() ? (
+              <>
+                <Grid container>
+                  <Grid item xs={6} align="left">
+                    <Typography align="left" variant="subtitle2" display="initial">
+                      ECG (BPM)
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} align="right">
+                    <Typography align="right" variant="caption" display="initial">
+                      HR
+                      <span aria-label="heart-emoji" role="img">
+                        ❤️
+                      </span>
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Typography align="right" variant="h2">
+                  {getECG() || 102}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Typography align="left" variant="subtitle2">
               ECG (BPM)
             </Typography>
             <Typography align="right" variant="h2">
-              {"--" || "--"}
-            </Typography>
+              {getECG() || "67"}
+            </Typography> */}
           </Grid>
-          <Grid item xs={2} className={classes.spo2}>
-            <Typography align="right" variant="subtitle2">
+          <Grid
+            item
+            xs={2}
+            className={classes.spo2}
+            style={getPulseRate() ? {} : { margin: "auto", color: "#a9a99d" }}
+          >
+            {getPulseRate() ? (
+              <>
+                <Typography align="right" variant="subtitle2">
+                  PR
+                </Typography>
+                <Typography align="right" variant="h3">
+                  {getPulseRate() || "43"}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Typography align="right" variant="subtitle2">
               PR
             </Typography>
             <Typography align="right" variant="h3">
-              {getHR() || "--"}
-            </Typography>
+              {getPulseRate() || "43"}
+            </Typography> */}
           </Grid>
         </Grid>
         {/* SpO Row */}
@@ -208,20 +296,61 @@ const TelemetryCard = (props) => {
           <Grid item xs={8}>
             {/* <Chart height={chartHeight} /> */}
           </Grid>
-          <Grid item xs={2} className={classes.spo2}>
-            <Typography align="left" variant="subtitle2">
+          <Grid
+            item
+            xs={2}
+            className={classes.spo2}
+            style={getSpo2() ? {} : { margin: "auto", color: "#a9a99d" }}
+          >
+            {getSpo2() ? (
+              <>
+                <Typography align="left" variant="subtitle2">
+                  SpO
+                  <sub>2</sub>
+                  (%)
+                </Typography>
+                <Typography align="right" variant="h2">
+                  {getSpo2()}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Typography align="left" variant="subtitle2">
               SpO<sub>2</sub> (%)
             </Typography>
             <Typography align="right" variant="h2">
-              {getSpo2() || "--"}
-            </Typography>
+              {getSpo2() || "98"}
+            </Typography> */}
           </Grid>
           <Grid item xs={2}>
-            <Typography align="left" variant="subtitle2">
-              NIBP @8:15 mmhg
-            </Typography>
-            <Typography align="right" variant="h3">
-              {getBP() || "--"}
+            <Grid container>
+              <Grid item align="left" xs={6}>
+                <Typography align="left" variant="caption">
+                  NIBP @8:15
+                  <Typography variant="caption" style={{ display: "block" }}>
+                    {" "}
+                    mmhg
+                  </Typography>
+                </Typography>
+              </Grid>
+              <Grid item align="right" xs={6}>
+                <Typography align="right" variant="caption">
+                  MAP{" "}
+                  <Typography variant="caption" style={{ display: "block" }}>
+                    {getMAP() || "--"}
+                  </Typography>
+                </Typography>
+              </Grid>
+            </Grid>
+            <Typography
+              align={getBP() ? "right" : "center"}
+              variant={getBP() ? "h4" : "h5"}
+              style={getBP() ? {} : { color: "#a9a99d" }}
+            >
+              {getBP() || "No Data"}
             </Typography>
           </Grid>
         </Grid>
@@ -230,22 +359,55 @@ const TelemetryCard = (props) => {
           <Grid item xs={8}>
             {/* <Chart height={chartHeight} /> */}
           </Grid>
-          <Grid item xs={2} className={classes.resp}>
-            <Typography align="left" variant="subtitle2">
+          <Grid
+            item
+            xs={2}
+            className={classes.resp}
+            style={getRR() ? {} : { margin: "auto", color: "#a9a99d" }}
+          >
+            {getRR() ? (
+              <>
+                <Typography align="left" variant="subtitle2">
+                  RESP (RPM)
+                </Typography>
+                <Typography align="right" variant="h2">
+                  {getRR()}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Typography align="left" variant="subtitle2">
               RESP (RPM)
             </Typography>
             <Typography align="right" variant="h2">
-              {getRR() || "--"}
-            </Typography>
+              {getRR() || "30"}
+            </Typography> */}
           </Grid>
 
-          <Grid item xs={2}>
-            <Typography align="left" variant="subtitle2">
+          <Grid item xs={2} style={getTemp() ? {} : { margin: "auto", color: "#a9a99d" }}>
+            {getTemp() ? (
+              <>
+                <Typography align="left" variant="subtitle2">
+                  TEMP C
+                </Typography>
+                <Typography align="right" variant="h3">
+                  {getTemp()}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Typography align="left" variant="subtitle2">
               TEMP C
             </Typography>
             <Typography align="right" variant="h3">
-              {getTemp() || "--"}
-            </Typography>
+              {getTemp()}
+            </Typography> */}
           </Grid>
         </Grid>
       </Paper>

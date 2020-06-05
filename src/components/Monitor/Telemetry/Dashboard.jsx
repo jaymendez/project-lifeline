@@ -13,7 +13,7 @@ const PatientRepository = RepositoryFactory.get("patient");
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
     ? process.env.REACT_APP_LOCAL
-    : process.env.REACT_APP_STAGING;
+    : process.env.REACT_APP_STAGING.slice(6);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -238,7 +238,7 @@ const TelemetryDashboard = (props) => {
             paper = <TelemetryCard patient={patient} rxbox={rxboxData} />;
           }
           patientCards.push(
-            <Grid item xs={6}>
+            <Grid key={`card-${index}`} item xs={6}>
               {paper}
             </Grid>
           );
