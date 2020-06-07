@@ -35,6 +35,7 @@
     "validator": "^13.0.0"
   },
   "scripts": {
+    "update": "git pull && npm run build",
     "start": "set PORT=8080 && react-scripts start",
     "dev": "react-scripts start",
     "build": "react-scripts build",
