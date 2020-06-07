@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import Pusher from "pusher-js";
 import _ from "lodash";
+import moment from "moment";
 import TelemetryCard from "./Card";
 import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 
@@ -126,6 +127,21 @@ const TelemetryDashboard = (props) => {
       }
     }
   };
+  const validateRxboxData = (data) => {
+    if (_.isEmpty(data.tpo_value)) {
+      return false;
+    }
+    if (!_.isEmpty(data.tpo_dataerror)) {
+      return false;
+    }
+    const now = moment();
+    const effectiveDate = moment(data.tpo_effectivity);
+    const diff = now.diff(effectiveDate) / 1000;
+    if (diff >= 30) {
+      return false;
+    }
+    return true;
+  }
 
   const getPatientRxboxData = (patientId) => {
     const data = [...rxboxData];
@@ -133,10 +149,14 @@ const TelemetryDashboard = (props) => {
       const rxbox = data.filter((el) => {
         if (Array.isArray(patientId)) {
           if (patientId.indexOf(el.tpo_subject) >= 0) {
-            return el;
+            if (validateRxboxData(el)) {
+              return el;
+            }
           }
         } else if (el.tpo_subject === patientId) {
-          return el;
+          if (validateRxboxData(el)) {
+            return el;
+          }
         }
       });
       return rxbox;
@@ -174,13 +194,21 @@ const TelemetryDashboard = (props) => {
     // start listening for events
     pusher.subscribe(channel).bind(event, function (data) {
       const parsedData = JSON.parse(data).map((el) => {
-        const { tpo_subject, tpo_code, tpo_value, tpo_dataerror, ...restData } = el;
+        const {
+          tpo_subject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+          tpo_effectivity,
+          ...restData
+        } = el;
         const parsedSubject = parseInt(tpo_subject.slice(tpo_subject.search("/") + 1), 10);
         return {
           tpo_subject: parsedSubject,
           tpo_code,
           tpo_value,
           tpo_dataerror,
+          tpo_effectivity,
         };
       });
       setRxboxData(parsedData);
@@ -198,7 +226,7 @@ const TelemetryDashboard = (props) => {
   }, [monitor]);
 
   useEffect(() => {
-    getPatientRxboxData([8, 9]);
+    // getPatientRxboxData([8, 9]);
   }, [rxboxData]);
 
   const placedMonitors = () => {
@@ -233,7 +261,8 @@ const TelemetryDashboard = (props) => {
           });
           const patient = patients[patientIndex];
           // console.log(patient);
-          const rxboxData = getPatientRxboxData(patientId);
+          let rxboxData = getPatientRxboxData(patientId);
+          console.log(rxboxData);
           if (!_.isEmpty(patient)) {
             paper = <TelemetryCard patient={patient} rxbox={rxboxData} />;
           }
