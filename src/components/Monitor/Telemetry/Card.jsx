@@ -98,26 +98,38 @@ const TelemetryCard = (props) => {
     return null;
   };
 
-  const getBP = (type) => {
+  const getBP = () => {
     let index;
-    switch (type) {
-      case "systolic":
-        index = _.findIndex(rxbox, function (o) {
-          return o.tpo_code === code.systolic_bp;
-        });
-        break;
-      case "diastolic":
-        index = _.findIndex(rxbox, function (o) {
-          return o.tpo_code === code.diastolic_bp;
-        });
-        break;
-      default:
-        return null;
-    }
+    // switch (type) {
+    //   case "systolic":
+    //     index = _.findIndex(rxbox, function (o) {
+    //       return o.tpo_code === code.systolic_bp;
+    //     });
+    //     break;
+    //   case "diastolic":
+    //     index = _.findIndex(rxbox, function (o) {
+    //       return o.tpo_code === code.diastolic_bp;
+    //     });
+    //     break;
+    //   default:
+    //     return null;
+    // }
+    const systolicIndex = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.systolic_bp;
+    });
 
-    if (index >= 0) {
-      return rxbox[index].tpo_value;
+    const diastolicIndex = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.diastolic_bp;
+    });
+
+    const systolicVal = systolicIndex >= 0 ? rxbox[systolicIndex].tpo_value : null;
+    const diastolicVal = diastolicIndex >= 0 ? rxbox[diastolicIndex].tpo_value : null;
+    if (!_.isEmpty(systolicVal) && !_.isEmpty(diastolicVal)) {
+      return `${systolicVal}/${diastolicVal}`;
     }
+    // if (index >= 0) {
+    //   return rxbox[index].tpo_value;
+    // }
     return null;
   };
 
@@ -142,12 +154,20 @@ const TelemetryCard = (props) => {
     return null;
   };
 
-  const getRR = (type) => {
+  const getRR = () => {
     const index = _.findIndex(rxbox, function (o) {
-      return o.tpo_code === code.rr;
+      return o.tpo_code === code.primary_rr;
     });
+
+    const secondaryIndex = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.secondary_rr;
+    });
+
     if (index >= 0) {
       return rxbox[index].tpo_value;
+    }
+    if (secondaryIndex >= 0) {
+      return rxbox[secondaryIndex].tpo_value;
     }
     return null;
   };
@@ -230,7 +250,7 @@ const TelemetryCard = (props) => {
             className={classes.ecg}
             style={getECG() ? {} : { margin: "auto", color: "#a9a99d" }}
           >
-            {!getECG() ? (
+            {getECG() ? (
               <>
                 <Grid container>
                   <Grid item xs={6} align="left">
@@ -248,7 +268,7 @@ const TelemetryCard = (props) => {
                   </Grid>
                 </Grid>
                 <Typography align="right" variant="h2">
-                  {getECG() || 102}
+                  {getECG() || "--"}
                 </Typography>
               </>
             ) : (
@@ -325,8 +345,42 @@ const TelemetryCard = (props) => {
               {getSpo2() || "98"}
             </Typography> */}
           </Grid>
-          <Grid item xs={2}>
-            <Grid container>
+          <Grid item xs={2} style={getMAP() && getBP() ? {} : { margin: "auto", color: "#a9a99d" }}>
+            {getMAP() && getBP() ? (
+              <>
+                <Grid container>
+                  <Grid item align="left" xs={6}>
+                    <Typography align="left" variant="caption">
+                      NIBP @8:15
+                      <Typography variant="caption" style={{ display: "block" }}>
+                        {" "}
+                        mmhg
+                      </Typography>
+                    </Typography>
+                  </Grid>
+                  <Grid item align="right" xs={6}>
+                    <Typography align="right" variant="caption">
+                      MAP{" "}
+                      <Typography variant="caption" style={{ display: "block" }}>
+                        {getMAP() || "--"}
+                      </Typography>
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Typography
+                  align={getBP() ? "right" : "center"}
+                  variant={getBP() ? "h4" : "h5"}
+                  style={getBP() ? {} : { color: "#a9a99d" }}
+                >
+                  {getBP() || "No Data"}
+                </Typography>
+              </>
+            ) : (
+              <Typography align="center" variant="h5">
+                NO DATA
+              </Typography>
+            )}
+            {/* <Grid container>
               <Grid item align="left" xs={6}>
                 <Typography align="left" variant="caption">
                   NIBP @8:15
@@ -351,7 +405,7 @@ const TelemetryCard = (props) => {
               style={getBP() ? {} : { color: "#a9a99d" }}
             >
               {getBP() || "No Data"}
-            </Typography>
+            </Typography> */}
           </Grid>
         </Grid>
         {/* RESP Row */}
