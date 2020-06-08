@@ -13,7 +13,7 @@ const PatientRepository = RepositoryFactory.get("patient");
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
-    ? process.env.REACT_APP_LOCAL
+    ? process.env.REACT_APP_LOCAL.slice(6)
     : process.env.REACT_APP_STAGING.slice(6);
 
 const useStyles = makeStyles((theme) => ({
