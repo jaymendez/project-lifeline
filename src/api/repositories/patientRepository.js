@@ -36,5 +36,20 @@ export default {
       formData.append(key, value);
     }
     return Repository.post(`/addPatientConfig`, formData);
-  }
+  },
+  getPatientObservation(payload) {
+    const formData = new FormData();
+    for (let [key, value] of Object.entries(payload)) {
+      if (typeof value === "undefined") {
+        value = "";
+      }
+      if (typeof value === "string") {
+        value = value.trim();
+      }
+      formData.append(key, value);
+    }
+    return Repository.post(`/getPatientRangedObservation`, formData);
+  },
+
+
 };

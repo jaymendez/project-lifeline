@@ -17,6 +17,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
+import PatientChart from "./PatientChart";
 
 const MySwal = withReactContent(Swal);
 const PatientRepository = RepositoryFactory.get("patient");
@@ -82,6 +83,62 @@ const PatientDetails = (props) => {
   const [patientConfig, setPatientConfig] = useState({});
   const [loader, setLoader] = useState(true);
   const [mode, setMode] = useState("READ");
+  const [code] = useState({
+    ecg: "76282-3",
+    spo2: "59407-7",
+    primary_rr: "76270-8",
+    secondary_rr: "76171-8",
+    temp: "8310-5",
+    hr: "76282-3",
+    pr: "8889-8",
+    bp: "131328",
+    systolic_bp: "8480-6",
+    diastolic_bp: "8462-4",
+    mean_arterial_pressure: "8478-0",
+  });
+  const [observationList] = useState([
+    {
+      name: "HEART RATE",
+      legend: "HR",
+      code: "76282-3",
+    },
+    {
+      name: "PULSE RATE",
+      legend: "PR",
+      code: "8889-8",
+    },
+    {
+      name: "SPO2",
+      legend: "%",
+      code: "59407-7",
+    },
+    {
+      name: "RESPIRATORY RATE",
+      legend: "RR",
+      code: "76270-8",
+    },
+    {
+      name: "BLOOD PRESSURE",
+      data: [
+        {
+          legend: "SYSTOLIC",
+          code: "8480-6",
+        },
+        {
+          legend: "DIASTOLIC",
+          code: "8462-4",
+        },
+        {
+          legend: "MAP",
+          code: "8478-0",
+        },
+      ],
+    },
+    {
+      name: "TEMPERATURE",
+      code: "8310-5",
+    },
+  ]);
   console.log(errors);
 
   const getPatient = async (id) => {
@@ -1170,6 +1227,16 @@ const PatientDetails = (props) => {
               </Grid>
             </form>
           </Paper>
+
+          {observationList.map((el) => {
+            return (
+              <PatientChart
+                style={{ marginTop: "50px" }}
+                patientId={patient.rpi_patientid}
+                observation={el}
+              />
+            );
+          })}
         </Grid>
       </Grid>
     </>
