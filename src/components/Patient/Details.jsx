@@ -136,6 +136,7 @@ const PatientDetails = (props) => {
     },
     {
       name: "TEMPERATURE",
+      legend: "CELSIUS",
       code: "8310-5",
     },
   ]);

@@ -185,10 +185,10 @@ const PatientChart = (props) => {
   return (
     <Paper elevation={3} className={classes.paper} style={{ ...style }}>
       <Grid container spacing={3}>
-        <Grid item xs={2}>
+        <Grid item xs={4} align="left">
           <Typography variant="h4">{observationType}</Typography>
         </Grid>
-        <Grid item xs={8} />
+        <Grid item xs={6} />
         <Grid item xs={2}>
           <MuiPickersUtilsProvider utils={MomentUtils}>
             <KeyboardDatePicker
