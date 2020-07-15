@@ -35,7 +35,7 @@ const tableIcons = {
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
-const CustomeMaterialTable = (props) => {
+const CustomMaterialTable = (props) => {
   return (
     <>
       <MaterialTable icons={tableIcons} {...props} />
@@ -43,4 +43,4 @@ const CustomeMaterialTable = (props) => {
   );
 };
 
-export default CustomeMaterialTable;
+export default CustomMaterialTable;
