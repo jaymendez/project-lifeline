@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
 const TelemetryCard = (props) => {
   const { patient, rxbox } = props;
   const classes = useStyles();
-  const [time] = useState(moment().format("HH:mm"));
+  const [time, setTime] = useState(moment().format("HH:mm"));
   const [chartHeight] = useState("80px");
   const [code] = useState({
     ecg: "76282-3",
@@ -88,6 +88,9 @@ const TelemetryCard = (props) => {
   //     const name = `get${parsed}`;
   //   }
   // }
+  useEffect(() => {
+    setTime(moment().format("HH:mm"));
+  }, [rxbox]);
 
   const getECG = () => {
     // heart rate
