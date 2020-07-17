@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core/styles";
 import _ from "lodash";
 import clsx from "clsx";
+import moment from "moment";
 import Chart from "./RTChart";
 
 let theme = createMuiTheme({
@@ -61,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
 const TelemetryCard = (props) => {
   const { patient, rxbox } = props;
   const classes = useStyles();
+  const [time] = useState(moment().format("HH:mm"));
   const [chartHeight] = useState("80px");
   const [code] = useState({
     ecg: "76282-3",
@@ -351,7 +353,7 @@ const TelemetryCard = (props) => {
                 <Grid container>
                   <Grid item align="left" xs={6}>
                     <Typography align="left" variant="caption">
-                      NIBP @8:15
+                      NIBP @{time}
                       <Typography variant="caption" style={{ display: "block" }}>
                         {" "}
                         mmhg

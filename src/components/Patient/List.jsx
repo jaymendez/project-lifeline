@@ -190,58 +190,6 @@ const PatientList = (props) => {
     }
   };
 
-  // const renderTable = () => {
-  //   return (
-  //     <TableContainer component={Paper}>
-  //       <Table className={classes.table} aria-label="simple table">
-  //         <TableHead>
-  //           <TableRow>
-  //             <TableCell>Name</TableCell>
-  //             <TableCell align="center">Date Admitted</TableCell>
-  //             <TableCell align="center">Time Admitted</TableCell>
-  //             <TableCell align="center">Location</TableCell>
-  //             <TableCell align="center">Status</TableCell>
-  //             {/* <TableCell align="center">Device</TableCell> */}
-  //             <TableCell align="center">Actions</TableCell>
-  //           </TableRow>
-  //         </TableHead>
-  //         <TableBody>
-  //           {patients.map((row, index) => (
-  //             <TableRow key={row.name}>
-  //               <>
-  //                 <TableCell component="th" scope="row">
-  //                   {row.rpi_patientfname}
-  //                   {row.rpi_patientlname}
-  //                 </TableCell>
-  //                 <TableCell align="center">{row.rpi_date_admitted}</TableCell>
-  //                 <TableCell align="center">{row.rpi_date_admitted}</TableCell>
-  //                 <TableCell align="center">WARD #</TableCell>
-  //                 <TableCell align="center">
-  //                   <div style={{ backgroundColor: "#4ba2e7", color: "white" }}>
-  //                     {row.rpi_covid19}
-  //                   </div>
-  //                 </TableCell>
-  //                 {/* <TableCell align="center">
-  //                   <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
-  //                 </TableCell> */}
-  //                 <TableCell align="center">
-  //                   <IconButton
-  //                     style={{ float: "right" }}
-  //                     aria-label="options"
-  //                     onClick={toggleOptions}
-  //                   >
-  //                     <MoreVert />
-  //                   </IconButton>
-  //                 </TableCell>
-  //               </>
-  //             </TableRow>
-  //           ))}
-  //         </TableBody>
-  //       </Table>
-  //     </TableContainer>
-  //   );
-  // };
-
   const columns = [
     {
       title: "Name",

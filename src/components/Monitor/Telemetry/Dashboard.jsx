@@ -13,8 +13,8 @@ const PatientRepository = RepositoryFactory.get("patient");
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
-    ? process.env.REACT_APP_LOCAL.slice(6)
-    : process.env.REACT_APP_STAGING.slice(6);
+    ? process.env.REACT_APP_LOCAL.slice(8)
+    : process.env.REACT_APP_STAGING.slice(8);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,28 +44,7 @@ const TelemetryDashboard = (props) => {
   const { match } = props;
   const classes = useStyles();
   const [rxboxData, setRxboxData] = useState([]);
-  const [patients, setPatients] = useState([
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 6,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 4,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 1,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-  ]);
+  const [patients, setPatients] = useState([]);
   const [monitor, setMonitor] = useState({});
   const [refreshInterval] = useState(60);
 
@@ -171,7 +150,8 @@ const TelemetryDashboard = (props) => {
 
   const autoRefresh = () => {
     setTimeout(function () {
-      window.location.reload();
+      // window.location.reload();
+      getMonitorWithPatientId();
     }, refreshInterval * 1000);
   };
 
@@ -193,7 +173,8 @@ const TelemetryDashboard = (props) => {
     var pusher = new Pusher(pusherKey, pusherOptions);
     // start listening for events
     pusher.subscribe(channel).bind(event, function (data) {
-      const parsedData = JSON.parse(data).map((el) => {
+      const d = JSON.parse(data);
+      const parsedData = d.patientBasicObservation.map((el) => {
         const {
           tpo_subject,
           tpo_code,
