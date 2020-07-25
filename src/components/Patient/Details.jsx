@@ -148,7 +148,6 @@ const PatientDetails = (props) => {
       try {
         const { data } = await PatientRepository.getPatient(id);
         setPatient(data.PatientData_report[0]);
-        console.log(data.PatientData_report)
       } catch (e) {
         alert("no patient with that id");
         console.log(e);
@@ -162,7 +161,6 @@ const PatientDetails = (props) => {
       /* Query to get patient */
       try {
         const { data } = await PatientRepository.getPatientConfig(id);
-        // console.log(data);
         if (data.length > 0) {
           setPatientConfig(data[0]);
           for (let [key, value] of Object.entries(data[0])) {
@@ -575,8 +573,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">msec</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         error={!_.isEmpty(errors.ecg_st_msec)}
                         inputRef={register({
                           validate: {
@@ -592,19 +591,6 @@ const PatientDetails = (props) => {
                       />
                     </Grid>
                     <Grid item xs={6} />
-
-                    {/* <FormControl variant="outlined">
-                    <OutlinedInput
-                      margin="dense"
-                      size="small"
-                      id="outlined-adornment-weight"
-                      value={123}
-                      // onChange={handleChange('weight')}
-                      endAdornment={<InputAdornment position="end">Kg</InputAdornment>}
-                      readOnly: mode === "READ",
-                      aria-describedby="outlined-weight-helper-text"
-                    />
-                  </FormControl> */}
                   </Grid>
                 </Grid>
                 <Grid item xs={3}>
@@ -629,8 +615,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="heartrate_upper_bpm"
                         error={!_.isEmpty(errors.heartrate_upper_bpm)}
                         inputRef={register({
@@ -666,8 +653,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="heartrate_lower_bpm"
                         error={!_.isEmpty(errors.heartrate_lower_bpm)}
                         inputRef={register({
@@ -708,8 +696,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="pulserate_upper_bpm"
                         error={!_.isEmpty(errors.pulserate_upper_bpm)}
                         inputRef={register({
@@ -745,8 +734,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">bpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="pulserate_lower_bpm"
                         error={!_.isEmpty(errors.pulserate_lower_bpm)}
                         inputRef={register({
@@ -789,8 +779,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="oxygen_upper_saturation"
                         error={!_.isEmpty(errors.oxygen_upper_saturation)}
                         inputRef={register({
@@ -826,8 +817,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="oxygen_lower_saturation"
                         error={!_.isEmpty(errors.oxygen_lower_saturation)}
                         inputRef={register({
@@ -870,8 +862,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">rpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="respiratory_upper_rpm"
                         error={!_.isEmpty(errors.respiratory_upper_rpm)}
                         inputRef={register({
@@ -907,8 +900,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">rpm</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="respiratory_lower_rpm"
                         error={!_.isEmpty(errors.respiratory_lower_rpm)}
                         inputRef={register({
@@ -958,8 +952,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="bp_systolic_upper"
                         error={!_.isEmpty(errors.bp_systolic_upper)}
                         inputRef={register({
@@ -992,8 +987,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="bp_diastolic_upper"
                         error={!_.isEmpty(errors.bp_diastolic_upper)}
                         inputRef={register({
@@ -1028,8 +1024,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="bp_systolic_lower"
                         error={!_.isEmpty(errors.bp_systolic_lower)}
                         inputRef={register({
@@ -1062,8 +1059,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">mm Hg</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="bp_diastolic_lower"
                         error={!_.isEmpty(errors.bp_diastolic_lower)}
                         inputRef={register({
@@ -1098,8 +1096,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">minutes</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="bp_time_frame"
                         error={!_.isEmpty(errors.bp_time_frame)}
                         inputRef={register({
@@ -1141,8 +1140,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">C</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="temperature_upper"
                         error={!_.isEmpty(errors.temperature_upper)}
                         inputRef={register({
@@ -1178,8 +1178,9 @@ const PatientDetails = (props) => {
                         className={classes.textField}
                         InputProps={{
                           endAdornment: <InputAdornment position="end">C</InputAdornment>,
-                          readOnly: mode === "READ",
+                          // readOnly: mode === "READ",
                         }}
+                        disabled={mode === "READ"}
                         name="temperature_lower"
                         error={!_.isEmpty(errors.temperature_lower)}
                         inputRef={register({

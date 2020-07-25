@@ -13,8 +13,8 @@ const PatientRepository = RepositoryFactory.get("patient");
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
-    ? process.env.REACT_APP_LOCAL.slice(8)
-    : process.env.REACT_APP_STAGING.slice(8);
+    ? process.env.REACT_APP_LOCAL.replace(/(^\w+:|^)\/\//, "")
+    : process.env.REACT_APP_STAGING.replace(/(^\w+:|^)\/\//, "");
 
 const useStyles = makeStyles((theme) => ({
   root: {
