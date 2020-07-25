@@ -47,6 +47,19 @@ const TelemetryDashboard = (props) => {
   const [patients, setPatients] = useState([]);
   const [monitor, setMonitor] = useState({});
   const [refreshInterval] = useState(60);
+  const [code] = useState({
+    ecg: "76282-3",
+    spo2: "59407-7",
+    primary_rr: "76270-8",
+    secondary_rr: "76171-8",
+    temp: "8310-5",
+    hr: "76282-3",
+    pr: "8889-8",
+    bp: "131328",
+    systolic_bp: "8480-6",
+    diastolic_bp: "8462-4",
+    mean_arterial_pressure: "8478-0",
+  });
 
   const getMonitorWithPatientId = async () => {
     if (!_.isEmpty(match.params)) {
@@ -114,13 +127,21 @@ const TelemetryDashboard = (props) => {
       return false;
     }
     const now = moment();
-    const effectiveDate = moment(data.tpo_effectivity);
+    const effectiveDate = moment.utc(data.tpo_effectivity)
     const diff = now.diff(effectiveDate) / 1000;
-    if (diff >= 30) {
+    if (
+      data.tpo_code === code.systolic_bp ||
+      data.tpo_code === code.diastolic_bp ||
+      data.tpo_code === code.mean_arterial_pressure
+    ) {
+      if (diff >= 3600) {
+        return false;
+      }
+    } else if (diff >= 30) {
       return false;
     }
     return true;
-  }
+  };
 
   const getPatientRxboxData = (patientId) => {
     const data = [...rxboxData];

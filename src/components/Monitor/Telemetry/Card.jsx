@@ -88,9 +88,9 @@ const TelemetryCard = (props) => {
   //     const name = `get${parsed}`;
   //   }
   // }
-  useEffect(() => {
-    setTime(moment().format("HH:mm"));
-  }, [rxbox]);
+  // useEffect(() => {
+  //   setTime(moment().format("HH:mm"));
+  // }, [rxbox]);
 
   const getECG = () => {
     // heart rate
@@ -189,7 +189,7 @@ const TelemetryCard = (props) => {
 
   const getPulseRate = () => {
     const index = _.findIndex(rxbox, function (o) {
-      return o.tpo_code === code.spo2;
+      return o.tpo_code === code.pr;
     });
     if (index >= 0) {
       return rxbox[index].tpo_value;
@@ -202,6 +202,7 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.mean_arterial_pressure;
     });
     if (index >= 0) {
+      setTime(moment(rxbox[index].tpo_effectivity).format("HH:mm"));
       return rxbox[index].tpo_value;
     }
     return null;

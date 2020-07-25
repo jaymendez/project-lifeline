@@ -148,6 +148,7 @@ const PatientDetails = (props) => {
       try {
         const { data } = await PatientRepository.getPatient(id);
         setPatient(data.PatientData_report[0]);
+        console.log(data.PatientData_report)
       } catch (e) {
         alert("no patient with that id");
         console.log(e);
@@ -161,13 +162,16 @@ const PatientDetails = (props) => {
       /* Query to get patient */
       try {
         const { data } = await PatientRepository.getPatientConfig(id);
-        setPatientConfig(data[0]);
-        for (let [key, value] of Object.entries(data[0])) {
-          key = key.slice(key.search("_") + 1);
-          setValue(key, value);
+        // console.log(data);
+        if (data.length > 0) {
+          setPatientConfig(data[0]);
+          for (let [key, value] of Object.entries(data[0])) {
+            key = key.slice(key.search("_") + 1);
+            setValue(key, value);
+          }
         }
       } catch (e) {
-        alert("no patient with that id");
+        alert("No patient config");
         console.log(e);
       }
       setLoader(false);
@@ -1199,7 +1203,7 @@ const PatientDetails = (props) => {
                   container
                   alignItems="center"
                   justify="flex-end"
-                  style={{ marginTop: "30px" }}
+                  style={mode === "READ" ? { visibility: "hidden", marginTop: "30px" } : { marginTop: "30px" }}
                   spacing={2}
                 >
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
