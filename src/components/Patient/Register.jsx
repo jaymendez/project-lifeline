@@ -272,9 +272,10 @@ const PatientRegister = (props) => {
         });
     } else {
       await PatientRepository.createPatient(formData)
-        .then((res) => {
+        .then(async (res) => {
           console.log(res);
           if (res.data.addpatient_report) {
+            await PatientRepository.createDefaultPatientConfig(res.data.addpatient_report[0].patient_id);
             Swal.fire({
               icon: "success",
               title: "Patient added",

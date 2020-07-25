@@ -37,6 +37,27 @@ export default {
     }
     return Repository.post(`/addPatientConfig`, formData);
   },
+  createDefaultPatientConfig(patientId) {
+    const defaultConfig = {
+      ecg_st_msec: "",
+      heartrate_upper_bpm: 100,
+      heartrate_lower_bpm: 50,
+      pulserate_upper_bpm: 100,
+      pulserate_lower_bpm: 50,
+      oxygen_upper_saturation: 100,
+      oxygen_lower_saturation: 94,
+      respiratory_upper_rpm: 20,
+      respiratory_lower_rpm: 12,
+      bp_systolic_upper: 120,
+      bp_systolic_lower: 90,
+      bp_diastolic_upper: 80,
+      bp_diastolic_lower: 60,
+      bp_time_frame: 30,
+      temperature_upper: 42.0,
+      temperature_lower: 35.8,
+    };
+    this.addPatientConfig({ patientid: patientId, ...defaultConfig });
+  },
   getPatientObservation(payload) {
     const formData = new FormData();
     for (let [key, value] of Object.entries(payload)) {
@@ -50,6 +71,4 @@ export default {
     }
     return Repository.post(`/getPatientRangedObservation`, formData);
   },
-
-
 };
