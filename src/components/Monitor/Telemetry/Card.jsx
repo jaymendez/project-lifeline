@@ -8,8 +8,11 @@ import {
 } from "@material-ui/core/styles";
 import _ from "lodash";
 import clsx from "clsx";
+import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 import moment from "moment";
 import Chart from "./RTChart";
+
+const PatientRepository = RepositoryFactory.get("patient");
 
 let theme = createMuiTheme({
   // typography: {
@@ -49,6 +52,9 @@ const useStyles = makeStyles((theme) => ({
   resp: {
     color: "#f6f830",
   },
+  error: {
+    color: "#db1e1e",
+  },
   TelemetryCard: {
     border: "2px solid white",
   },
@@ -64,6 +70,16 @@ const TelemetryCard = (props) => {
   const classes = useStyles();
   const [time, setTime] = useState(moment().format("HH:mm"));
   const [chartHeight] = useState("80px");
+  const [patientConfig, setPatientConfig] = useState({});
+  const [issue, setIssue] = useState(false);
+  const [errors, setErrors] = useState({
+    ecg: true,
+    spo2: false,
+    rr: false,
+    temp: false,
+    pr: false,
+    bp: false,
+  });
   const [code] = useState({
     ecg: "76282-3",
     spo2: "59407-7",
@@ -77,20 +93,22 @@ const TelemetryCard = (props) => {
     diastolic_bp: "8462-4",
     mean_arterial_pressure: "8478-0",
   });
-  // const generateFunctions = () => {
-  //   for (let [key, value] of Object.entries(code)) {
-  //     const arr = key.split("_");
-  //     const parsed = arr.reduce((acc, val) => {
-  //       const captAcc = acc.charAt(0).toUpperCase() + acc.slice(1);
-  //       const captVal = val.charAt(0).toUpperCase() + val.slice(1);
-  //       return captAcc + val;
-  //     });
-  //     const name = `get${parsed}`;
-  //   }
-  // }
-  // useEffect(() => {
-  //   setTime(moment().format("HH:mm"));
-  // }, [rxbox]);
+
+  const getPatientConfig = async (id) => {
+    if (id) {
+      /* Query to get patient */
+      try {
+        const { data } = await PatientRepository.getPatientConfig(id);
+        if (data.length > 0) {
+          console.log(data[0]);
+          setPatientConfig(data[0]);
+        }
+      } catch (e) {
+        alert("No patient config");
+        console.log(e);
+      }
+    }
+  };
 
   const getECG = () => {
     // heart rate
@@ -98,27 +116,15 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.ecg;
     });
     if (index >= 0) {
-      return rxbox[index].tpo_value;
+      const { tpo_value } = rxbox[index];
+
+      return tpo_value;
     }
     return null;
   };
 
   const getBP = () => {
     let index;
-    // switch (type) {
-    //   case "systolic":
-    //     index = _.findIndex(rxbox, function (o) {
-    //       return o.tpo_code === code.systolic_bp;
-    //     });
-    //     break;
-    //   case "diastolic":
-    //     index = _.findIndex(rxbox, function (o) {
-    //       return o.tpo_code === code.diastolic_bp;
-    //     });
-    //     break;
-    //   default:
-    //     return null;
-    // }
     const systolicIndex = _.findIndex(rxbox, function (o) {
       return o.tpo_code === code.systolic_bp;
     });
@@ -130,6 +136,25 @@ const TelemetryCard = (props) => {
     const systolicVal = systolicIndex >= 0 ? rxbox[systolicIndex].tpo_value : null;
     const diastolicVal = diastolicIndex >= 0 ? rxbox[diastolicIndex].tpo_value : null;
     if (!_.isEmpty(systolicVal) && !_.isEmpty(diastolicVal)) {
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const {
+          rpc_bp_systolic_lower,
+          rpc_bp_systolic_upper,
+          rpc_bp_diastolic_upper,
+          rpc_bp_diastolic_lower,
+        } = patientConfig;
+        err.bp = false;
+        if (systolicVal > rpc_bp_systolic_upper || systolicVal < rpc_bp_systolic_lower) {
+          // error
+          err.bp = true;
+        }
+        if (diastolicVal > rpc_bp_diastolic_upper || diastolicVal < rpc_bp_diastolic_lower) {
+          // error
+          err.bp = true;
+        }
+        setErrors(err);
+      }
       return `${systolicVal}/${diastolicVal}`;
     }
     // if (index >= 0) {
@@ -154,7 +179,19 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.temp;
     });
     if (index >= 0) {
-      return rxbox[index].tpo_value;
+      const { tpo_value } = rxbox[index];
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const { rpc_temperature_lower, rpc_temperature_upper } = patientConfig;
+        err.temp = false;
+
+        if (tpo_value > rpc_temperature_upper || tpo_value < rpc_temperature_lower) {
+          // error
+          err.temp = true;
+        }
+        setErrors(err);
+      }
+      return tpo_value;
     }
     return null;
   };
@@ -169,10 +206,34 @@ const TelemetryCard = (props) => {
     });
 
     if (index >= 0) {
-      return rxbox[index].tpo_value;
+      const { tpo_value } = rxbox[index];
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const { rpc_respiratory_lower_rpm, rpc_respiratory_upper_rpm } = patientConfig;
+        err.rr = false;
+
+        if (tpo_value > rpc_respiratory_upper_rpm || tpo_value < rpc_respiratory_lower_rpm) {
+          // error
+          err.rr = true;
+        }
+        setErrors(err);
+      }
+      return tpo_value;
     }
     if (secondaryIndex >= 0) {
-      return rxbox[secondaryIndex].tpo_value;
+      const { tpo_value } = rxbox[secondaryIndex];
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const { rpc_respiratory_lower_rpm, rpc_respiratory_upper_rpm } = patientConfig;
+        err.rr = false;
+
+        if (tpo_value > rpc_respiratory_upper_rpm || tpo_value < rpc_respiratory_lower_rpm) {
+          // error
+          err.rr = true;
+        }
+        setErrors(err);
+      }
+      return tpo_value;
     }
     return null;
   };
@@ -182,7 +243,19 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.spo2;
     });
     if (index >= 0) {
-      return rxbox[index].tpo_value;
+      const { tpo_value } = rxbox[index];
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const { rpc_oxygen_lower_saturation, rpc_oxygen_upper_saturation } = patientConfig;
+        err.spo2 = false;
+
+        if (tpo_value > rpc_oxygen_upper_saturation || tpo_value < rpc_oxygen_lower_saturation) {
+          // error
+          err.spo2 = true;
+        }
+        setErrors(err);
+      }
+      return tpo_value;
     }
     return null;
   };
@@ -192,7 +265,18 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.pr;
     });
     if (index >= 0) {
-      return rxbox[index].tpo_value;
+      const { tpo_value } = rxbox[index];
+      if (!_.isEmpty(patientConfig)) {
+        const err = { ...errors };
+        const { rpc_pulserate_lower_bpm, rpc_pulserate_upper_bpm } = patientConfig;
+        err.pr = false;
+        if (tpo_value > rpc_pulserate_upper_bpm || tpo_value < rpc_pulserate_lower_bpm) {
+          // error
+          err.pr = true;
+        }
+        setErrors(err);
+      }
+      return tpo_value;
     }
     return null;
   };
@@ -216,10 +300,95 @@ const TelemetryCard = (props) => {
     return `${name}`;
   };
 
+  const isError = (type) => {
+    if (type) {
+      const data = { ...errors };
+      return data[type];
+    }
+  };
+
+  const setStyle = (type) => {
+    const style = { color: "#a9a99d" };
+    switch (type) {
+      case "ecg":
+        if (getECG()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      case "pr":
+        if (getPulseRate()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      case "spo2":
+        if (getSpo2()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      case "bp":
+        if (getBP() && getMAP()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      case "rr":
+        if (getRR()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      case "temp":
+        if (getTemp()) {
+          style.margin = "auto";
+          if (isError(type)) {
+            style.color = "#db1e1e";
+          }
+        }
+        break;
+      default:
+        break;
+    }
+    return style;
+  };
+
+  useEffect(() => {
+    if (patient) {
+      getPatientConfig(patient.rpi_patientid);
+    }
+  }, [patient]);
+
+  useEffect(() => {
+    if (errors) {
+      const arr = _.some(errors, true);
+      if (arr) {
+        setIssue(true);
+      } else {
+        setIssue(false);
+      }
+    }
+  }, [errors]);
+
   return (
     <ThemeProvider theme={theme}>
       <Paper className={clsx(classes.paper, classes.TelemetryCard)}>
-        <Grid container className={classes.bordered}>
+        <Grid
+          container
+          className={classes.bordered}
+          style={issue ? { backgroundColor: "#db1e1e" } : {}}
+        >
           <Grid item xs={1}>
             <Typography variant="h5">B#{patient.rpi_bednumber || "--"}</Typography>
           </Grid>
@@ -254,7 +423,8 @@ const TelemetryCard = (props) => {
             item
             xs={2}
             className={classes.ecg}
-            style={getECG() ? {} : { margin: "auto", color: "#a9a99d" }}
+            // style={getECG() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("ecg")}
           >
             {getECG() ? (
               <>
@@ -293,7 +463,8 @@ const TelemetryCard = (props) => {
             item
             xs={2}
             className={classes.spo2}
-            style={getPulseRate() ? {} : { margin: "auto", color: "#a9a99d" }}
+            // style={getPulseRate() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("pr")}
           >
             {getPulseRate() ? (
               <>
@@ -326,7 +497,8 @@ const TelemetryCard = (props) => {
             item
             xs={2}
             className={classes.spo2}
-            style={getSpo2() ? {} : { margin: "auto", color: "#a9a99d" }}
+            // style={getSpo2() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("spo2")}
           >
             {getSpo2() ? (
               <>
@@ -351,7 +523,12 @@ const TelemetryCard = (props) => {
               {getSpo2() || "98"}
             </Typography> */}
           </Grid>
-          <Grid item xs={2} style={getMAP() && getBP() ? {} : { margin: "auto", color: "#a9a99d" }}>
+          <Grid
+            item
+            xs={2}
+            // style={getMAP() && getBP() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("bp")}
+          >
             {getMAP() && getBP() ? (
               <>
                 <Grid container>
@@ -423,7 +600,8 @@ const TelemetryCard = (props) => {
             item
             xs={2}
             className={classes.resp}
-            style={getRR() ? {} : { margin: "auto", color: "#a9a99d" }}
+            // style={getRR() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("rr")}
           >
             {getRR() ? (
               <>
@@ -447,7 +625,12 @@ const TelemetryCard = (props) => {
             </Typography> */}
           </Grid>
 
-          <Grid item xs={2} style={getTemp() ? {} : { margin: "auto", color: "#a9a99d" }}>
+          <Grid
+            item
+            xs={2}
+            // style={getTemp() ? {} : { margin: "auto", color: "#a9a99d" }}
+            style={setStyle("temp")}
+          >
             {getTemp() ? (
               <>
                 <Typography align="left" variant="subtitle2">

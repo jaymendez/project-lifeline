@@ -112,6 +112,7 @@ const TelemetryDashboard = (props) => {
         const patientsData = await Promise.all(
           patientIds.map((el) => {
             const patient = getPatient(el);
+
             return patient;
           })
         );
@@ -127,7 +128,7 @@ const TelemetryDashboard = (props) => {
       return false;
     }
     const now = moment();
-    const effectiveDate = moment.utc(data.tpo_effectivity)
+    const effectiveDate = moment.utc(data.tpo_effectivity);
     const diff = now.diff(effectiveDate) / 1000;
     if (
       data.tpo_code === code.systolic_bp ||
@@ -162,6 +163,7 @@ const TelemetryDashboard = (props) => {
       return rxbox;
     }
   };
+
 
   const parsePatientsOrder = () => {
     const data = [...patients];
@@ -264,7 +266,6 @@ const TelemetryDashboard = (props) => {
           const patient = patients[patientIndex];
           // console.log(patient);
           let rxboxData = getPatientRxboxData(patientId);
-          console.log(rxboxData);
           if (!_.isEmpty(patient)) {
             paper = <TelemetryCard patient={patient} rxbox={rxboxData} />;
           }
