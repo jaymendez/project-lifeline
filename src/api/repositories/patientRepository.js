@@ -71,4 +71,7 @@ export default {
     }
     return Repository.post(`/getPatientRangedObservation`, formData);
   },
+  getLivePatientObservation() {
+    return Repository.post(`/getPatientObservation`);
+  },
 };

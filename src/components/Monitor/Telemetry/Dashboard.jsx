@@ -10,6 +10,7 @@ import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
+const RXBOX_INTERVAL = 5000;
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
@@ -178,6 +179,32 @@ const TelemetryDashboard = (props) => {
     }, refreshInterval * 1000);
   };
 
+  const getPatientObservation = () => {
+    const observation = PatientRepository.getLivePatientObservation();
+    console.log(observation);
+    if (observation) {
+      const parsedData = JSON.parse(observation).map((el) => {
+        const {
+          tpo_subject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+          tpo_effectivity,
+          ...restData
+        } = el;
+        const parsedSubject = parseInt(tpo_subject.slice(tpo_subject.search("/") + 1), 10);
+        return {
+          tpo_subject: parsedSubject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+          tpo_effectivity,
+        };
+      });
+      setRxboxData(parsedData);
+    }
+  }; 
+
   const initPusher = () => {
     const pusherOptions = {
       cluster: "eu",
@@ -220,7 +247,8 @@ const TelemetryDashboard = (props) => {
   };
 
   useEffect(() => {
-    initPusher();
+    setInterval(getPatientObservation, RXBOX_INTERVAL);
+    // initPusher();
     getMonitorWithPatientId();
     autoRefresh();
   }, []);
