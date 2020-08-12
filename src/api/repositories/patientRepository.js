@@ -36,5 +36,8 @@ export default {
       formData.append(key, value);
     }
     return Repository.post(`/addPatientConfig`, formData);
-  }
+  },
+  getPatientObservation() {
+    return Repository.post(`/getPatientObservation`);
+  },
 };

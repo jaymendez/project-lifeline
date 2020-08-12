@@ -10,6 +10,7 @@ import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
+const RXBOX_INTERVAL = 5000;
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
@@ -44,28 +45,7 @@ const TelemetryDashboard = (props) => {
   const { match } = props;
   const classes = useStyles();
   const [rxboxData, setRxboxData] = useState([]);
-  const [patients, setPatients] = useState([
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 6,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 4,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 1,
-    // },
-    // {
-    //   name: "Sample Name",
-    //   monitor: 1,
-    //   monitorSection: 2,
-    // },
-  ]);
+  const [patients, setPatients] = useState([]);
   const [monitor, setMonitor] = useState({});
   const [refreshInterval] = useState(60);
 
@@ -141,7 +121,7 @@ const TelemetryDashboard = (props) => {
       return false;
     }
     return true;
-  }
+  };
 
   const getPatientRxboxData = (patientId) => {
     const data = [...rxboxData];
@@ -174,6 +154,32 @@ const TelemetryDashboard = (props) => {
       window.location.reload();
     }, refreshInterval * 1000);
   };
+
+  const getPatientObservation = () => {
+    const observation = PatientRepository.getPatientObservation();
+    console.log(observation);
+    if (observation) {
+      const parsedData = JSON.parse(observation).map((el) => {
+        const {
+          tpo_subject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+          tpo_effectivity,
+          ...restData
+        } = el;
+        const parsedSubject = parseInt(tpo_subject.slice(tpo_subject.search("/") + 1), 10);
+        return {
+          tpo_subject: parsedSubject,
+          tpo_code,
+          tpo_value,
+          tpo_dataerror,
+          tpo_effectivity,
+        };
+      });
+      setRxboxData(parsedData);
+    }
+  }; 
 
   const initPusher = () => {
     const pusherOptions = {
@@ -216,7 +222,8 @@ const TelemetryDashboard = (props) => {
   };
 
   useEffect(() => {
-    initPusher();
+    setInterval(getPatientObservation, RXBOX_INTERVAL);
+    // initPusher();
     getMonitorWithPatientId();
     autoRefresh();
   }, []);
