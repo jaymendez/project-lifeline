@@ -179,11 +179,13 @@ const TelemetryDashboard = (props) => {
     }, refreshInterval * 1000);
   };
 
-  const getPatientObservation = () => {
-    const observation = PatientRepository.getLivePatientObservation();
-    console.log(observation);
-    if (observation) {
-      const parsedData = JSON.parse(observation).map((el) => {
+  const getPatientObservation = async () => {
+    const {data, status} = await PatientRepository.getLivePatientObservation();
+    // console.log(JSON.parse(data))
+    if (status === 200) {
+      const [obs, notifs] = data;
+      const observations = obs.patientBasicObservation;
+      const parsedData = observations.map((el) => {
         const {
           tpo_subject,
           tpo_code,
