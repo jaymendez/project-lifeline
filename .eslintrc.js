@@ -23,5 +23,8 @@ module.exports = {
     'react',
   ],
   rules: {
+    camelcase: "never",
+    "react/prop-types": 0,
+    "react/forbid-prop-types": 0
   },
 };

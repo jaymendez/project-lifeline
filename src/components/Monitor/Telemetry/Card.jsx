@@ -136,25 +136,6 @@ const TelemetryCard = (props) => {
     const systolicVal = systolicIndex >= 0 ? rxbox[systolicIndex].tpo_value : null;
     const diastolicVal = diastolicIndex >= 0 ? rxbox[diastolicIndex].tpo_value : null;
     if (!_.isEmpty(systolicVal) && !_.isEmpty(diastolicVal)) {
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const {
-          rpc_bp_systolic_lower,
-          rpc_bp_systolic_upper,
-          rpc_bp_diastolic_upper,
-          rpc_bp_diastolic_lower,
-        } = patientConfig;
-        err.bp = false;
-        if (systolicVal > rpc_bp_systolic_upper || systolicVal < rpc_bp_systolic_lower) {
-          // error
-          err.bp = true;
-        }
-        if (diastolicVal > rpc_bp_diastolic_upper || diastolicVal < rpc_bp_diastolic_lower) {
-          // error
-          err.bp = true;
-        }
-        setErrors(err);
-      }
       return `${systolicVal}/${diastolicVal}`;
     }
     // if (index >= 0) {
@@ -180,17 +161,6 @@ const TelemetryCard = (props) => {
     });
     if (index >= 0) {
       const { tpo_value } = rxbox[index];
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const { rpc_temperature_lower, rpc_temperature_upper } = patientConfig;
-        err.temp = false;
-
-        if (tpo_value > rpc_temperature_upper || tpo_value < rpc_temperature_lower) {
-          // error
-          err.temp = true;
-        }
-        setErrors(err);
-      }
       return tpo_value;
     }
     return null;
@@ -207,32 +177,10 @@ const TelemetryCard = (props) => {
 
     if (index >= 0) {
       const { tpo_value } = rxbox[index];
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const { rpc_respiratory_lower_rpm, rpc_respiratory_upper_rpm } = patientConfig;
-        err.rr = false;
-
-        if (tpo_value > rpc_respiratory_upper_rpm || tpo_value < rpc_respiratory_lower_rpm) {
-          // error
-          err.rr = true;
-        }
-        setErrors(err);
-      }
       return tpo_value;
     }
     if (secondaryIndex >= 0) {
       const { tpo_value } = rxbox[secondaryIndex];
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const { rpc_respiratory_lower_rpm, rpc_respiratory_upper_rpm } = patientConfig;
-        err.rr = false;
-
-        if (tpo_value > rpc_respiratory_upper_rpm || tpo_value < rpc_respiratory_lower_rpm) {
-          // error
-          err.rr = true;
-        }
-        setErrors(err);
-      }
       return tpo_value;
     }
     return null;
@@ -244,17 +192,6 @@ const TelemetryCard = (props) => {
     });
     if (index >= 0) {
       const { tpo_value } = rxbox[index];
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const { rpc_oxygen_lower_saturation, rpc_oxygen_upper_saturation } = patientConfig;
-        err.spo2 = false;
-
-        if (tpo_value > rpc_oxygen_upper_saturation || tpo_value < rpc_oxygen_lower_saturation) {
-          // error
-          err.spo2 = true;
-        }
-        setErrors(err);
-      }
       return tpo_value;
     }
     return null;
@@ -266,19 +203,18 @@ const TelemetryCard = (props) => {
     });
     if (index >= 0) {
       const { tpo_value } = rxbox[index];
-      if (!_.isEmpty(patientConfig)) {
-        const err = { ...errors };
-        const { rpc_pulserate_lower_bpm, rpc_pulserate_upper_bpm } = patientConfig;
-        err.pr = false;
-        if (tpo_value > rpc_pulserate_upper_bpm || tpo_value < rpc_pulserate_lower_bpm) {
-          // error
-          err.pr = true;
-        }
-        setErrors(err);
-      }
       return tpo_value;
     }
     return null;
+  };
+
+  const getTime = () => {
+    const index = _.findIndex(rxbox, function (o) {
+      return o.tpo_code === code.mean_arterial_pressure;
+    });
+    if (index >= 0) {
+      setTime(moment(rxbox[index].tpo_effectivity).format("HH:mm"));
+    }
   };
 
   const getMAP = () => {
@@ -286,7 +222,7 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.mean_arterial_pressure;
     });
     if (index >= 0) {
-      setTime(moment(rxbox[index].tpo_effectivity).format("HH:mm"));
+      // setTime(moment(rxbox[index].tpo_effectivity).format("HH:mm"));
       return rxbox[index].tpo_value;
     }
     return null;
@@ -298,6 +234,76 @@ const TelemetryCard = (props) => {
       patient.rpi_patientlname || ""
     } ${middleInitial}`.toUpperCase();
     return `${name}`;
+  };
+
+  const validateRxboxConfig = () => {
+    if (!_.isEmpty(patientConfig)) {
+      const err = { ...errors };
+      const {
+        rpc_bp_systolic_lower,
+        rpc_bp_systolic_upper,
+        rpc_bp_diastolic_upper,
+        rpc_bp_diastolic_lower,
+        rpc_temperature_lower, 
+        rpc_temperature_upper,
+        rpc_respiratory_lower_rpm, rpc_respiratory_upper_rpm,
+        rpc_oxygen_lower_saturation, rpc_oxygen_upper_saturation,
+        rpc_pulserate_lower_bpm, rpc_pulserate_upper_bpm
+      } = patientConfig;
+      err.temp = false;
+      err.bp = false;
+      err.rr = false;
+      err.spo2 = false;
+      err.pr = false;
+
+
+      const tempValue = getTemp();
+      const respValue = getRR();
+      const spo2Value = getSpo2();
+      const bpValue = getBP();
+      const prValue = getPulseRate();
+
+      if (tempValue) {
+        if (tempValue > rpc_temperature_upper || tempValue < rpc_temperature_lower) {
+          // error
+          err.temp = true;
+        }
+      }
+
+      if (respValue) {
+        if (respValue > rpc_respiratory_upper_rpm || respValue < rpc_respiratory_lower_rpm) {
+          // error
+          err.rr = true;
+        }
+      }
+
+      if (spo2Value) {
+        if (spo2Value > rpc_oxygen_upper_saturation || spo2Value < rpc_oxygen_lower_saturation) {
+          // error
+          err.spo2 = true;
+        }
+      }
+
+      if (bpValue) {
+        const [systolicVal, diastolicVal] = bpValue.split("/");
+        if (systolicVal > rpc_bp_systolic_upper || systolicVal < rpc_bp_systolic_lower) {
+          // error
+          err.bp = true;
+        }
+        if (diastolicVal > rpc_bp_diastolic_upper || diastolicVal < rpc_bp_diastolic_lower) {
+          // error
+          err.bp = true;
+        }
+      }
+
+      if (prValue) {
+        if (prValue > rpc_pulserate_upper_bpm || prValue < rpc_pulserate_lower_bpm) {
+          // error
+          err.pr = true;
+        }
+      }
+      setErrors(err);
+    }
   };
 
   const isError = (type) => {
@@ -369,6 +375,11 @@ const TelemetryCard = (props) => {
       getPatientConfig(patient.rpi_patientid);
     }
   }, [patient]);
+
+  useEffect(() => {
+    validateRxboxConfig();
+    getTime();
+  }, [rxbox]);
 
   useEffect(() => {
     if (errors) {
@@ -532,7 +543,7 @@ const TelemetryCard = (props) => {
             {getMAP() && getBP() ? (
               <>
                 <Grid container>
-                  <Grid item align="left" xs={6}>
+                  <Grid item align="left" xs={7}>
                     <Typography align="left" variant="caption">
                       NIBP @{time}
                       <Typography variant="caption" style={{ display: "block" }}>
@@ -541,7 +552,7 @@ const TelemetryCard = (props) => {
                       </Typography>
                     </Typography>
                   </Grid>
-                  <Grid item align="right" xs={6}>
+                  <Grid item align="right" xs={5}>
                     <Typography align="right" variant="caption">
                       MAP{" "}
                       <Typography variant="caption" style={{ display: "block" }}>

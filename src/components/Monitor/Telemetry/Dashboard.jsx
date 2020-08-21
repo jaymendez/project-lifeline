@@ -128,7 +128,7 @@ const TelemetryDashboard = (props) => {
     if (!_.isEmpty(data.tpo_dataerror)) {
       return false;
     }
-    const now = moment();
+    const now = moment.utc();
     const effectiveDate = moment.utc(data.tpo_effectivity);
     const diff = now.diff(effectiveDate) / 1000;
     if (
@@ -165,7 +165,6 @@ const TelemetryDashboard = (props) => {
     }
   };
 
-
   const parsePatientsOrder = () => {
     const data = [...patients];
     const sortedData = _.sortBy(data, ["monitorSection"]);
@@ -180,7 +179,7 @@ const TelemetryDashboard = (props) => {
   };
 
   const getPatientObservation = async () => {
-    const {data, status} = await PatientRepository.getLivePatientObservation();
+    const { data, status } = await PatientRepository.getLivePatientObservation();
     // console.log(JSON.parse(data))
     if (status === 200) {
       const [obs, notifs] = data;
@@ -205,7 +204,77 @@ const TelemetryDashboard = (props) => {
       });
       setRxboxData(parsedData);
     }
-  }; 
+  };
+
+  const getPatientObservationTest = async () => {
+    const data = [
+      {
+        /* spo2 */
+        tpo_code: "59407-7",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "93",
+      },
+      {
+        /* pulse rate */
+        tpo_code: "8889-8",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "101",
+      },
+      {
+        /* systolic bp */
+        tpo_code: "8480-6",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "93",
+      },
+      {
+        /* diastolic bp */
+        tpo_code: "8462-4",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "93",
+      },
+      {
+        /* diastolic bp */
+        tpo_code: "8478-0",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "93",
+      },
+      {
+        /* primary rr */
+        tpo_code: "76270-8",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "98",
+      },
+      {
+        /* temp */
+        tpo_code: "8310-5",
+        tpo_dataerror: "",
+        tpo_effectivity: moment.utc(),
+        tpo_obsid: 704894,
+        tpo_subject: 63,
+        tpo_value: "98",
+      },
+    ];
+    setRxboxData(data);
+    // return data;
+  };
 
   const initPusher = () => {
     const pusherOptions = {
@@ -250,6 +319,7 @@ const TelemetryDashboard = (props) => {
 
   useEffect(() => {
     setInterval(getPatientObservation, RXBOX_INTERVAL);
+    // setInterval(getPatientObservationTest, RXBOX_INTERVAL);
     // initPusher();
     getMonitorWithPatientId();
     autoRefresh();
