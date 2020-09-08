@@ -207,6 +207,7 @@ const TelemetryDashboard = (props) => {
   };
 
   const getPatientObservationTest = async () => {
+    const val = moment.utc().format("ss") % 2 === 1 ? "90" : "25";
     const data = [
       {
         /* spo2 */
@@ -215,7 +216,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "93",
+        tpo_value: val
       },
       {
         /* pulse rate */
@@ -224,7 +225,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "101",
+        tpo_value: val
       },
       {
         /* systolic bp */
@@ -233,7 +234,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "93",
+        tpo_value: val
       },
       {
         /* diastolic bp */
@@ -242,7 +243,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "93",
+        tpo_value: val
       },
       {
         /* diastolic bp */
@@ -251,7 +252,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "93",
+        tpo_value: val
       },
       {
         /* primary rr */
@@ -260,7 +261,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "98",
+        tpo_value: val
       },
       {
         /* temp */
@@ -269,7 +270,7 @@ const TelemetryDashboard = (props) => {
         tpo_effectivity: moment.utc(),
         tpo_obsid: 704894,
         tpo_subject: 63,
-        tpo_value: "98",
+        tpo_value: val
       },
     ];
     setRxboxData(data);

@@ -213,7 +213,7 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.mean_arterial_pressure;
     });
     if (index >= 0) {
-      setTime(moment(rxbox[index].tpo_effectivity).format("HH:mm"));
+      setTime(moment(rxbox[index].tpo_effectivity).local().format("HH:mm"));
     }
   };
 
@@ -319,6 +319,7 @@ const TelemetryCard = (props) => {
       case "ecg":
         if (getECG()) {
           style.margin = "auto";
+          style.color = "#76db3d";
           if (isError(type)) {
             style.color = "#db1e1e";
           }
@@ -327,6 +328,7 @@ const TelemetryCard = (props) => {
       case "pr":
         if (getPulseRate()) {
           style.margin = "auto";
+          style.color = "#17eaf1";
           if (isError(type)) {
             style.color = "#db1e1e";
           }
@@ -335,6 +337,7 @@ const TelemetryCard = (props) => {
       case "spo2":
         if (getSpo2()) {
           style.margin = "auto";
+          style.color = "#17eaf1";
           if (isError(type)) {
             style.color = "#db1e1e";
           }
@@ -351,6 +354,7 @@ const TelemetryCard = (props) => {
       case "rr":
         if (getRR()) {
           style.margin = "auto";
+          style.color = "#f6f830";
           if (isError(type)) {
             style.color = "#db1e1e";
           }
