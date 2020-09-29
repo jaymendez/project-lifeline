@@ -312,55 +312,9 @@ const PatientList = (props) => {
           {/* TABLE */}
           <Grid container>
             <Grid align="left" xs={2} item>
-              {/* <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel id="patient-status-label">Patient Status</InputLabel>
-                <Select
-                  labelId="patient-status-label"
-                  value={filter.patientStatus}
-                  autoWidth
-                  name="patientStatus"
-                  onChange={(e) => {
-                    const data = { ...filter };
-                    data[e.target.name] = e.target.value;
-                    setFilter(data);
-                  }}
-                  label="Patient Status"
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Stable or No co morbid</MenuItem>
-                  <MenuItem value={20}>Stable or unstable co morbid</MenuItem>
-                  <MenuItem value={30}>CAP-HR, sepsis, or shock</MenuItem>
-                  <MenuItem value={40}>ARDS</MenuItem>
-                </Select>
-              </FormControl> */}
             </Grid>
             <Grid xs={7} item />
             <Grid align="right" xs={3} item>
-              {/* <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
-                <OutlinedInput
-                  id="search-table"
-                  value={filter.search}
-                  onChange={(e) => {
-                    const data = { ...filter };
-                    data[e.target.name] = e.target.value;
-                    setFilter(data);
-                  }}
-                  name="search"
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <Search />
-                    </InputAdornment>
-                  }
-                  aria-describedby="search-table"
-                  inputProps={{
-                    "aria-label": "search",
-                  }}
-                  labelWidth={0}
-                  fullWidth
-                />
-              </FormControl> */}
             </Grid>
           </Grid>
           {renderTable()}
