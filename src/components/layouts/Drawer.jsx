@@ -220,13 +220,13 @@ export default function MiniDrawer(props) {
         </div>
         <Divider />
         <List>
-          {/* <ListItem button>
+          {/* 
+              ""<ListItem button>
             {!open ? (
               <ListItemIcon>
                 <Search />
               </ListItemIcon>
             ) : (
-              ""
             )}
             <ListItemText
               primary={
