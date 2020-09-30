@@ -12,6 +12,7 @@ import PatientList from "./components/Patient/List";
 import PatientRegister from "./components/Patient/Register";
 import PatientDetails from "./components/Patient/Details";
 import Testing from "./components/utils/components/testing";
+import ecg from "./components/utils/components/ecg-test";
 
 const theme = createMuiTheme({
   typography: {
@@ -37,7 +38,7 @@ function App() {
     <div className="App">
       <ThemeProvider theme={theme}>
         <Switch>
-          <Route exact path="/testing" component={Testing} />
+          <Route exact path="/testing" component={ecg} />
           {/* <Route path="/monitors" component={TelemetryDashboard} /> */}
           <Route path="/telemetry/:id" component={TelemetryDashboard} />
           <MiniDrawer>
