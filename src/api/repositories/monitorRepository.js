@@ -67,4 +67,15 @@ export default {
     formData.append("wardid", 1);
     return Repository.post("/update_monitor", formData);
   },
+
+  requestBP(patientid) {
+    const formData = new FormData();
+    formData.append("patientid", patientid);
+    return Repository.post("/requestBP", formData);
+  },
+  getRequestBPValue(requestid) {
+    const formData = new FormData();
+    formData.append("requestid", requestid);
+    return Repository.post("/getRequestBPValue ", formData);
+  },
 };

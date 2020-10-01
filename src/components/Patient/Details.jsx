@@ -18,9 +18,11 @@ import withReactContent from "sweetalert2-react-content";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
 import PatientChart from "./PatientChart";
+import MaterialTable from "material-table";
 
 const MySwal = withReactContent(Swal);
 const PatientRepository = RepositoryFactory.get("patient");
+const MonitorRepository = RepositoryFactory.get("monitor");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -141,6 +143,7 @@ const PatientDetails = (props) => {
     },
   ]);
   console.log(errors);
+  const [requestId, setRequestId] = useState(null);
 
   const getPatient = async (id) => {
     if (id) {
@@ -213,6 +216,68 @@ const PatientDetails = (props) => {
     getPatient(match.params.id);
     getPatientConfig(match.params.id);
   }, []);
+
+  const requestBP = async () => {
+    try {
+      const patientId = patient.rpi_patientid;
+      const { data } = await MonitorRepository.requestBP(patientId);
+      setRequestId(data.RequestResult[0].requestid);
+    } catch (e) {
+      if (e) {
+        // alert("no patient with that id");
+        console.log(e);
+        MySwal.fire({
+          icon: "error",
+          title: "Request BP failed.",
+          text: e,
+        });
+      }
+    }
+  };
+
+  const confirmBPRequest = () => {
+    const LIMIT = 4;
+    const SECONDS = 30;
+    let cnt = 0;
+    console.log('confirm BPO');
+    const query = setInterval(() => {
+      if (requestId) {
+        if (cnt <= LIMIT) {
+          if (getBPRequest(requestId)) {
+            MySwal.fire({
+              icon: "success",
+              title: "BP Success.",
+            });
+            clearInterval(query);
+          }
+        } else {
+          clearInterval(query);
+        }
+        cnt++;
+      }
+    }, 1000*SECONDS)
+  };
+
+  const getBPRequest = async (requestid) => {
+    try {
+      const { data } = await MonitorRepository.getRequestBPValue(requestid);
+      return data.BPValue.length;
+    } catch (e) {
+      if (e) {
+        console.log(e);
+        MySwal.fire({
+          icon: "error",
+          title: "Request BP failed.",
+          text: e,
+        });
+      }
+    }
+  }
+
+  useEffect(() => {
+    confirmBPRequest();
+
+  }, [requestId])
 
   return (
     <>
@@ -1229,11 +1294,34 @@ const PatientDetails = (props) => {
                     </Button>
                   </Grid>
                 </Grid>
-                {/* END PATIENT CONFIG */}
               </Grid>
             </form>
+            {/* END PATIENT CONFIG */}
+            <Typography variant="h5" align="left" style={{ marginTop: 30 }}>
+              ACTIONS
+            </Typography>
+            <Divider style={{ marginTop: 5 }} />
+            <Grid container>
+              <Grid item xs={3}>
+                <Button
+                  onClick={requestBP}
+                  variant="contained"
+                  color="primary"
+                  style={{ marginTop: 15, float: "left" }}
+                >
+                  BP NOW
+                </Button>
+              </Grid>
+            </Grid>
           </Paper>
-
+          <Paper elevation={3} className={classes.paper} style={{marginTop: "50px"}}>
+            <MaterialTable
+              // other props
+              options={{
+                filtering: true
+              }}
+            />
+          </Paper>
           {observationList.map((el) => {
             return (
               <PatientChart
