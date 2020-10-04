@@ -78,4 +78,15 @@ export default {
     formData.append("requestid", requestid);
     return Repository.post("/getRequestBPValue ", formData);
   },
+
+  updateMonitor(payload) {
+    const { patientSlot, id: monitorId, description, name } = payload;
+    const formData = new FormData();
+    formData.append("monitorid", monitorId);
+    formData.append("monitordesc", description);
+    formData.append("monitorname", name);
+    formData.append("maxslot", patientSlot);
+    formData.append("wardid", 1);
+    return Repository.post("/update_monitor", formData);
+  }
 };

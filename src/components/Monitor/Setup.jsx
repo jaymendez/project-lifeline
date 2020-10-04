@@ -39,9 +39,12 @@ import {
   Close,
   Search,
   DragIndicator,
+  Edit
 } from "@material-ui/icons";
 import moment from "moment";
-import _ from "lodash";
+import _, { isUndefined } from "lodash";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DateTimePatientCards from "../utils/components/toolbar/DateTimePatientCards";
 import Progress from "../utils/components/feedback/Progress";
@@ -51,6 +54,7 @@ import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
 const StatuscodesRepository = RepositoryFactory.get("statuscodes");
+const MySwal = withReactContent(Swal);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -119,6 +123,7 @@ const MonitorSetup = () => {
   const [monitors, setMonitors] = useState([]);
   const [patients, setPatients] = useState([]);
   const [patientStatus, setPatientStatus] = useState([]);
+  const [chosenMonitor, setChosenMonitor] = useState("");
 
   useEffect(() => {
     getMonitorsWithPatient();
@@ -471,8 +476,12 @@ const MonitorSetup = () => {
       return (
         <Grid item xs={4}>
           <Typography align="left" variant="h5">
-            Monitor
-            {el.id}
+            {/* Monitor
+            {el.id} */}
+            {el.name}
+            <IconButton aria-label="edit-monitor" onClick={(e) => editMonitorForm(el)}>
+              <Edit style={{marginTop: -5}} />
+            </IconButton>
           </Typography>
           <Droppable droppableId={`monitor-${el.id}`}>
             {(provided, snapshot) => (
@@ -612,7 +621,7 @@ const MonitorSetup = () => {
 
                     <TableCell align="center">{row.rpi_date_admitted.slice(0, 10)}</TableCell>
                     <TableCell align="center">{row.rpi_date_admitted.slice(11)}</TableCell>
-                    <TableCell align="center">SAMPLE Location</TableCell>
+                    <TableCell align="center"></TableCell>
                     <TableCell align="center">
                       <div
                         // style={{ backgroundColor: "#4ba2e7", color: "white" }}
@@ -649,6 +658,36 @@ const MonitorSetup = () => {
     }
     // el.style.width = "10%";
     // el.style.width = "500px";
+  };
+
+  const editMonitorForm = async (monitor) => {
+    const { value } = await MySwal.fire({
+      title: 'Monitor Number',
+      input: 'text',
+      inputValue: monitor.name,
+      showCancelButton: true,
+      inputValidator: (value) => {
+        if (!value) {
+          return 'The monitor name required'
+        }
+        if (value === monitor.name) {
+          return 'The monitor name must be different'
+        }
+      }
+    });
+    if (value) {
+      monitor.name = value;
+      const data = await MonitorRepository.updateMonitor(monitor);
+      console.log(data);
+      if (data.status === 200) {
+        MySwal.fire({
+          icon: "success",
+          title: "Monitor updated.",
+          showConfirmButton: true,
+          onClose: () => getMonitorsWithPatient(),
+        });
+      }
+    }
   };
 
   return (
