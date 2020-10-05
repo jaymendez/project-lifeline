@@ -663,7 +663,7 @@ const MonitorSetup = () => {
   const editMonitorForm = async (monitor) => {
     const updatedMonitor = {...monitor};
     const { value } = await MySwal.fire({
-      title: 'Monitor Number',
+      title: 'Monitor Name',
       input: 'text',
       inputValue: monitor.name,
       showCancelButton: true,
@@ -689,7 +689,7 @@ const MonitorSetup = () => {
       } else {
         MySwal.fire({
           icon: "warning",
-          title: "Error encountered with the request.",
+          text: "Error encountered with the request.",
           showConfirmButton: true,
           // onClose: () => getMonitorsWithPatient(),
         });
