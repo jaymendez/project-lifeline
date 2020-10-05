@@ -661,6 +661,7 @@ const MonitorSetup = () => {
   };
 
   const editMonitorForm = async (monitor) => {
+    const updatedMonitor = {...monitor};
     const { value } = await MySwal.fire({
       title: 'Monitor Number',
       input: 'text',
@@ -676,15 +677,21 @@ const MonitorSetup = () => {
       }
     });
     if (value) {
-      monitor.name = value;
-      const data = await MonitorRepository.updateMonitor(monitor);
-      console.log(data);
+      updatedMonitor.name = value;
+      const data = await MonitorRepository.updateMonitor(updatedMonitor);
       if (data.status === 200) {
         MySwal.fire({
           icon: "success",
           title: "Monitor updated.",
           showConfirmButton: true,
           onClose: () => getMonitorsWithPatient(),
+        });
+      } else {
+        MySwal.fire({
+          icon: "warning",
+          title: "Error encountered with the request.",
+          showConfirmButton: true,
+          // onClose: () => getMonitorsWithPatient(),
         });
       }
     }

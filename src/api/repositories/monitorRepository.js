@@ -1,4 +1,5 @@
 import Repository from "./Repository";
+import {v4 as uuid} from "uuid"
 
 const resource = "/";
 
@@ -17,7 +18,8 @@ export default {
 
   addMonitor() {
     const formData = new FormData();
-    formData.append("monitorname", "");
+    const id = uuid().slice(0,5);
+    formData.append("monitorname", `Monitor-${id}`);
     formData.append("monitordesc", "");
     formData.append("wardid", 1);
     formData.append("maxslot", 0);
@@ -79,7 +81,7 @@ export default {
     return Repository.post("/getRequestBPValue ", formData);
   },
 
-  updateMonitor(payload) {
+  async updateMonitor(payload) {
     const { patientSlot, id: monitorId, description, name } = payload;
     const formData = new FormData();
     formData.append("monitorid", monitorId);
@@ -87,6 +89,13 @@ export default {
     formData.append("monitorname", name);
     formData.append("maxslot", patientSlot);
     formData.append("wardid", 1);
-    return Repository.post("/update_monitor", formData);
+    try {
+      const response = await Repository.post("/update_monitor", formData);
+      return response;
+    } catch (e) {
+      if (e) {
+        return e;
+      }
+    }
   }
 };

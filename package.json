@@ -32,6 +32,7 @@
     "react-scripts": "3.4.1",
     "sweetalert2": "^9.10.12",
     "sweetalert2-react-content": "^3.0.1",
+    "uuid": "^8.3.1",
     "validator": "^13.0.0"
   },
   "scripts": {
