@@ -26,7 +26,7 @@ import {
   InputAdornment,
   FormHelperText,
   CircularProgress,
-  TablePagination
+  TablePagination,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -39,7 +39,7 @@ import {
   Close,
   Search,
   DragIndicator,
-  Edit
+  Edit,
 } from "@material-ui/icons";
 import moment from "moment";
 import _, { isUndefined } from "lodash";
@@ -105,7 +105,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
 const MonitorSetup = () => {
   const classes = useStyles();
   const rowRef = useRef(null);
@@ -129,8 +128,7 @@ const MonitorSetup = () => {
     getMonitorsWithPatient();
     getPatients();
     getStatuscodes();
-  }, [])
-
+  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -144,12 +142,12 @@ const MonitorSetup = () => {
   const getStatuscodes = async () => {
     const { data } = await StatuscodesRepository.getPatientCovidCase();
     setPatientStatus(data.filter_statuscode_report);
-  }
+  };
 
   const getMonitorsWithPatient = async () => {
     setMonitorLoader(true);
     const { data } = await MonitorRepository.getMonitorsWithPatient();
-    const updatedMonitor = data.map(el => {
+    const updatedMonitor = data.map((el) => {
       let { patientIds, ...data } = el;
       if (_.isEmpty(patientIds)) {
         patientIds = [];
@@ -158,24 +156,24 @@ const MonitorSetup = () => {
       }
       return {
         ...data,
-        patientIds
+        patientIds,
       };
     });
     setMonitors(updatedMonitor);
     setMonitorLoader(false);
     // console.log(updatedMonitor);
-  }
+  };
 
   const getPatients = async () => {
     const { data } = await PatientRepository.getPatients();
-    const parsedData = data.getpatientlist_report.map(el => {
+    const parsedData = data.getpatientlist_report.map((el) => {
       const { rpi_patientid: id, ...patient } = el;
       const name = `${patient.rpi_patientfname} ${patient.rpi_patientlname}`;
       return {
         id,
         name,
-        ...patient
-      }
+        ...patient,
+      };
     });
     // console.log(parsedData);
     setPatients(parsedData);
@@ -200,19 +198,25 @@ const MonitorSetup = () => {
     // setMonitors(updateMonitors);
     const res = await MonitorRepository.addMonitor();
     getMonitorsWithPatient();
-
   };
 
   const deleteMonitor = async (monitorId) => {
-    // const updateMonitors = [...monitors];
-    // const index = _.findIndex(updateMonitors, function (o) {
-    //   return o.id === monitorId;
-    // });
-    // updateMonitors.splice(index, 1);
-    // setMonitors(updateMonitors);
-    const res = await MonitorRepository.deleteMonitor(monitorId);
-    getMonitorsWithPatient();
-
+    MySwal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+    }).then(async (result) => {
+      if (result.value) {
+        const res = await MonitorRepository.deleteMonitor(monitorId);
+        getMonitorsWithPatient();
+      }
+    });
+    // const res = await MonitorRepository.deleteMonitor(monitorId);
+    // getMonitorsWithPatient();
   };
 
   const addPatientSlot = async (monitorId) => {
@@ -247,19 +251,51 @@ const MonitorSetup = () => {
       if (patientId) {
         const patientIndex = patientIds.indexOf(patientId);
         if (patientIndex >= 0) {
-          // remove patient at monitor join
-
-          // patientIds.splice(patientIndex, 1);
-          console.log(patientId);
-          await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
+          MySwal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes",
+            // onClose: () => {
+            //   getMonitorsWithPatient();
+            // },
+          }).then(async (result) => {
+            if (result.value) {
+              await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
+              getMonitorsWithPatient();
+            }
+          });
+          // await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
         }
       } else {
         // Deduct patientSlot
         // updateMonitors[index].patientSlot--;
-        await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
+        MySwal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes",
+          // onClose: () => {
+          //   getMonitorsWithPatient();
+          // },
+        }).then(async (result) => {
+          if (result.value) {
+            // await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
+            await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
+            getMonitorsWithPatient();
+
+          }
+        });
+        // await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
       }
     }
-    getMonitorsWithPatient();
+    // getMonitorsWithPatient();
     // setMonitors(updateMonitors);
   };
 
@@ -269,7 +305,7 @@ const MonitorSetup = () => {
     if (!el) {
       return;
     }
-    console.log('on dragend')
+    console.log("on dragend");
     el.style.width = "5%";
     // el.style.border = "";
     // console.log(el);
@@ -336,7 +372,6 @@ const MonitorSetup = () => {
         return;
       }
       await MonitorRepository.addPatientToMonitor(patientId, destinationMonitorId);
-
     } else {
       if (destinationMonitor.patientSlot <= destinationMonitor.patientIds.length) {
         response.errors.push("Monitor destination has no slot left.");
@@ -360,7 +395,6 @@ const MonitorSetup = () => {
     }
     await getMonitorsWithPatient();
     setMonitorLoader(false);
-
   };
 
   const renderPatients = (monitorIndex) => {
@@ -470,7 +504,7 @@ const MonitorSetup = () => {
 
   const renderMonitors = () => {
     let monitorsData = [...monitors];
-    monitorsData = monitorsData.filter(el => el.patientSlot <= 6);
+    monitorsData = monitorsData.filter((el) => el.patientSlot <= 6);
     return monitorsData.map((el, i) => {
       const { patientSlot } = el;
       return (
@@ -480,7 +514,7 @@ const MonitorSetup = () => {
             {el.id} */}
             {el.name}
             <IconButton aria-label="edit-monitor" onClick={(e) => editMonitorForm(el)}>
-              <Edit style={{marginTop: -5}} />
+              <Edit style={{ marginTop: -5 }} />
             </IconButton>
           </Typography>
           <Droppable droppableId={`monitor-${el.id}`}>
@@ -587,7 +621,7 @@ const MonitorSetup = () => {
                       {(draggableProvided, draggableSnapshot) => (
                         <>
                           <TableCell
-                            ref={node => {
+                            ref={(node) => {
                               rowRef.current = node;
                               draggableProvided.innerRef(node);
                             }}
@@ -599,11 +633,15 @@ const MonitorSetup = () => {
                               <TableCell
                                 // ref={rowRef}
                                 scope="row"
-                                style={{ border: "1px solid #4ba2e7", backgroundColor: "#4ba2e7", width: "inherit"}}
+                                style={{
+                                  border: "1px solid #4ba2e7",
+                                  backgroundColor: "#4ba2e7",
+                                  width: "inherit",
+                                }}
                               >
-                                <Grid alignItems="center" container style={{width: "300px"}}>
+                                <Grid alignItems="center" container style={{ width: "300px" }}>
                                   <Grid item xs={3}>
-                                    <Person style={{ marginRight: 15, color: "white"}} />
+                                    <Person style={{ marginRight: 15, color: "white" }} />
                                   </Grid>
                                   <Grid item xs>
                                     <Typography style={{ color: "white" }}>{row.name}</Typography>
@@ -624,11 +662,15 @@ const MonitorSetup = () => {
                     <TableCell align="center"></TableCell>
                     <TableCell align="center">
                       <div
-                        // style={{ backgroundColor: "#4ba2e7", color: "white" }}
+                      // style={{ backgroundColor: "#4ba2e7", color: "white" }}
                       >
-                        {row.rpi_covid19 ? (<span style={{ backgroundColor: "#4ba2e7", color: "white", padding: 8 }}>
-                      {row.rpi_covid19}
-                        </span>) : ""}
+                        {row.rpi_covid19 ? (
+                          <span style={{ backgroundColor: "#4ba2e7", color: "white", padding: 8 }}>
+                            {row.rpi_covid19}
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </div>
                     </TableCell>
                     <TableCell align="center">
@@ -661,20 +703,20 @@ const MonitorSetup = () => {
   };
 
   const editMonitorForm = async (monitor) => {
-    const updatedMonitor = {...monitor};
+    const updatedMonitor = { ...monitor };
     const { value } = await MySwal.fire({
-      title: 'Monitor Name',
-      input: 'text',
+      title: "Monitor Name",
+      input: "text",
       inputValue: monitor.name,
       showCancelButton: true,
       inputValidator: (value) => {
         if (!value) {
-          return 'The monitor name required'
+          return "The monitor name required";
         }
         if (value === monitor.name) {
-          return 'The monitor name must be different'
+          return "The monitor name must be different";
         }
-      }
+      },
     });
     if (value) {
       updatedMonitor.name = value;
@@ -715,10 +757,12 @@ const MonitorSetup = () => {
           alignItems="center"
           className={classes.root}
           spacing={3}
-          style={{display: "relative"}}
+          style={{ display: "relative" }}
         >
           {/* <Progress open={true}/> */}
-          <CircularProgress style={ monitorLoader ? {display: "absolute", zIndex: "999"} : {display: "none"}}/>
+          <CircularProgress
+            style={monitorLoader ? { display: "absolute", zIndex: "999" } : { display: "none" }}
+          />
           {/* <CircularProgress /> */}
           {/* {!monitorLoader ? renderMonitors() : null} */}
           {renderMonitors()}
@@ -753,9 +797,9 @@ const MonitorSetup = () => {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {
-                      patientStatus.map(el => <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>)
-                    }
+                    {patientStatus.map((el) => (
+                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -802,6 +846,5 @@ const MonitorSetup = () => {
     </>
   );
 };
-
 
 export default MonitorSetup;
