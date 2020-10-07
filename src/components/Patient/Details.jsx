@@ -18,7 +18,7 @@ import withReactContent from "sweetalert2-react-content";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
 import PatientChart from "./PatientChart";
-import MaterialTable from "material-table";
+import VitalsTable from "./VitalsTable";
 
 const MySwal = withReactContent(Swal);
 const PatientRepository = RepositoryFactory.get("patient");
@@ -1327,14 +1327,7 @@ const PatientDetails = (props) => {
               </Grid>
             </Grid>
           </Paper>
-          <Paper elevation={3} className={classes.paper} style={{marginTop: "50px"}}>
-            <MaterialTable
-              // other props
-              options={{
-                filtering: true
-              }}
-            />
-          </Paper>
+          <VitalsTable />
           {observationList.map((el) => {
             return (
               <PatientChart
