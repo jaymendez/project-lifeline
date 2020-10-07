@@ -10,7 +10,7 @@ import {
   Button,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Create } from "@material-ui/icons";
+import { Create, RedoTwoTone } from "@material-ui/icons";
 import { useForm, Controller } from "react-hook-form";
 import _ from "lodash";
 import Swal from "sweetalert2";
@@ -183,6 +183,8 @@ const PatientDetails = (props) => {
     setLoader(true);
     try {
       const patientId = patient.rpi_patientid;
+      formData.bp_time_frame = formData.time_frame;
+      delete formData.time_frame;
       const response = await PatientRepository.addPatientConfig({
         patientid: patientId,
         ...formData,
@@ -1175,8 +1177,8 @@ const PatientDetails = (props) => {
                           // readOnly: mode === "READ",
                         }}
                         disabled={mode === "READ"}
-                        name="bp_time_frame"
-                        error={!_.isEmpty(errors.bp_time_frame)}
+                        name="time_frame"
+                        error={!_.isEmpty(errors.time_frame)}
                         inputRef={register({
                           validate: {
                             integer: (value) => {
