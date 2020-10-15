@@ -107,7 +107,7 @@ const PatientList = (props) => {
   const classes = useStyles();
   const [filter, setFilter] = useState({
     search: "",
-    admissionStatus: "",
+    admissionStatus: "Active",
     covidStatus: "",
     classificationStatus: ""
   });
@@ -149,10 +149,21 @@ const PatientList = (props) => {
   }, []);
 
   const filteredPatients = () => {
-    const data = [...patients];
-    if (filter.patientStatus) {
-      return data.filter((el) => {
-        return el.rpi_covid19 === filter.patientStatus;
+    let data = [...patients];
+
+    if (filter.admissionStatus) {
+      data = data.filter((el) => {
+        return el["Admission Status"] === filter.admissionStatus;
+      });
+    }
+    if (filter.covidStatus) {
+      data = data.filter((el) => {
+        return el["Covid Case"] === filter.covidStatus;
+      });
+    }
+    if (filter.classificationStatus) {
+      data = data.filter((el) => {
+        return el.classification === filter.classificationStatus;
       });
     }
     return data;
@@ -344,7 +355,7 @@ const PatientList = (props) => {
                   </MenuItem>
                   {patientStatus.map((el) => {
                     if (el.rps_category === "Classification") {
-                      return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
+                      return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
                     }
                   })}
                 </Select>
