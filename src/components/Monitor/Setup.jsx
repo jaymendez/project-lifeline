@@ -142,13 +142,9 @@ const MonitorSetup = () => {
   };
 
   const getStatuscodes = async () => {
-    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
-    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
-    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
+    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
     setPatientStatus([
       ...covidStatus.filter_statuscode_report,
-      ...classificationStatus.filter_statuscode_report,
-      ...admission.filter_statuscode_report,
     ]);
   };
 
@@ -582,19 +578,9 @@ const MonitorSetup = () => {
         return el;
       }
     });
-    if (filter.admissionStatus) {
-      filteredPatients = filteredPatients.filter((el) => {
-        return el["Admission Status"] === filter.admissionStatus;
-      });
-    }
     if (filter.covidStatus) {
       filteredPatients = filteredPatients.filter((el) => {
         return el["Covid Case"] === filter.covidStatus;
-      });
-    }
-    if (filter.classificationStatus) {
-      filteredPatients = filteredPatients.filter((el) => {
-        return el.classification === filter.classificationStatus;
       });
     }
     return filteredPatients;
@@ -792,32 +778,6 @@ const MonitorSetup = () => {
             <Grid container spacing={0}>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="admission-status-label">Admission Status</InputLabel>
-                  <Select
-                    labelId="admission-status-label"
-                    value={filter.admissionStatus}
-                    autoWidth
-                    name="admissionStatus"
-                    onChange={(e) => {
-                      const data = { ...filter };
-                      data[e.target.name] = e.target.value;
-                      setFilter(data);
-                    }}
-                    label="Admission Status"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {patientStatus.map((el) => {
-                      if (el.rps_category === "Admission Status") {
-                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
-                      }
-                    })}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid align="left" xs={2} item>
-                <FormControl variant="outlined" className={classes.formControl}>
                   <InputLabel id="covid-status-label">COVID-19 Case</InputLabel>
                   <Select
                     labelId="covid-status-label"
@@ -842,33 +802,7 @@ const MonitorSetup = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid align="left" xs={2} item>
-                <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="classification-status-label">COVID-19 Diagnosis</InputLabel>
-                  <Select
-                    labelId="classification-status-label"
-                    value={filter.classificationStatus}
-                    autoWidth
-                    name="classificationStatus"
-                    onChange={(e) => {
-                      const data = { ...filter };
-                      data[e.target.name] = e.target.value;
-                      setFilter(data);
-                    }}
-                    label="COVID-19 Diagnosis"
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {patientStatus.map((el) => {
-                      if (el.rps_category === "Classification") {
-                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
-                      }
-                    })}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid xs={3} item />
+              <Grid xs={7} item />
               <Grid align="right" xs={3} item>
                 <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
                   <OutlinedInput

@@ -128,8 +128,8 @@ const PatientList = (props) => {
   };
 
   const getStatuscodes = async () => {
-    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
-    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
     const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
     setPatientStatus([
       ...covidStatus.filter_statuscode_report,
