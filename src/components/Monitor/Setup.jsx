@@ -115,7 +115,9 @@ const MonitorSetup = () => {
   const [monitorLoader, setMonitorLoader] = useState(true);
   const [filter, setFilter] = useState({
     search: "",
-    patientStatus: "",
+    admissionStatus: "Active",
+    covidStatus: "",
+    classificationStatus: "",
   });
   const [ward, setWard] = useState("UP-PGH WARD 1");
   const [maximumSlots] = useState(6);
@@ -140,8 +142,14 @@ const MonitorSetup = () => {
   };
 
   const getStatuscodes = async () => {
-    const { data } = await StatuscodesRepository.getPatientCovidCase();
-    setPatientStatus(data.filter_statuscode_report);
+    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
+    setPatientStatus([
+      ...covidStatus.filter_statuscode_report,
+      ...classificationStatus.filter_statuscode_report,
+      ...admission.filter_statuscode_report,
+    ]);
   };
 
   const getMonitorsWithPatient = async () => {
@@ -574,6 +582,21 @@ const MonitorSetup = () => {
         return el;
       }
     });
+    if (filter.admissionStatus) {
+      filteredPatients = filteredPatients.filter((el) => {
+        return el["Admission Status"] === filter.admissionStatus;
+      });
+    }
+    if (filter.covidStatus) {
+      filteredPatients = filteredPatients.filter((el) => {
+        return el["Covid Case"] === filter.covidStatus;
+      });
+    }
+    if (filter.classificationStatus) {
+      filteredPatients = filteredPatients.filter((el) => {
+        return el.classification === filter.classificationStatus;
+      });
+    }
     return filteredPatients;
   };
 
@@ -769,73 +792,79 @@ const MonitorSetup = () => {
             <Grid container spacing={0}>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="patient-status-label">Admission Status</InputLabel>
+                  <InputLabel id="admission-status-label">Admission Status</InputLabel>
                   <Select
-                    labelId="patient-status-label"
-                    value={filter.patientStatus}
+                    labelId="admission-status-label"
+                    value={filter.admissionStatus}
                     autoWidth
-                    name="patientStatus"
+                    name="admissionStatus"
                     onChange={(e) => {
                       const data = { ...filter };
                       data[e.target.name] = e.target.value;
                       setFilter(data);
                     }}
-                    label="Patient Status"
+                    label="Admission Status"
                   >
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {patientStatus.map((el) => (
-                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
-                    ))}
+                    {patientStatus.map((el) => {
+                      if (el.rps_category === "Admission Status") {
+                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                      }
+                    })}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="patient-status-label">COVID-19 Case</InputLabel>
+                  <InputLabel id="covid-status-label">COVID-19 Case</InputLabel>
                   <Select
-                    labelId="patient-status-label"
-                    value={filter.patientStatus}
+                    labelId="covid-status-label"
+                    value={filter.covidStatus}
                     autoWidth
-                    name="patientStatus"
+                    name="covidStatus"
                     onChange={(e) => {
                       const data = { ...filter };
                       data[e.target.name] = e.target.value;
                       setFilter(data);
                     }}
-                    label="Patient Status"
+                    label="COVID-19 Case"
                   >
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {patientStatus.map((el) => (
-                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
-                    ))}
+                    {patientStatus.map((el) => {
+                      if (el.rps_category === "Covid Case") {
+                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                      }
+                    })}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="patient-status-label">COVID-19 Diagnosis</InputLabel>
+                  <InputLabel id="classification-status-label">COVID-19 Diagnosis</InputLabel>
                   <Select
-                    labelId="patient-status-label"
-                    value={filter.patientStatus}
+                    labelId="classification-status-label"
+                    value={filter.classificationStatus}
                     autoWidth
-                    name="patientStatus"
+                    name="classificationStatus"
                     onChange={(e) => {
                       const data = { ...filter };
                       data[e.target.name] = e.target.value;
                       setFilter(data);
                     }}
-                    label="Patient Status"
+                    label="COVID-19 Diagnosis"
                   >
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    {patientStatus.map((el) => (
-                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
-                    ))}
+                    {patientStatus.map((el) => {
+                      if (el.rps_category === "Classification") {
+                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                      }
+                    })}
                   </Select>
                 </FormControl>
               </Grid>
@@ -873,7 +902,7 @@ const MonitorSetup = () => {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={patients.length}
+        count={filterPatients().length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}

@@ -1366,7 +1366,7 @@ const PatientDetails = (props) => {
             </Grid>
           </Paper>
           <PatientNotes data={patient} getPatient={getPatient} />
-          <VitalsTable data={tableData} />
+          {/* <VitalsTable data={tableData} /> */}
           {observationList.map((el) => {
             return (
               <PatientChart
