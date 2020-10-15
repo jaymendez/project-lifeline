@@ -279,7 +279,9 @@ const PatientRegister = (props) => {
         .then(async (res) => {
           console.log(res);
           if (res.data.addpatient_report) {
-            await PatientRepository.createDefaultPatientConfig(res.data.addpatient_report[0].patient_id);
+            await PatientRepository.createDefaultPatientConfig(
+              res.data.addpatient_report[0].patient_id
+            );
             Swal.fire({
               icon: "success",
               title: "Patient added",
@@ -344,7 +346,7 @@ const PatientRegister = (props) => {
                         {
                           validate: {
                             InvalidInput: (value) => {
-                              if (!value.replace(/\s/g, '').length) {
+                              if (!value.replace(/\s/g, "").length) {
                                 return "Input is empty or has only spaces";
                               }
                             },
@@ -433,7 +435,7 @@ const PatientRegister = (props) => {
                         {
                           validate: {
                             InvalidInput: (value) => {
-                              if (!value.replace(/\s/g, '').length) {
+                              if (!value.replace(/\s/g, "").length) {
                                 return "Input is empty or has only spaces";
                               }
                             },
@@ -661,7 +663,7 @@ const PatientRegister = (props) => {
                         validate: {
                           positive: (value) => parseInt(value, 10) > 0,
                           InvalidInput: (value) => {
-                            if (!value.replace(/\s/g, '').length) {
+                            if (!value.replace(/\s/g, "").length) {
                               return "Input is empty or has only spaces";
                             }
                           },
