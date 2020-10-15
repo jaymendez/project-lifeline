@@ -1,33 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from "react";
 import MaterialTable from "../utils/components/table/MaterialTable";
 
-const VitalsTable = () => {
-  const data = [
-    {time: "12:00 AM"},
-    {time: "1:00 AM"},
-    {time: "2:00 AM"},
-    {time: "3:00 AM"},
-    {time: "4:00 AM"},
-    {time: "5:00 AM"},
-    {time: "6:00 AM"},
-    {time: "7:00 AM"},
-    {time: "8:00 AM"},
-    {time: "9:00 AM"},
-    {time: "10:00 AM"},
-    {time: "11:00 AM"},
-    {time: "12:00 PM"},
-    {time: "1:00 PM"},
-    {time: "2:00 PM"},
-    {time: "3:00 PM"},
-    {time: "4:00 PM"},
-    {time: "5:00 PM"},
-    {time: "6:00 PM"},
-    {time: "7:00 PM"},
-    {time: "8:00 PM"},
-    {time: "9:00 PM"},
-    {time: "10:00 PM"},
-    {time: "11:00 PM"},
-  ];
+const VitalsTable = ({ data }) => {
+  const [tableData, setTableData] = useState([]);
+
+  useEffect(() => {
+    setTableData(data);
+  }, [data]);
   const columns = [
     {
       title: "Time",
@@ -37,54 +16,62 @@ const VitalsTable = () => {
     {
       title: "Heart Rate",
       field: "heart_rate",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.heart_rate || 0} bpm`,
     },
     {
       title: "Pulse Rate",
       field: "pulse_rate",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.pulse_rate || 0} bpm`,
     },
     {
       title: "SPO2",
       field: "spo2",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.spo2 || 0} %`,
     },
     {
       title: "Resp. Rate",
       field: "respiratory_rate",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.respiratory_rate || 0} brpm`,
     },
     {
       title: "Blood Pressure",
       field: "blood_pressure",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.blood_pressure || 0} mmHg`,
     },
     {
       title: "MAP",
       field: "map",
-      render: (rowData) => ``,
+      render: (rowData) => `${rowData.map || 0} mmHg`,
     },
     {
       title: "Temperature",
       field: "temperature",
-      render: (rowData) => ``,
+      render: (rowData) => {
+        return (
+          <>
+            {rowData.temperature || 0} 
+            <sup style={{marginLeft: 2}}>o</sup>C
+          </>
+        );
+      },
     },
-
   ];
 
   return (
     <MaterialTable
       // other props
       columns={columns}
-      data={data}
+      data={tableData}
       options={{
         filtering: false,
         search: false,
-        paging: false
+        paging: false,
+        sorting: false,
+        toolbar: false,
       }}
-      style={{marginTop: 50}}
+      style={{ marginTop: 50 }}
     />
-  )
-}
+  );
+};
 
-export default VitalsTable
+export default VitalsTable;

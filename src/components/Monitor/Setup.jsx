@@ -289,7 +289,6 @@ const MonitorSetup = () => {
             // await MonitorRepository.removePatientFromMonitor(patientId, monitorId);
             await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
             getMonitorsWithPatient();
-
           }
         });
         // await MonitorRepository.decrementPatientSlot(updateMonitors[index]);
@@ -599,13 +598,10 @@ const MonitorSetup = () => {
                   <TableCell>Name</TableCell>
                   <TableCell align="center">Date Admitted</TableCell>
                   <TableCell align="center">Time Admitted</TableCell>
-                  <TableCell align="center">Location</TableCell>
-                  <TableCell align="center">Status</TableCell>
-                  <TableCell align="center">Device</TableCell>
-                  <TableCell align="center">Actions</TableCell>
+                  <TableCell align="center">Bed No.</TableCell>
+                  <TableCell align="center">COVID-19 Case</TableCell>
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {filteredPatients.map((row, index) => (
                   /* sol 1 */
@@ -659,7 +655,7 @@ const MonitorSetup = () => {
 
                     <TableCell align="center">{row.rpi_date_admitted.slice(0, 10)}</TableCell>
                     <TableCell align="center">{row.rpi_date_admitted.slice(11)}</TableCell>
-                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">Bed #{row.rpi_bednumber}</TableCell>
                     <TableCell align="center">
                       <div
                       // style={{ backgroundColor: "#4ba2e7", color: "white" }}
@@ -672,14 +668,6 @@ const MonitorSetup = () => {
                           ""
                         )}
                       </div>
-                    </TableCell>
-                    <TableCell align="center">
-                      <div style={{ backgroundColor: "#ebebeb" }}>RX BOX</div>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton style={{ float: "right" }} aria-label="options">
-                        <MoreVert />
-                      </IconButton>
                     </TableCell>
                   </TableRow>
                   /* end sol 1 */
@@ -778,10 +766,10 @@ const MonitorSetup = () => {
         >
           <Grid item xs={12}>
             {/* TABLE */}
-            <Grid container>
+            <Grid container spacing={0}>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
-                  <InputLabel id="patient-status-label">Patient Status</InputLabel>
+                  <InputLabel id="patient-status-label">Admission Status</InputLabel>
                   <Select
                     labelId="patient-status-label"
                     value={filter.patientStatus}
@@ -803,7 +791,55 @@ const MonitorSetup = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid xs={7} item />
+              <Grid align="left" xs={2} item>
+                <FormControl variant="outlined" className={classes.formControl}>
+                  <InputLabel id="patient-status-label">COVID-19 Case</InputLabel>
+                  <Select
+                    labelId="patient-status-label"
+                    value={filter.patientStatus}
+                    autoWidth
+                    name="patientStatus"
+                    onChange={(e) => {
+                      const data = { ...filter };
+                      data[e.target.name] = e.target.value;
+                      setFilter(data);
+                    }}
+                    label="Patient Status"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {patientStatus.map((el) => (
+                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid align="left" xs={2} item>
+                <FormControl variant="outlined" className={classes.formControl}>
+                  <InputLabel id="patient-status-label">COVID-19 Diagnosis</InputLabel>
+                  <Select
+                    labelId="patient-status-label"
+                    value={filter.patientStatus}
+                    autoWidth
+                    name="patientStatus"
+                    onChange={(e) => {
+                      const data = { ...filter };
+                      data[e.target.name] = e.target.value;
+                      setFilter(data);
+                    }}
+                    label="Patient Status"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {patientStatus.map((el) => (
+                      <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid xs={3} item />
               <Grid align="right" xs={3} item>
                 <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
                   <OutlinedInput

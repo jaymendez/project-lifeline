@@ -14,11 +14,13 @@ import { Create, RedoTwoTone } from "@material-ui/icons";
 import { useForm, Controller } from "react-hook-form";
 import _ from "lodash";
 import Swal from "sweetalert2";
+import moment from "moment";
 import withReactContent from "sweetalert2-react-content";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
 import PatientChart from "./PatientChart";
 import VitalsTable from "./VitalsTable";
+import PatientNotes from "./Notes";
 
 const MySwal = withReactContent(Swal);
 const PatientRepository = RepositoryFactory.get("patient");
@@ -80,6 +82,7 @@ const PatientDetails = (props) => {
   const classes = useStyles();
   const { match } = props;
   const [ward] = useState("UP-PGH WARD 1");
+  const [tableData, setTableData] = useState([]);
   const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({});
   const [patientConfig, setPatientConfig] = useState({});
@@ -144,8 +147,26 @@ const PatientDetails = (props) => {
   ]);
   console.log(errors);
   const [requestId, setRequestId] = useState(null);
+  
+
+  const getAllObservation = async (data) => {
+    let { spec_date, patientid } = data;
+
+    if (_.isEmpty(spec_date)) {
+      spec_date = moment().format("YYYY-MM-DD");
+    }
+    if (!patientid) {
+      return;
+    }
+    console.log('test');
+    const params = { spec_date, patientid };
+    const query = await PatientRepository.getAllObservation(params);
+    setTableData(query);
+  }
 
   const getPatient = async (id) => {
+    setLoader(true);
+    console.log(id)
     if (id) {
       /* Query to get patient */
       try {
@@ -217,6 +238,7 @@ const PatientDetails = (props) => {
   useEffect(() => {
     getPatient(match.params.id);
     getPatientConfig(match.params.id);
+    getAllObservation({patientid: match.params.id})
   }, []);
 
   const requestBP = async () => {
@@ -484,32 +506,6 @@ const PatientDetails = (props) => {
                 {/* 6th row */}
                 <Grid alignItems="center" container>
                   <Grid item xs={6} align="left">
-                    <Typography
-                      // display="inline"
-                      variant="h6"
-                      color="textSecondary"
-                      gutterBottom
-                      className={classes.detailsKey}
-                    >
-                      PATIENT HISTORY/NOTES:
-                    </Typography>
-                    <TextField
-                      margin="dense"
-                      variant="outlined"
-                      rows={3}
-                      multiline
-                      name="remarks"
-                      value={`-lorem ipsum dolor lorem ipsum dolor lorem ipsum dolor
-
-                      -lorem ipsum
-
-                      -lorem ipsum dolor lorem ipsum dolor
-
-                      -lorem
-
-                      `}
-                      // onChange={patientHandler}
-                    />
                   </Grid>
                   <Grid item xs={3} />
                   <Grid item xs={3} />
@@ -1327,7 +1323,8 @@ const PatientDetails = (props) => {
               </Grid>
             </Grid>
           </Paper>
-          <VitalsTable />
+          <PatientNotes data={patient} getPatient={getPatient} />
+          <VitalsTable data={tableData} />
           {observationList.map((el) => {
             return (
               <PatientChart

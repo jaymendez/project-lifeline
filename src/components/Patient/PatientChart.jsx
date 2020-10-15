@@ -80,6 +80,8 @@ const PatientChart = (props) => {
   const [timeCoverage] = useState(24);
   const [chartProps, setChartProps] = useState({});
 
+  
+
   const getPatientObservation = async (data) => {
     let { obscode, spec_date, patientid } = data;
     if (_.isEmpty(spec_date)) {
@@ -170,11 +172,6 @@ const PatientChart = (props) => {
   }, []);
 
   useEffect(() => {
-    // getPatientObservation({
-    //   obscode: "8889-8",
-    //   // spec_date: "2020-06-09",
-    //   patientid: "51",
-    // });
     getPatientObservation({
       obscode: observation,
       spec_date: dateFilter,

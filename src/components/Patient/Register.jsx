@@ -94,6 +94,7 @@ const PatientRegister = (props) => {
     age: "",
     gender: "",
     covid19_case: "",
+    admission: "",
     remarks: "",
     address: "",
     city: "",
@@ -115,11 +116,13 @@ const PatientRegister = (props) => {
   }, []);
 
   const getStatuscodes = async () => {
-    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
-    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
     setPatientStatus([
       ...covidStatus.filter_statuscode_report,
       ...classificationStatus.filter_statuscode_report,
+      ...admission.filter_statuscode_report,
     ]);
   };
 
@@ -211,7 +214,8 @@ const PatientRegister = (props) => {
       birthday: data.birthdate,
       gender: data.gender,
       age: data.age,
-      covid19: data.covid19_case,
+      covidcase: data.covid19_case,
+      admissionstatus: data.admission,
       address: data.address,
       city: data.city,
       country: data.country,
@@ -293,6 +297,7 @@ const PatientRegister = (props) => {
   useEffect(() => {
     register({ name: "covid19_case" }, { required: true }); // custom register react-select
     register({ name: "patient_classification" }, { required: true }); // custom register react-select
+    register({ name: "admission" }, { required: true }); // custom register react-select
     register({ name: "civil_status" }, { required: true }); // custom register react-select
     register({ name: "gender" }); // custom register antd input
     register({ name: "patientid" }); // custom register antd input
@@ -547,7 +552,7 @@ const PatientRegister = (props) => {
                 <Grid container alignItems="center" className={classes.gridInputMargin}>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                      Classification:
+                      COVID-19 Diagnosis:
                     </Typography>
                   </Grid>
                   <Grid item xs={3} align="left">
@@ -563,8 +568,8 @@ const PatientRegister = (props) => {
                       >
                         {/* <ListSubheader>Classification</ListSubheader> */}
                         {patientStatus.map((el) => {
-                          if (el.rps_category === "PATIENT CLASSIFICATION") {
-                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          if (el.rps_category === "Classification") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
                           }
                         })}
                       </Select>
@@ -607,8 +612,8 @@ const PatientRegister = (props) => {
                       >
                         {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
                         {patientStatus.map((el) => {
-                          if (el.rps_category === "PATIENT COVID CASE") {
-                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          if (el.rps_category === "Covid Case") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
                           }
                         })}
                       </Select>
@@ -616,10 +621,35 @@ const PatientRegister = (props) => {
                   </Grid>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Admission Status:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.admission}
+                        id="admission-select"
+                        labelId="admission"
+                        value={patient.admission || ""}
+                        onChange={patientHandler}
+                        name="admission"
+                        // inputRef={register({ required: true })}
+                      >
+                        {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "Admission Status") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography variant="body1" color="textSecondary" gutterBottom>
                       Bed No.:
                     </Typography>
                   </Grid>
-                  <Grid item xs={3} align="left">
+                  <Grid item xs={1} align="left">
                     <TextField
                       error={errors.bed_number}
                       margin="dense"

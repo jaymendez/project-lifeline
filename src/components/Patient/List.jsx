@@ -220,7 +220,17 @@ const PatientList = (props) => {
       render: (rowData) => `${rowData.rpi_bednumber}`,
     },
     {
-      title: "Status",
+      title: "Admission Status",
+      field: "rpi_covid19",
+      render: (rowData) => `${rowData.rpi_covid19}`,
+    },
+    {
+      title: "COVID-19 Case",
+      field: "rpi_covid19",
+      render: (rowData) => `${rowData.rpi_covid19}`,
+    },
+    {
+      title: "COVID-19 Diagnosis",
       field: "rpi_covid19",
       render: (rowData) => `${rowData.rpi_covid19}`,
     },
@@ -253,28 +263,81 @@ const PatientList = (props) => {
         columns={columns}
         data={filteredPatients(patients)}
         title={
-          <FormControl variant="outlined" className={classes.formControl}>
-            <InputLabel id="patient-status-label">Patient Status</InputLabel>
-            <Select
-              labelId="patient-status-label"
-              value={filter.patientStatus}
-              autoWidth
-              name="patientStatus"
-              onChange={(e) => {
-                const data = { ...filter };
-                data[e.target.name] = e.target.value;
-                setFilter(data);
-              }}
-              label="Patient Status"
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              {patientStatus.map((el) => (
-                <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Grid container>
+            <Grid item xs>
+              <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel id="patient-status-label">Admission Status</InputLabel>
+                <Select
+                  labelId="patient-status-label"
+                  value={filter.patientStatus}
+                  autoWidth
+                  name="patientStatus"
+                  onChange={(e) => {
+                    const data = { ...filter };
+                    data[e.target.name] = e.target.value;
+                    setFilter(data);
+                  }}
+                  label="Patient Status"
+                  >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {patientStatus.map((el) => (
+                    <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs>
+              <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel id="patient-status-label">COVID-19 Case</InputLabel>
+                <Select
+                  labelId="patient-status-label"
+                  value={filter.patientStatus}
+                  autoWidth
+                  name="patientStatus"
+                  onChange={(e) => {
+                    const data = { ...filter };
+                    data[e.target.name] = e.target.value;
+                    setFilter(data);
+                  }}
+                  label="Patient Status"
+                  >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {patientStatus.map((el) => (
+                    <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs>
+              <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel id="patient-status-label">COVID-19 Diagnosis</InputLabel>
+                <Select
+                  labelId="patient-status-label"
+                  value={filter.patientStatus}
+                  autoWidth
+                  name="patientStatus"
+                  onChange={(e) => {
+                    const data = { ...filter };
+                    data[e.target.name] = e.target.value;
+                    setFilter(data);
+                  }}
+                  label="Patient Status"
+                  >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {patientStatus.map((el) => (
+                    <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            
+          </Grid>
         }
       />
     );

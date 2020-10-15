@@ -4,9 +4,12 @@ const resource = "/";
 
 export default {
   getPatientClassification() {
-    return Repository.get("/filter_statuscode?statuscode=PATIENT CLASSIFICATION");
+    return Repository.get("/filter_statuscode?statuscode=Classification");
   },
   getPatientCovidCase() {
-    return Repository.get("/filter_statuscode?statuscode=PATIENT COVID CASE");
+    return Repository.get("/filter_statuscode?statuscode=Covid Case");
   },
+  getPatientAdmissionStatus() {
+    return Repository.get("/filter_statuscode?statuscode=Admission Status");
+  }
 };
