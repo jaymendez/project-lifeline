@@ -514,7 +514,7 @@ const PatientDetails = (props) => {
               <Grid item xs={4}>
                 {/* 1st row */}
                 <Grid container>
-                  <Grid item xs={12} style={{ marginBottom: 15 }}>
+                  {/* <Grid item xs={12} style={{ marginBottom: 15 }}>
                     <Grid container spacing={3}>
                       <Grid item xs>
                         <div style={{ backgroundColor: "#f66464", padding: "5px", color: "white" }}>
@@ -538,6 +538,48 @@ const PatientDetails = (props) => {
                         </div>
                       </Grid>
                     </Grid>
+                  </Grid> */}
+                  <Grid item xs={12} align="left">
+                    <Typography
+                      display="inline"
+                      variant="h6"
+                      color="textSecondary"
+                      gutterBottom
+                      className={classes.detailsKey}
+                    >
+                      COVID-19 Diagnosis:
+                    </Typography>
+                    <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
+                      {patient["classification"] || "----"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} align="left">
+                    <Typography
+                      display="inline"
+                      variant="h6"
+                      color="textSecondary"
+                      gutterBottom
+                      className={classes.detailsKey}
+                    >
+                      COVID-19 Case:
+                    </Typography>
+                    <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
+                      {patient["Covid Case"] || "----"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} align="left">
+                    <Typography
+                      display="inline"
+                      variant="h6"
+                      color="textSecondary"
+                      gutterBottom
+                      className={classes.detailsKey}
+                    >
+                      Admission Status:
+                    </Typography>
+                    <Typography display="inline" variant="h6" color="textPrimary" gutterBottom>
+                      {patient["Admission Status"] || "----"}
+                    </Typography>
                   </Grid>
                   <Grid item xs={12} align="left">
                     <Typography
