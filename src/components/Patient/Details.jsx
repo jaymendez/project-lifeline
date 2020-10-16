@@ -278,7 +278,7 @@ const PatientDetails = (props) => {
     const query = setInterval(() => {
       if (requestId) {
         if (cnt <= LIMIT) {
-          if (getBPRequest(requestId)) {
+          if (getBPRequest(requestId) > 0) {
             MySwal.fire({
               icon: "success",
               title: "BP Success.",
@@ -296,7 +296,8 @@ const PatientDetails = (props) => {
   const getBPRequest = async (requestid) => {
     try {
       const { data } = await MonitorRepository.getRequestBPValue(requestid);
-      return data.BPValue.length;
+      console.log("bprequest data", data);
+      return data.BPValue[0].rob_bp;
     } catch (e) {
       if (e) {
         console.log(e);
