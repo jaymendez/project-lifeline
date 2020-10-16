@@ -182,7 +182,7 @@ const PatientRegister = (props) => {
     updatedData.emergency_contact_number = data.rpi_contact_number;
     updatedData.emergency_relationship = data.rpi_contact_relationship;
     updatedData.country = data.rpi_country;
-    updatedData.covid19_case = data.rpi_covid19;
+    updatedData.covid19_case = data.rps_case;
     updatedData.date_admitted = data.rpi_date_admitted;
     updatedData.date_admitted = data.rpi_dateregistered;
     updatedData.email = data.rpi_email_add;
@@ -192,21 +192,23 @@ const PatientRegister = (props) => {
     updatedData.firstname = data.rpi_patientfname;
     updatedData.lastname = data.rpi_patientlname;
     updatedData.middlename = data.rpi_patientmname;
-    updatedData.patientstatus = data.rpi_patientstatus;
+    updatedData.admission = data.rps_admission;
     updatedData.philhealth_number = data.rpi_philhealth_number;
     updatedData.remarks = data.rpi_remarks;
     updatedData.sss_gsis_number = data.rpi_sss_gsis_number;
     updatedData.ward_id = data.rpi_ward_id;
     updatedData.bed_number = data.rpi_bednumber;
     updatedData.civil_status = data.rpi_civilstatus;
-    updatedData.patient_classification = data.rpi_classification;
+    updatedData.patient_classification = data.rps_class;
     setPatient(updatedData);
+    console.log(updatedData);
     for (let [key, value] of Object.entries(updatedData)) {
       setValue(key, value);
     }
   };
 
   const validateInputs = (data) => {
+    console.log('formdata', data);
     const response = {
       patientfname: data.firstname,
       patientlname: data.lastname,
@@ -224,7 +226,7 @@ const PatientRegister = (props) => {
       sss_gsis: data.sss_gsis_number,
       philhealth: data.philhealth_number,
       hmo: data.hmo,
-      admission: moment().format("YYYY-MM-DD HH:mm:ss"),
+      admissiondate: moment().format("YYYY-MM-DD HH:mm:ss"),
       emcontactname: data.emergency_name,
       emcontactnumber: data.emergency_contact_number,
       emrelationship: data.emergency_relationship,
@@ -393,8 +395,8 @@ const PatientRegister = (props) => {
                         }}
                         inputRef={register({ required: true })}
                         format="MM/DD/YYYY"
-                        // minDate={new Date()}
-                        // format="MM/dd/yyyy"
+                      // minDate={new Date()}
+                      // format="MM/dd/yyyy"
                       />
                     </MuiPickersUtilsProvider>
                   </Grid>
@@ -458,7 +460,7 @@ const PatientRegister = (props) => {
                         value={patient.civil_status || ""}
                         onChange={patientHandler}
                         name="civil_status"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         <MenuItem value={"Single"}>Single</MenuItem>
                         <MenuItem value={"Married"}>Married</MenuItem>
@@ -566,7 +568,7 @@ const PatientRegister = (props) => {
                         value={patient.patient_classification || ""}
                         onChange={patientHandler}
                         name="patient_classification"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         {/* <ListSubheader>Classification</ListSubheader> */}
                         {patientStatus.map((el) => {
@@ -610,7 +612,7 @@ const PatientRegister = (props) => {
                         value={patient.covid19_case || ""}
                         onChange={patientHandler}
                         name="covid19_case"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
                         {patientStatus.map((el) => {
@@ -635,7 +637,7 @@ const PatientRegister = (props) => {
                         value={patient.admission || ""}
                         onChange={patientHandler}
                         name="admission"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
                         {patientStatus.map((el) => {
@@ -670,7 +672,7 @@ const PatientRegister = (props) => {
                         },
                       })}
 
-                      // inputRef={register({ min: 1 })}
+                    // inputRef={register({ min: 1 })}
                     />
                   </Grid>
                 </Grid>
