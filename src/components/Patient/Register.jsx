@@ -111,18 +111,19 @@ const PatientRegister = (props) => {
   const [patientStatus, setPatientStatus] = useState([]);
 
   useEffect(() => {
+    getPatient();
     getStatuscodes();
   }, []);
 
-  useEffect(() => {
-    getPatient(); 
-  }, [patientStatus]);
-
   const getStatuscodes = async () => {
-    const { data } = await StatuscodesRepository.getAllStatus();
-    setPatientStatus(
-      data.statuscode_report
-    );
+    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
+    setPatientStatus([
+      ...covidStatus.filter_statuscode_report,
+      ...classificationStatus.filter_statuscode_report,
+      ...admission.filter_statuscode_report,
+    ]);
   };
 
   const patientHandler = (e, modifiedVal = null) => {
@@ -151,23 +152,13 @@ const PatientRegister = (props) => {
     setPatient(data);
   };
 
-  const parsePatientStatus = (name) => {
-    if (name) {
-      const index = _.findIndex(patientStatus, function(o) {
-        return name == o.rps_name;
-      });
-      return patientStatus[index]?.rps_id;
-    }
-    return "";
-  }
-
   const getPatient = async () => {
     if (!_.isEmpty(match.params)) {
       const res = await PatientRepository.getPatient(match.params.id);
       if (!_.isEmpty(res.data.PatientData_report)) {
         const patient = res.data.PatientData_report[0];
-        console.log(patient);
         await parsePatientData(patient);
+        console.log(patient);
       } else {
         alert("no patient data");
       }
@@ -175,6 +166,12 @@ const PatientRegister = (props) => {
   };
 
   const parsePatientData = (data) => {
+    /* new fields from update
+      id
+      middlename
+      patientstatus
+      ward_id
+    */
     const updatedData = { ...patient };
     updatedData.address = data.rpi_address;
     updatedData.age = data.rpi_age;
@@ -185,6 +182,7 @@ const PatientRegister = (props) => {
     updatedData.emergency_contact_number = data.rpi_contact_number;
     updatedData.emergency_relationship = data.rpi_contact_relationship;
     updatedData.country = data.rpi_country;
+    updatedData.covid19_case = data.rpi_covid19;
     updatedData.date_admitted = data.rpi_date_admitted;
     updatedData.date_admitted = data.rpi_dateregistered;
     updatedData.email = data.rpi_email_add;
@@ -201,11 +199,7 @@ const PatientRegister = (props) => {
     updatedData.ward_id = data.rpi_ward_id;
     updatedData.bed_number = data.rpi_bednumber;
     updatedData.civil_status = data.rpi_civilstatus;
-    
-    updatedData.patient_classification = parsePatientStatus(data.classification);
-    updatedData.covid19_case = parsePatientStatus(data["Covid Case"]);
-    updatedData.admission = parsePatientStatus(data["Admission Status"]);
-
+    updatedData.patient_classification = data.rpi_classification;
     setPatient(updatedData);
     for (let [key, value] of Object.entries(updatedData)) {
       setValue(key, value);
@@ -220,6 +214,8 @@ const PatientRegister = (props) => {
       birthday: data.birthdate,
       gender: data.gender,
       age: data.age,
+      covidcase: data.covid19_case,
+      admissionstatus: data.admission,
       address: data.address,
       city: data.city,
       country: data.country,
@@ -238,9 +234,6 @@ const PatientRegister = (props) => {
       patientstatus: data.patientstatus || "",
       civil_status: data.civil_status,
       bed_no: data.bed_number,
-      
-      admissionstatus: data.admission,
-      covidcase: data.covid19_case,
       classification: data.patient_classification,
     };
     return response;
