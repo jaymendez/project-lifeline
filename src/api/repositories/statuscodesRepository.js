@@ -11,5 +11,8 @@ export default {
   },
   getPatientAdmissionStatus() {
     return Repository.get("/filter_statuscode?statuscode=Admission Status");
+  },
+  getAllStatus() {
+    return Repository.get("/statuscodes/all");
   }
 };
