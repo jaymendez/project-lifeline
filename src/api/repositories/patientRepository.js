@@ -104,6 +104,7 @@ export default {
         code: "76270-8",
       },
       {
+        id: "blood_pressure",
         name: "BLOOD PRESSURE",
         data: [
           {
@@ -128,7 +129,6 @@ export default {
         code: "8310-5",
       },
     ];
-    console.log('test');
     const tableData = {
       "00": {key: "00", time: "12:00 AM"},
       "01": {key: "01", time: "1:00 AM"},
@@ -168,6 +168,29 @@ export default {
 
         obs.map(e => {
           tableData[e.hour_clustered] = Object.assign(tableData[e.hour_clustered], {[el.id]: e.avg_value});
+        });
+      } else {
+        /* For BP */
+        const systolic = el.data[0].code;
+        const diastolic = el.data[1].code;
+
+        formData.append("obscode", systolic);
+        const { data: systolicData } = await Repository.post(`/getPatientRangedObservation`, formData);
+        const obsSystolic = systolicData.PatientRangedObservation;
+
+        formData.append("obscode", diastolic);
+        const { data: diastolicData } = await Repository.post(`/getPatientRangedObservation`, formData);
+        const obsDiastolic = diastolicData.PatientRangedObservation;
+
+        obsSystolic.map(e => {
+          const diastolicIndex = _.findIndex(obsDiastolic, function (o) {
+            return o.hour_clustered === e.hour_clustered
+          });
+          if (diastolicIndex === -1) {
+            return;
+          }
+          const diastolicVal = obsDiastolic[diastolicIndex].avg_value;
+          tableData[e.hour_clustered] = Object.assign(tableData[e.hour_clustered], {[el.id]: `${e.avg_value}/${diastolicVal}`});
         });
       }
     }));
