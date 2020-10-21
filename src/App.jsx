@@ -41,6 +41,7 @@ function App() {
           {/* <Route path="/monitors" component={TelemetryDashboard} /> */}
           <Route path="/telemetry/:id" component={TelemetryDashboard} />
           <MiniDrawer>
+            <Route exact path="/" component={PatientList} />
             <Route path="/home" component={Home} />
             <Route path="/patient/details/:id" component={PatientDetails} />
             <Route path="/patient/list" component={PatientList} />
