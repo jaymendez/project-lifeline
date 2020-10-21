@@ -281,14 +281,15 @@ const PatientRegister = (props) => {
         .then(async (res) => {
           console.log(res);
           if (res.data.addpatient_report) {
+            const patient_id = res.data.addpatient_report[0].patient_id;
             await PatientRepository.createDefaultPatientConfig(
-              res.data.addpatient_report[0].patient_id
+              patient_id
             );
             Swal.fire({
               icon: "success",
               title: "Patient added",
               showConfirmButton: true,
-              onClose: () => history.push({ pathname: `/patient/list`, state: "" }),
+              onClose: () => history.push({ pathname: `/patient/details/${patient_id}`, state: "" }),
             });
           }
         })
