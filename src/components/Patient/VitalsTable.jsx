@@ -84,7 +84,7 @@ const VitalsTable = ({ data }) => {
           }
         }
       }}
-      style={{ marginTop: 50, overflowY: "auto", height: 750 }}
+      style={{ marginTop: 50, height: 600, overflowY: "auto" }}
     />
   );
 };

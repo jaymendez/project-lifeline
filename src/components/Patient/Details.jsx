@@ -80,7 +80,7 @@ const useStyles = makeStyles((theme) => ({
 
 const PatientDetails = (props) => {
   const classes = useStyles();
-  const { match } = props;
+  const { match, history } = props;
   const [ward] = useState("UP-PGH WARD 1");
   const [tableData, setTableData] = useState([]);
   const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
@@ -147,7 +147,6 @@ const PatientDetails = (props) => {
   ]);
   console.log(errors);
   const [requestId, setRequestId] = useState(null);
-  
 
   const getAllObservation = async (data) => {
     let { spec_date, patientid } = data;
@@ -158,15 +157,15 @@ const PatientDetails = (props) => {
     if (!patientid) {
       return;
     }
-    console.log('test');
+    console.log("test");
     const params = { spec_date, patientid };
     const query = await PatientRepository.getAllObservation(params);
     setTableData(query);
-  }
+  };
 
   const getPatient = async (id) => {
     setLoader(true);
-    console.log(id)
+    console.log(id);
     if (id) {
       /* Query to get patient */
       try {
@@ -238,7 +237,7 @@ const PatientDetails = (props) => {
   useEffect(() => {
     getPatient(match.params.id);
     getPatientConfig(match.params.id);
-    getAllObservation({patientid: match.params.id})
+    getAllObservation({ patientid: match.params.id });
   }, []);
 
   const requestBP = async () => {
@@ -290,7 +289,7 @@ const PatientDetails = (props) => {
         }
         cnt++;
       }
-    }, 1000*SECONDS)
+    }, 1000 * SECONDS);
   };
 
   const getBPRequest = async (requestid) => {
@@ -308,12 +307,11 @@ const PatientDetails = (props) => {
         });
       }
     }
-  }
+  };
 
   useEffect(() => {
     confirmBPRequest();
-
-  }, [requestId])
+  }, [requestId]);
 
   return (
     <>
@@ -329,7 +327,14 @@ const PatientDetails = (props) => {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper elevation={3} className={classes.paper}>
-            <Grid container spacing={3}>
+            <Typography variant="h5" align="left">
+              INFORMATION
+              <IconButton style={{ margin: 10 }} onClick={() => history.push(`/patient/update/${match.params.id}`)}>
+                <Create />
+              </IconButton>
+            </Typography>
+            <Divider style={{ marginBottom: 5 }} />
+            <Grid container spacing={3} style={{padding: 30}}>
               <Grid item xs={8}>
                 {/* 1st row */}
                 <Grid alignItems="center" container>
@@ -506,8 +511,7 @@ const PatientDetails = (props) => {
                 </Grid>
                 {/* 6th row */}
                 <Grid alignItems="center" container>
-                  <Grid item xs={6} align="left">
-                  </Grid>
+                  <Grid item xs={6} align="left"></Grid>
                   <Grid item xs={3} />
                   <Grid item xs={3} />
                 </Grid>
@@ -1321,7 +1325,11 @@ const PatientDetails = (props) => {
                   container
                   alignItems="center"
                   justify="flex-end"
-                  style={mode === "READ" ? { visibility: "hidden", marginTop: "30px" } : { marginTop: "30px" }}
+                  style={
+                    mode === "READ"
+                      ? { visibility: "hidden", marginTop: "30px" }
+                      : { marginTop: "30px" }
+                  }
                   spacing={2}
                 >
                   <Grid item xs={1} style={{ marginRight: "15px" }}>
