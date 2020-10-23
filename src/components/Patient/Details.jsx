@@ -158,7 +158,8 @@ const PatientDetails = (props) => {
       return;
     }
     console.log("test");
-    const params = { spec_date, patientid };
+    const utc_offset = moment().utcOffset();
+    const params = { spec_date, patientid, utc_offset };
     const query = await PatientRepository.getAllObservation(params);
     setTableData(query);
   };
@@ -274,10 +275,12 @@ const PatientDetails = (props) => {
     const LIMIT = 4;
     const SECONDS = 30;
     let cnt = 0;
-    const query = setInterval(() => {
+    const query = setInterval(async () => {
       if (requestId) {
         if (cnt <= LIMIT) {
-          if (getBPRequest(requestId) > 0) {
+          const resp = await getBPRequest(requestId);
+          //console.log('resp ' + resp);
+          if (resp > 0) {
             MySwal.fire({
               icon: "success",
               title: "BP Success.",
