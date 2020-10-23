@@ -889,12 +889,12 @@ const PatientRegister = (props) => {
                   style={{ marginTop: "30px" }}
                   spacing={2}
                 >
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button color="secondary" onClick={() => history.push("/patient/list")}>
                       Cancel
                     </Button>
                   </Grid>
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button type="submit" variant="contained" color="primary">
                       Register
                     </Button>

@@ -49,7 +49,7 @@ const DateTimePatientCards = () => {
   return (
     <div>
       <Grid container direction="row" className={classes.root} spacing={1}>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>
@@ -72,7 +72,7 @@ const DateTimePatientCards = () => {
             </CardActions> */}
           </Card>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>
@@ -95,7 +95,7 @@ const DateTimePatientCards = () => {
             </CardActions> */}
           </Card>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>
