@@ -16,6 +16,8 @@ import _ from "lodash";
 import Swal from "sweetalert2";
 import moment from "moment";
 import withReactContent from "sweetalert2-react-content";
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
+import MomentUtils from "@date-io/moment";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
 import Progress from "../utils/components/feedback/Progress";
 import PatientChart from "./PatientChart";
@@ -83,6 +85,7 @@ const PatientDetails = (props) => {
   const { match, history } = props;
   const [ward] = useState("UP-PGH WARD 1");
   const [tableData, setTableData] = useState([]);
+  const [tableFilter, setTableFilter] = useState("");
   const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({});
   const [patientConfig, setPatientConfig] = useState({});
@@ -329,12 +332,15 @@ const PatientDetails = (props) => {
           <Paper elevation={3} className={classes.paper}>
             <Typography variant="h5" align="left">
               INFORMATION
-              <IconButton style={{ margin: 10 }} onClick={() => history.push(`/patient/update/${match.params.id}`)}>
+              <IconButton
+                style={{ margin: 10 }}
+                onClick={() => history.push(`/patient/update/${match.params.id}`)}
+              >
                 <Create />
               </IconButton>
             </Typography>
             <Divider style={{ marginBottom: 5 }} />
-            <Grid container spacing={3} style={{padding: 30}}>
+            <Grid container spacing={3} style={{ padding: 30 }}>
               <Grid item xs={8}>
                 {/* 1st row */}
                 <Grid alignItems="center" container>
@@ -1375,7 +1381,37 @@ const PatientDetails = (props) => {
             </Grid>
           </Paper>
           <PatientNotes data={patient} getPatient={getPatient} />
-          <VitalsTable data={tableData} />
+
+          <Paper elevation={3} className={classes.paper}>
+            <Grid container spacing={3}>
+              <Grid item xs={4} align="left">
+                <Typography variant="h4">MONITORING CHART</Typography>
+              </Grid>
+              <Grid item xs={6} />
+              <Grid item xs={2}>
+                <MuiPickersUtilsProvider utils={MomentUtils}>
+                  <KeyboardDatePicker
+                    margin="dense"
+                    inputVariant="outlined"
+                    disableFuture
+                    clearable
+                    // placeholder="10/10/2018"
+                    name="birthdate"
+                    value={tableFilter}
+                    onChange={(date) => {
+                      setTableFilter(date.format("YYYY-MM-DD"));
+                    }}
+                    format="MM/DD/YYYY"
+                    // minDate={new Date()}
+                    // format="MM/dd/yyyy"
+                  />
+                </MuiPickersUtilsProvider>
+              </Grid>
+              <Grid xs={12}>
+                <VitalsTable data={tableData} />
+              </Grid>
+            </Grid>
+          </Paper>
           {observationList.map((el) => {
             return (
               <PatientChart
