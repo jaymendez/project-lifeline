@@ -772,7 +772,7 @@ const PatientRegister = (props) => {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" style={{ margin: "15px" }}>
-                  <Grid item xs={4}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" align="left" color="textSecondary" gutterBottom>
                       Person to contact in case of Emergency
                     </Typography>
