@@ -74,7 +74,8 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "15px",
   },
   formControl: {
-    width: 200,
+    width: "100%",
+    paddingRight: "1em"
   },
   smallFormControl: {
     margin: theme.spacing(1),
@@ -322,8 +323,8 @@ const PatientRegister = (props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {console.log(errors)}
         <Grid container>
-          <Grid item xs={2} />
-          <Grid item align="" xs={8}>
+          <Grid item xs={0} lg={1} />
+          <Grid item align="" xs={12} lg={10}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h5" align="left" color="textSecondary" gutterBottom>
@@ -406,8 +407,8 @@ const PatientRegister = (props) => {
                       Age:
                     </Typography>
                   </Grid>
-                  <Grid item xs={1}>
-                    <TextField
+                  <Grid item xs={2}>
+                    <TextField className={classes.formControl}
                       margin="dense"
                       variant="outlined"
                       name="age"
@@ -475,10 +476,10 @@ const PatientRegister = (props) => {
                       Gender:
                     </Typography>
                   </Grid>
-                  <Grid item xs={1}>
+                  <Grid item xs={2}>
                     <FormControl
                       margin="dense"
-                      className={classes.smallFormControl}
+                      className={classes.formControl}
                       variant="outlined"
                     >
                       <Select
@@ -585,8 +586,8 @@ const PatientRegister = (props) => {
                       Note/s:
                     </Typography>
                   </Grid>
-                  <Grid item xs={3} align="left">
-                    <TextField
+                  <Grid item xs={5} align="left">
+                    <TextField className={classes.formControl}
                       margin="dense"
                       variant="outlined"
                       rows={3}
@@ -654,8 +655,8 @@ const PatientRegister = (props) => {
                       Bed No.:
                     </Typography>
                   </Grid>
-                  <Grid item xs={1} align="left">
-                    <TextField
+                  <Grid item xs={2} align="left">
+                    <TextField className={classes.formControl}
                       error={errors.bed_number}
                       margin="dense"
                       variant="outlined"
@@ -771,7 +772,7 @@ const PatientRegister = (props) => {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" style={{ margin: "15px" }}>
-                  <Grid item xs={4}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" align="left" color="textSecondary" gutterBottom>
                       Person to contact in case of Emergency
                     </Typography>
@@ -888,12 +889,12 @@ const PatientRegister = (props) => {
                   style={{ marginTop: "30px" }}
                   spacing={2}
                 >
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button color="secondary" onClick={() => history.push("/patient/list")}>
                       Cancel
                     </Button>
                   </Grid>
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button type="submit" variant="contained" color="primary">
                       Register
                     </Button>
