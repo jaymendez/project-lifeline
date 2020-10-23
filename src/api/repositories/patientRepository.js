@@ -155,11 +155,12 @@ export default {
       22: {key: "22", time: "10:00 PM"},
       23: {key: "23", time: "11:00 PM"},
     };
-    const { spec_date, patientid } = payload;
+    const { spec_date, patientid, utc_offset } = payload;
     await Promise.all(observationList.map(async el => {
       const formData = new FormData();
       formData.append("spec_date", spec_date);
       formData.append("patientid", patientid);
+      formData.append("utc_offset", utc_offset);
       if (!_.isEmpty(el.code)) {
         formData.append("obscode", el.code);
         const { data } = await Repository.post(`/getPatientRangedObservation`, formData);

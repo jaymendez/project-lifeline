@@ -158,7 +158,8 @@ const PatientDetails = (props) => {
       return;
     }
     console.log("test");
-    const params = { spec_date, patientid };
+    const utc_offset = moment().utcOffset();
+    const params = { spec_date, patientid, utc_offset };
     const query = await PatientRepository.getAllObservation(params);
     setTableData(query);
   };
