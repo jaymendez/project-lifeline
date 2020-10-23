@@ -275,10 +275,12 @@ const PatientDetails = (props) => {
     const LIMIT = 4;
     const SECONDS = 30;
     let cnt = 0;
-    const query = setInterval(() => {
+    const query = setInterval(async () => {
       if (requestId) {
         if (cnt <= LIMIT) {
-          if (getBPRequest(requestId) > 0) {
+          const resp = await getBPRequest(requestId);
+          //console.log('resp ' + resp);
+          if (resp > 0) {
             MySwal.fire({
               icon: "success",
               title: "BP Success.",
