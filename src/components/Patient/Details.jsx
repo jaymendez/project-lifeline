@@ -85,7 +85,7 @@ const PatientDetails = (props) => {
   const { match, history } = props;
   const [ward] = useState("UP-PGH WARD 1");
   const [tableData, setTableData] = useState([]);
-  const [tableFilter, setTableFilter] = useState("");
+  const [tableFilter, setTableFilter] = useState(moment().format("YYYY-MM-DD"));
   const { register, handleSubmit, watch, errors, control, setValue, getValues } = useForm();
   const [patient, setPatient] = useState({});
   const [patientConfig, setPatientConfig] = useState({});
@@ -243,6 +243,11 @@ const PatientDetails = (props) => {
     getPatientConfig(match.params.id);
     getAllObservation({ patientid: match.params.id });
   }, []);
+
+  useEffect(() => {
+    getAllObservation({ patientid: match.params.id, spec_date: tableFilter });
+
+  }, [tableFilter])
 
   const requestBP = async () => {
     try {
@@ -1385,7 +1390,7 @@ const PatientDetails = (props) => {
           </Paper>
           <PatientNotes data={patient} getPatient={getPatient} />
 
-          <Paper elevation={3} className={classes.paper}>
+          <Paper elevation={3} className={classes.paper} style={{marginTop: 50}}>
             <Grid container spacing={3}>
               <Grid item xs={4} align="left">
                 <Typography variant="h4">MONITORING CHART</Typography>

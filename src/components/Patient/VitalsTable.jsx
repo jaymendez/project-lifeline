@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { MTableBody } from 'material-table';
 import MaterialTable from "../utils/components/table/MaterialTable";
 
 const VitalsTable = ({ data }) => {
@@ -16,22 +17,22 @@ const VitalsTable = ({ data }) => {
     {
       title: "Heart Rate",
       field: "heart_rate",
-      render: (rowData) => (rowData.heart_rate ? `${rowData.heart_rate} bpm` : ""),
+      render: (rowData) => (rowData.heart_rate ? `${rowData.heart_rate.toFixed(3)} bpm` : ""),
     },
     {
       title: "Pulse Rate",
       field: "pulse_rate",
-      render: (rowData) => (rowData.pulse_rate ? `${rowData.pulse_rate} bpm` : ""),
+      render: (rowData) => (rowData.pulse_rate ? `${rowData.pulse_rate.toFixed(3)} bpm` : ""),
     },
     {
       title: "SPO2",
       field: "spo2",
-      render: (rowData) => (rowData.spo2 ? `${rowData.spo2} %` : ""),
+      render: (rowData) => (rowData.spo2 ? `${rowData.spo2.toFixed(3)} %` : ""),
     },
     {
       title: "Resp. Rate",
       field: "respiratory_rate",
-      render: (rowData) => (rowData.respiratory_rate ? `${rowData.respiratory_rate} brpm` : ""),
+      render: (rowData) => (rowData.respiratory_rate ? `${rowData.respiratory_rate.toFixed(3)} brpm` : ""),
     },
     {
       title: "Blood Pressure",
@@ -56,7 +57,7 @@ const VitalsTable = ({ data }) => {
           <>
             {rowData.temperature ? (
               <>
-                {rowData.temperature} <sup style={{ marginLeft: 2 }}>o</sup>C
+                {rowData.temperature.toFixed(3)} <sup style={{ marginLeft: 2 }}>o</sup>C
               </>
             ) : (
               ""
@@ -78,6 +79,7 @@ const VitalsTable = ({ data }) => {
         paging: false,
         sorting: false,
         toolbar: false,
+        draggable: false,
         rowStyle: rowData => {
           if (rowData.tableData.id % 2 === 0) {
             return { backgroundColor: "rgba(242,242,242,0.5)" }
