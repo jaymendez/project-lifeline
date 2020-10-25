@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Switch, withRouter, Redirect } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Route, Switch, withRouter, Redirect, useHistory } from "react-router-dom";
 import "./App.css";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import MiniDrawer from "./components/layouts/Drawer";
@@ -34,6 +34,47 @@ const theme = createMuiTheme({
 });
 
 function App() {
+  const history = useHistory();
+  const auth = localStorage.getItem("authenticated") === "true";
+
+  let killSession = () => {
+    var minutes = 30; //Kill session in 40 minutes
+    var duration = minutes * 60;
+    var idleTime = 0;
+    var idleInterval = setInterval(timerIncrement, duration * 1000); // 1 second
+
+    //Zero the idle timer on mouse movement.
+    window.onload = window.onfocus = function () {
+      document.onmousemove = function (e) {
+        // console.log('test')
+        idleTime = 0;
+      };
+      document.onkeypress = function (e) {
+        // console.log('test')
+        idleTime = 0;
+      };
+    };
+    window.onblur = function () {
+      // console.log(idleTime);
+      console.log("User is away");
+    };
+
+    function timerIncrement() {
+      idleTime = idleTime + 1;
+      if (idleTime > 1) {
+        localStorage.setItem("authenticated", false);
+        history.go(0)
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (auth) {
+      killSession();
+    }
+    // inactivityTime();
+  }, []);
+
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
@@ -41,21 +82,24 @@ function App() {
           <Route exact path="/testing" component={Testing} />
           {/* <Route path="/monitors" component={TelemetryDashboard} /> */}
           <Route path="/telemetry/:id" component={TelemetryDashboard} />
-          <MiniDrawer>
+          {!auth ? (
             <AuthenticateUser />
-            <Route exact path="/" component={PatientList} />
-            <Route path="/home" component={Home} />
-            <Route path="/patient/details/:id" component={PatientDetails} />
-            <Route path="/patient/list" component={PatientList} />
-            <Route path="/patient/register" component={PatientRegister} />
-            <Route path="/patient/update/:id" component={PatientRegister} />
-            <Route path="/monitor/setup" component={SetupMonitor} />
-            <Route path="/monitor/list" component={ListMonitor} />
-            {/* <Route path="/monitor/create" component={CreateMonitor} /> */}
-            {/* <Route path="/telemetry/:id" component={TelemetryDashboard} /> */}
-            {/* <Route path="/patient/:id" component={CreateMonitor} /> */}
-            {/* <Route path="/monitor/setup" component={MonitorSetup} /> */}
-          </MiniDrawer>
+          ) : (
+            <MiniDrawer>
+              <Route exact path="/" component={PatientList} />
+              <Route path="/home" component={Home} />
+              <Route path="/patient/details/:id" component={PatientDetails} />
+              <Route path="/patient/list" component={PatientList} />
+              <Route path="/patient/register" component={PatientRegister} />
+              <Route path="/patient/update/:id" component={PatientRegister} />
+              <Route path="/monitor/setup" component={SetupMonitor} />
+              <Route path="/monitor/list" component={ListMonitor} />
+              {/* <Route path="/monitor/create" component={CreateMonitor} /> */}
+              {/* <Route path="/telemetry/:id" component={TelemetryDashboard} /> */}
+              {/* <Route path="/patient/:id" component={CreateMonitor} /> */}
+              {/* <Route path="/monitor/setup" component={MonitorSetup} /> */}
+            </MiniDrawer>
+          )}
         </Switch>
       </ThemeProvider>
     </div>

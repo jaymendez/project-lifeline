@@ -42,7 +42,9 @@ export default function AuthDialog() {
     if (res.status === 200) {
       const auth = res.data.checkpassword[0].access;
       if (auth === "granted") {
+        localStorage.setItem("authenticated", true);
         setOpen(false);
+        history.push("/");
       } else {
         setErrors({ password: "Wrong Password" });
       }
