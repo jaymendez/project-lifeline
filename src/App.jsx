@@ -12,6 +12,7 @@ import PatientList from "./components/Patient/List";
 import PatientRegister from "./components/Patient/Register";
 import PatientDetails from "./components/Patient/Details";
 import Testing from "./components/utils/components/testing";
+import AuthenticateUser from "./components/utils/components/dialog/AuthDialog";
 
 const theme = createMuiTheme({
   typography: {
@@ -41,6 +42,7 @@ function App() {
           {/* <Route path="/monitors" component={TelemetryDashboard} /> */}
           <Route path="/telemetry/:id" component={TelemetryDashboard} />
           <MiniDrawer>
+            <AuthenticateUser />
             <Route exact path="/" component={PatientList} />
             <Route path="/home" component={Home} />
             <Route path="/patient/details/:id" component={PatientDetails} />
