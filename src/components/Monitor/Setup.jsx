@@ -143,8 +143,12 @@ const MonitorSetup = () => {
 
   const getStatuscodes = async () => {
     const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
     setPatientStatus([
       ...covidStatus.filter_statuscode_report,
+      ...classificationStatus.filter_statuscode_report,
+      ...admission.filter_statuscode_report,
     ]);
   };
 
@@ -578,9 +582,19 @@ const MonitorSetup = () => {
         return el;
       }
     });
+    if (filter.admissionStatus) {
+      filteredPatients = filteredPatients.filter((el) => {
+        return el["Admission Status"] === filter.admissionStatus;
+      });
+    }
     if (filter.covidStatus) {
       filteredPatients = filteredPatients.filter((el) => {
         return el["Covid Case"] === filter.covidStatus;
+      });
+    }
+    if (filter.classificationStatus) {
+      filteredPatients = filteredPatients.filter((el) => {
+        return el.classification === filter.classificationStatus;
       });
     }
     return filteredPatients;
@@ -608,7 +622,9 @@ const MonitorSetup = () => {
                   <TableCell align="center">Date Admitted</TableCell>
                   <TableCell align="center">Time Admitted</TableCell>
                   <TableCell align="center">Bed No.</TableCell>
+                  <TableCell align="center">Admission Status</TableCell>
                   <TableCell align="center">COVID-19 Case</TableCell>
+                  <TableCell align="center">COVID-19 Diagnosis</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -665,19 +681,9 @@ const MonitorSetup = () => {
                     <TableCell align="center">{row.rpi_date_admitted.slice(0, 10)}</TableCell>
                     <TableCell align="center">{row.rpi_date_admitted.slice(11)}</TableCell>
                     <TableCell align="center">Bed #{row.rpi_bednumber}</TableCell>
-                    <TableCell align="center">
-                      <div
-                      // style={{ backgroundColor: "#4ba2e7", color: "white" }}
-                      >
-                        {row.rpi_covid19 ? (
-                          <span style={{ backgroundColor: "#4ba2e7", color: "white", padding: 8 }}>
-                            {row.rpi_covid19}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                    </TableCell>
+                    <TableCell align="center">{row["Admission Status"] || ""}</TableCell>
+                    <TableCell align="center">{row["Covid Case"] || ""}</TableCell>
+                    <TableCell align="center">{row.classification || ""}</TableCell>
                   </TableRow>
                   /* end sol 1 */
                 ))}
@@ -778,6 +784,32 @@ const MonitorSetup = () => {
             <Grid container spacing={0}>
               <Grid align="left" xs={2} item>
                 <FormControl variant="outlined" className={classes.formControl}>
+                  <InputLabel id="admission-status-label">Admission Status</InputLabel>
+                  <Select
+                    labelId="admission-status-label"
+                    value={filter.admissionStatus}
+                    autoWidth
+                    name="admissionStatus"
+                    onChange={(e) => {
+                      const data = { ...filter };
+                      data[e.target.name] = e.target.value;
+                      setFilter(data);
+                    }}
+                    label="Admission Status"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {patientStatus.map((el) => {
+                      if (el.rps_category === "Admission Status") {
+                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                      }
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid align="left" xs={2} item>
+                <FormControl variant="outlined" className={classes.formControl}>
                   <InputLabel id="covid-status-label">COVID-19 Case</InputLabel>
                   <Select
                     labelId="covid-status-label"
@@ -802,7 +834,33 @@ const MonitorSetup = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid xs={7} item />
+              <Grid align="left" xs={2} item>
+                <FormControl variant="outlined" className={classes.formControl}>
+                  <InputLabel id="classification-status-label">COVID-19 Diagnosis</InputLabel>
+                  <Select
+                    labelId="classification-status-label"
+                    value={filter.classificationStatus}
+                    autoWidth
+                    name="classificationStatus"
+                    onChange={(e) => {
+                      const data = { ...filter };
+                      data[e.target.name] = e.target.value;
+                      setFilter(data);
+                    }}
+                    label="COVID-19 Diagnosis"
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {patientStatus.map((el) => {
+                      if (el.rps_category === "Classification") {
+                        return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                      }
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid xs={3} item />
               <Grid align="right" xs={3} item>
                 <FormControl className={clsx(classes.margin, classes.textField)} variant="outlined">
                   <OutlinedInput
