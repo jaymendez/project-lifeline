@@ -41,9 +41,13 @@ const PatientNotes = ({data, getPatient}) => {
     contact_number: "emcontactnumber",
     contact_relationship: "emrelationship",
     bednumber: "bed_no",
-    "Admission Status": "admissionstatus",
-    "Covid Case": "covidcase",
-    date_admitted: "admissiondate"
+    date_admitted: "admissiondate",
+    rps_case: "covidcase",
+    rps_admission: "admissionstatus",
+    rps_class: "classification",
+    classification: "deprecated",
+    admissionstatus: "deprecated",
+    covidcase: "deprecated"
   }
   const [mode, setMode] = useState("READ");
   const [note, setNotes] = useState("");
