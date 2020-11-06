@@ -3,6 +3,7 @@ import MonitorRepository from "./monitorRepository";
 import WardRepository from "./wardRepository";
 import TelemetryRepository from "./telemetryRepository";
 import StatuscodesRepository from "./statuscodesRepository";
+import AuthRepository from "./authRepository";
 
 const repositories = {
   patient: PatientRepository,
@@ -10,6 +11,7 @@ const repositories = {
   ward: WardRepository,
   telemetry: TelemetryRepository,
   statuscodes: StatuscodesRepository,
+  auth: AuthRepository
 };
 
 export const RepositoryFactory = {

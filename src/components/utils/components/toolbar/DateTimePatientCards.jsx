@@ -3,6 +3,9 @@ import { Grid, Typography, Card, CardContent } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DateRange, Alarm, Person } from "@material-ui/icons";
 import moment from "moment";
+import { RepositoryFactory } from "../../../../api/repositories/RepositoryFactory";
+
+const PatientRepository = RepositoryFactory.get("patient");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,8 +26,14 @@ const useStyles = makeStyles((theme) => ({
 
 const DateTimePatientCards = () => {
   const classes = useStyles();
-  const [time, setTime] = useState();
+  const [time, setTime] = useState("12:00:00 PM");
   const [patientCount, setPatientCount] = useState(0);
+
+
+  const getPatients = async () => {
+    const { data } = await PatientRepository.getPatients();
+    setPatientCount(data.getpatientlist_report.length || 0)
+  };
 
   const clock = () => {
     setInterval(() => {
@@ -34,11 +43,13 @@ const DateTimePatientCards = () => {
   };
   useEffect(() => {
     clock();
-  });
+    getPatients();
+  }, []);
+  
   return (
     <div>
       <Grid container direction="row" className={classes.root} spacing={1}>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>
@@ -61,7 +72,7 @@ const DateTimePatientCards = () => {
             </CardActions> */}
           </Card>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>
@@ -84,7 +95,7 @@ const DateTimePatientCards = () => {
             </CardActions> */}
           </Card>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4} lg={3}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Grid alignItems="center" container>

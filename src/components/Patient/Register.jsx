@@ -74,7 +74,8 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "15px",
   },
   formControl: {
-    width: 200,
+    width: "100%",
+    paddingRight: "1em"
   },
   smallFormControl: {
     margin: theme.spacing(1),
@@ -94,6 +95,7 @@ const PatientRegister = (props) => {
     age: "",
     gender: "",
     covid19_case: "",
+    admission: "",
     remarks: "",
     address: "",
     city: "",
@@ -115,11 +117,13 @@ const PatientRegister = (props) => {
   }, []);
 
   const getStatuscodes = async () => {
-    const { data: covidStatus } = await StatuscodesRepository.getPatientCovidCase();
-    const { data: classificationStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: covidStatus } = await StatuscodesRepository.getPatientClassification();
+    const { data: classificationStatus } = await StatuscodesRepository.getPatientCovidCase();
+    const { data: admission } = await StatuscodesRepository.getPatientAdmissionStatus();
     setPatientStatus([
       ...covidStatus.filter_statuscode_report,
       ...classificationStatus.filter_statuscode_report,
+      ...admission.filter_statuscode_report,
     ]);
   };
 
@@ -179,7 +183,7 @@ const PatientRegister = (props) => {
     updatedData.emergency_contact_number = data.rpi_contact_number;
     updatedData.emergency_relationship = data.rpi_contact_relationship;
     updatedData.country = data.rpi_country;
-    updatedData.covid19_case = data.rpi_covid19;
+    updatedData.covid19_case = data.rps_case;
     updatedData.date_admitted = data.rpi_date_admitted;
     updatedData.date_admitted = data.rpi_dateregistered;
     updatedData.email = data.rpi_email_add;
@@ -189,21 +193,23 @@ const PatientRegister = (props) => {
     updatedData.firstname = data.rpi_patientfname;
     updatedData.lastname = data.rpi_patientlname;
     updatedData.middlename = data.rpi_patientmname;
-    updatedData.patientstatus = data.rpi_patientstatus;
+    updatedData.admission = data.rps_admission;
     updatedData.philhealth_number = data.rpi_philhealth_number;
     updatedData.remarks = data.rpi_remarks;
     updatedData.sss_gsis_number = data.rpi_sss_gsis_number;
     updatedData.ward_id = data.rpi_ward_id;
     updatedData.bed_number = data.rpi_bednumber;
     updatedData.civil_status = data.rpi_civilstatus;
-    updatedData.patient_classification = data.rpi_classification;
+    updatedData.patient_classification = data.rps_class;
     setPatient(updatedData);
+    console.log(updatedData);
     for (let [key, value] of Object.entries(updatedData)) {
       setValue(key, value);
     }
   };
 
   const validateInputs = (data) => {
+    console.log('formdata', data);
     const response = {
       patientfname: data.firstname,
       patientlname: data.lastname,
@@ -211,7 +217,8 @@ const PatientRegister = (props) => {
       birthday: data.birthdate,
       gender: data.gender,
       age: data.age,
-      covid19: data.covid19_case,
+      covidcase: data.covid19_case,
+      admissionstatus: data.admission,
       address: data.address,
       city: data.city,
       country: data.country,
@@ -220,7 +227,7 @@ const PatientRegister = (props) => {
       sss_gsis: data.sss_gsis_number,
       philhealth: data.philhealth_number,
       hmo: data.hmo,
-      admission: moment().format("YYYY-MM-DD HH:mm:ss"),
+      admissiondate: moment().format("YYYY-MM-DD HH:mm:ss"),
       emcontactname: data.emergency_name,
       emcontactnumber: data.emergency_contact_number,
       emrelationship: data.emergency_relationship,
@@ -272,14 +279,18 @@ const PatientRegister = (props) => {
         });
     } else {
       await PatientRepository.createPatient(formData)
-        .then((res) => {
+        .then(async (res) => {
           console.log(res);
           if (res.data.addpatient_report) {
+            const patient_id = res.data.addpatient_report[0].patient_id;
+            await PatientRepository.createDefaultPatientConfig(
+              patient_id
+            );
             Swal.fire({
               icon: "success",
               title: "Patient added",
               showConfirmButton: true,
-              onClose: () => history.push({ pathname: `/patient/list`, state: "" }),
+              onClose: () => history.push({ pathname: `/patient/details/${patient_id}`, state: "" }),
             });
           }
         })
@@ -292,6 +303,7 @@ const PatientRegister = (props) => {
   useEffect(() => {
     register({ name: "covid19_case" }, { required: true }); // custom register react-select
     register({ name: "patient_classification" }, { required: true }); // custom register react-select
+    register({ name: "admission" }, { required: true }); // custom register react-select
     register({ name: "civil_status" }, { required: true }); // custom register react-select
     register({ name: "gender" }); // custom register antd input
     register({ name: "patientid" }); // custom register antd input
@@ -311,8 +323,8 @@ const PatientRegister = (props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {console.log(errors)}
         <Grid container>
-          <Grid item xs={2} />
-          <Grid item align="" xs={8}>
+          <Grid item xs={0} lg={1} />
+          <Grid item align="" xs={12} lg={10}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h5" align="left" color="textSecondary" gutterBottom>
@@ -338,7 +350,7 @@ const PatientRegister = (props) => {
                         {
                           validate: {
                             InvalidInput: (value) => {
-                              if (!value.replace(/\s/g, '').length) {
+                              if (!value.replace(/\s/g, "").length) {
                                 return "Input is empty or has only spaces";
                               }
                             },
@@ -385,8 +397,8 @@ const PatientRegister = (props) => {
                         }}
                         inputRef={register({ required: true })}
                         format="MM/DD/YYYY"
-                        // minDate={new Date()}
-                        // format="MM/dd/yyyy"
+                      // minDate={new Date()}
+                      // format="MM/dd/yyyy"
                       />
                     </MuiPickersUtilsProvider>
                   </Grid>
@@ -395,8 +407,8 @@ const PatientRegister = (props) => {
                       Age:
                     </Typography>
                   </Grid>
-                  <Grid item xs={1}>
-                    <TextField
+                  <Grid item xs={2}>
+                    <TextField className={classes.formControl}
                       margin="dense"
                       variant="outlined"
                       name="age"
@@ -427,7 +439,7 @@ const PatientRegister = (props) => {
                         {
                           validate: {
                             InvalidInput: (value) => {
-                              if (!value.replace(/\s/g, '').length) {
+                              if (!value.replace(/\s/g, "").length) {
                                 return "Input is empty or has only spaces";
                               }
                             },
@@ -450,7 +462,7 @@ const PatientRegister = (props) => {
                         value={patient.civil_status || ""}
                         onChange={patientHandler}
                         name="civil_status"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         <MenuItem value={"Single"}>Single</MenuItem>
                         <MenuItem value={"Married"}>Married</MenuItem>
@@ -464,10 +476,10 @@ const PatientRegister = (props) => {
                       Gender:
                     </Typography>
                   </Grid>
-                  <Grid item xs={1}>
+                  <Grid item xs={2}>
                     <FormControl
                       margin="dense"
-                      className={classes.smallFormControl}
+                      className={classes.formControl}
                       variant="outlined"
                     >
                       <Select
@@ -546,7 +558,7 @@ const PatientRegister = (props) => {
                 <Grid container alignItems="center" className={classes.gridInputMargin}>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
-                      Classification:
+                      COVID-19 Diagnosis:
                     </Typography>
                   </Grid>
                   <Grid item xs={3} align="left">
@@ -558,12 +570,12 @@ const PatientRegister = (props) => {
                         value={patient.patient_classification || ""}
                         onChange={patientHandler}
                         name="patient_classification"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         {/* <ListSubheader>Classification</ListSubheader> */}
                         {patientStatus.map((el) => {
-                          if (el.rps_category === "PATIENT CLASSIFICATION") {
-                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          if (el.rps_category === "Classification") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
                           }
                         })}
                       </Select>
@@ -574,8 +586,8 @@ const PatientRegister = (props) => {
                       Note/s:
                     </Typography>
                   </Grid>
-                  <Grid item xs={3} align="left">
-                    <TextField
+                  <Grid item xs={5} align="left">
+                    <TextField className={classes.formControl}
                       margin="dense"
                       variant="outlined"
                       rows={3}
@@ -602,12 +614,12 @@ const PatientRegister = (props) => {
                         value={patient.covid19_case || ""}
                         onChange={patientHandler}
                         name="covid19_case"
-                        // inputRef={register({ required: true })}
+                      // inputRef={register({ required: true })}
                       >
                         {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
                         {patientStatus.map((el) => {
-                          if (el.rps_category === "PATIENT COVID CASE") {
-                            return <MenuItem value={el.rps_name}>{el.rps_name}</MenuItem>;
+                          if (el.rps_category === "Covid Case") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
                           }
                         })}
                       </Select>
@@ -615,11 +627,36 @@ const PatientRegister = (props) => {
                   </Grid>
                   <Grid item xs={2} align="left">
                     <Typography variant="body1" align="left" color="textSecondary" gutterBottom>
+                      Admission Status:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2} align="left">
+                    <FormControl margin="dense" variant="outlined" className={classes.formControl}>
+                      <Select
+                        error={errors.admission}
+                        id="admission-select"
+                        labelId="admission"
+                        value={patient.admission || ""}
+                        onChange={patientHandler}
+                        name="admission"
+                      // inputRef={register({ required: true })}
+                      >
+                        {/* <ListSubheader>Confirmed Covid-19 Case</ListSubheader> */}
+                        {patientStatus.map((el) => {
+                          if (el.rps_category === "Admission Status") {
+                            return <MenuItem value={el.rps_id}>{el.rps_name}</MenuItem>;
+                          }
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography variant="body1" color="textSecondary" gutterBottom>
                       Bed No.:
                     </Typography>
                   </Grid>
-                  <Grid item xs={3} align="left">
-                    <TextField
+                  <Grid item xs={2} align="left">
+                    <TextField className={classes.formControl}
                       error={errors.bed_number}
                       margin="dense"
                       variant="outlined"
@@ -630,14 +667,14 @@ const PatientRegister = (props) => {
                         validate: {
                           positive: (value) => parseInt(value, 10) > 0,
                           InvalidInput: (value) => {
-                            if (!value.replace(/\s/g, '').length) {
+                            if (!value.replace(/\s/g, "").length) {
                               return "Input is empty or has only spaces";
                             }
                           },
                         },
                       })}
 
-                      // inputRef={register({ min: 1 })}
+                    // inputRef={register({ min: 1 })}
                     />
                   </Grid>
                 </Grid>
@@ -735,7 +772,7 @@ const PatientRegister = (props) => {
                   </Grid>
                 </Grid>
                 <Grid container alignItems="center" style={{ margin: "15px" }}>
-                  <Grid item xs={4}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" align="left" color="textSecondary" gutterBottom>
                       Person to contact in case of Emergency
                     </Typography>
@@ -852,12 +889,12 @@ const PatientRegister = (props) => {
                   style={{ marginTop: "30px" }}
                   spacing={2}
                 >
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button color="secondary" onClick={() => history.push("/patient/list")}>
                       Cancel
                     </Button>
                   </Grid>
-                  <Grid item xs={1} style={{ marginRight: "15px" }}>
+                  <Grid item xs={2} lg={1} style={{ marginRight: "15px" }}>
                     <Button type="submit" variant="contained" color="primary">
                       Register
                     </Button>

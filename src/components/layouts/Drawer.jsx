@@ -103,14 +103,14 @@ export default function MiniDrawer(props) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [menu] = useState([
-    { name: "HOME", link: "home" },
+    // { name: "HOME", link: "home" },
     { name: "PATIENT REGISTRATION", link: "patient/register" },
     { name: "PATIENT LIST", link: "patient/list" },
     { name: "MONITORING SETTINGS", link: "monitor/setup" },
-    { name: "SETTINGS", link: "settings" },
+    // { name: "SETTINGS", link: "settings" },
   ]);
   const [menuIcons] = useState([
-    <Home />,
+    // <Home />,
     <AccountBox />,
     <Assignment />,
     <DesktopWindows />,
@@ -220,13 +220,13 @@ export default function MiniDrawer(props) {
         </div>
         <Divider />
         <List>
-          <ListItem button>
+          {/* 
+              ""<ListItem button>
             {!open ? (
               <ListItemIcon>
                 <Search />
               </ListItemIcon>
             ) : (
-              ""
             )}
             <ListItemText
               primary={
@@ -245,7 +245,7 @@ export default function MiniDrawer(props) {
                 />
               }
             />
-          </ListItem>
+          </ListItem> */}
           {menu.map((el, i) => {
             const { name, link } = el;
             return (
