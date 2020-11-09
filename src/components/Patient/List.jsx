@@ -413,7 +413,7 @@ const PatientList = (props) => {
         onClose={closeOptions}
       >
         <MenuItem onClick={updateHandler}>Edit</MenuItem>
-        <MenuItem onClick={deleteHandler}>Delete</MenuItem>
+        {/*<MenuItem onClick={deleteHandler}>Delete</MenuItem>*/}
       </Menu>
     </>
   );
