@@ -17,27 +17,29 @@ const VitalsTable = ({ data }) => {
     {
       title: "Heart Rate",
       field: "heart_rate",
-      render: (rowData) => (rowData.heart_rate ? `${rowData.heart_rate.toFixed(3)} bpm` : ""),
+      render: (rowData) => (rowData.heart_rate ? `${rowData.heart_rate.toFixed(0)} bpm` : ""),
     },
     {
       title: "Pulse Rate",
       field: "pulse_rate",
-      render: (rowData) => (rowData.pulse_rate ? `${rowData.pulse_rate.toFixed(3)} bpm` : ""),
+      render: (rowData) => (rowData.pulse_rate ? `${rowData.pulse_rate.toFixed(0)} bpm` : ""),
     },
     {
       title: "SPO2",
       field: "spo2",
-      render: (rowData) => (rowData.spo2 ? `${rowData.spo2.toFixed(3)} %` : ""),
+      render: (rowData) => (rowData.spo2 ? `${rowData.spo2.toFixed(0)} %` : ""),
     },
     {
       title: "Resp. Rate",
       field: "respiratory_rate",
-      render: (rowData) => (rowData.respiratory_rate ? `${rowData.respiratory_rate.toFixed(3)} brpm` : ""),
+      render: (rowData) => (rowData.respiratory_rate ? `${rowData.respiratory_rate.toFixed(0)} brpm` : ""),
     },
     {
       title: "Blood Pressure",
       field: "blood_pressure",
-      render: (rowData) => (rowData.blood_pressure ? `${rowData.blood_pressure} mmHg` : ""),
+      render: (rowData) => (
+        rowData.blood_pressure ? `${parseFloat(rowData.blood_pressure.split("/")[0]).toFixed(1) + "/" + parseFloat(rowData.blood_pressure.split("/")[1]).toFixed(1)} mmHg` : ""
+      ),
     },
     {
       title: "MAP",
@@ -57,7 +59,7 @@ const VitalsTable = ({ data }) => {
           <>
             {rowData.temperature ? (
               <>
-                {rowData.temperature.toFixed(3)} <sup style={{ marginLeft: 2 }}>o</sup>C
+                {rowData.temperature.toFixed(1)} <sup style={{ marginLeft: 2 }}>o</sup>C
               </>
             ) : (
               ""
