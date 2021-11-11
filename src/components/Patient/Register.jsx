@@ -305,7 +305,7 @@ const PatientRegister = (props) => {
     register({ name: "patient_classification" }, { required: true }); // custom register react-select
     register({ name: "admission" }, { required: true }); // custom register react-select
     register({ name: "civil_status" }, { required: true }); // custom register react-select
-    register({ name: "gender" }); // custom register antd input
+    register({ name: "gender" }, { required: true }); // custom register antd input
     register({ name: "patientid" }); // custom register antd input
     register({ name: "middlename" }); // custom register antd input
     register({ name: "patientstatus" }); // custom register antd input
