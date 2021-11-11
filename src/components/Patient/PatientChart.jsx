@@ -16,6 +16,7 @@ import moment from "moment";
 import { ResponsiveLine } from "@nivo/line";
 import { makeStyles } from "@material-ui/core/styles";
 import { RepositoryFactory } from "../../api/repositories/RepositoryFactory";
+import Constants from '../../utils/Constants';
 
 const PatientRepository = RepositoryFactory.get("patient");
 
@@ -94,7 +95,7 @@ const PatientChart = (props) => {
 
     if (!_.isEmpty(obscode.code)) {
       try {
-        const params = { obscode: obscode.code, spec_date, patientid };
+        const params = { obscode: obscode.code, spec_date, patientid, utc_offset: Constants.UTC_OFFSETS };
         const { data: result } = await PatientRepository.getPatientObservation(params);
         const response = result.PatientRangedObservation;
         const len = [...Array(timeCoverage + 1).keys()].slice(1, timeCoverage + 1);
@@ -130,6 +131,7 @@ const PatientChart = (props) => {
             obscode: el.code,
             spec_date,
             patientid,
+            utc_offset: Constants.UTC_OFFSETS
           };
           const { data: result } = await PatientRepository.getPatientObservation(params);
           const response = result.PatientRangedObservation;
@@ -268,7 +270,6 @@ const PatientChart = (props) => {
               //   </strong>)
               // }}
               sliceTooltip={({ slice }) => {
-                console.log("test", slice);
                 return (
                   <div
                     style={{
