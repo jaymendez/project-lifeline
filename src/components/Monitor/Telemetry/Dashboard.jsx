@@ -151,14 +151,16 @@ const TelemetryDashboard = (props) => {
       const rxbox = data.filter((el) => {
         if (Array.isArray(patientId)) {
           if (patientId.indexOf(el.tpo_subject) >= 0) {
-            if (validateRxboxData(el)) {
-              return el;
-            }
+            return el;
+            // if (validateRxboxData(el)) {
+            // }
+            // console.log(false, "----validate----");
           }
         } else if (el.tpo_subject === patientId) {
-          if (validateRxboxData(el)) {
-            return el;
-          }
+          return el;
+          // if (validateRxboxData(el)) {
+          // }
+          // console.log(false, "----validate----");
         }
       });
       return rxbox;
@@ -180,7 +182,6 @@ const TelemetryDashboard = (props) => {
 
   const getPatientObservation = async () => {
     const { data, status } = await PatientRepository.getLivePatientObservation();
-    // console.log(JSON.parse(data))
     if (status === 200) {
       const [obs, notifs] = data;
       const observations = obs.patientBasicObservation;
@@ -357,7 +358,7 @@ const TelemetryDashboard = (props) => {
     const patientCards = [];
     if (!_.isEmpty(monitor)) {
       const { patientIds } = monitor;
-      if (patientIds.length) {
+      if (patientIds.length && patients.length) {
         for (let index = 0; index < 6; index++) {
           let paper = "";
           const patientId = patientIds[index];
@@ -365,7 +366,6 @@ const TelemetryDashboard = (props) => {
             return e.rpi_patientid === patientId;
           });
           const patient = patients[patientIndex];
-          // console.log(patient);
           let rxboxData = getPatientRxboxData(patientId);
           if (!_.isEmpty(patient)) {
             paper = <TelemetryCard patient={patient} rxbox={rxboxData} />;
