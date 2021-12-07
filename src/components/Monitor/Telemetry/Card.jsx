@@ -94,6 +94,17 @@ const TelemetryCard = (props) => {
     mean_arterial_pressure: "8478-0",
   });
 
+  const [bpReading, setBPReading] = useState({
+    sys: {
+      timestamp: moment().format("YYYY-MM-DD HH:mm:ss"),
+      value: 0
+    },
+    dias: {
+      timestamp: moment().format("YYYY-MM-DD HH:mm:ss"),
+      value: 0
+    }
+  });
+
   const getPatientConfig = async (id) => {
     if (id) {
       /* Query to get patient */
@@ -133,10 +144,38 @@ const TelemetryCard = (props) => {
       return o.tpo_code === code.diastolic_bp;
     });
 
-    const systolicVal = systolicIndex >= 0 ? rxbox[systolicIndex].tpo_value : null;
-    const diastolicVal = diastolicIndex >= 0 ? rxbox[diastolicIndex].tpo_value : null;
+    let systolicVal = systolicIndex >= 0 ? rxbox[systolicIndex].tpo_value : null;
+    let diastolicVal = diastolicIndex >= 0 ? rxbox[diastolicIndex].tpo_value : null;
+
     if (!_.isEmpty(systolicVal) && !_.isEmpty(diastolicVal)) {
+      
+      const currentSys = rxbox[systolicIndex].tpo_effectivity;
+      const currentDia = rxbox[diastolicIndex].tpo_effectivity;
+    
+      if (bpReading.sys.timestamp !== currentSys && bpReading.dias.timestamp !== currentDia) {
+        
+        setBPReading({
+          sys:{
+            timestamp: currentSys,
+            value: systolicVal
+          },
+          dias:{
+            timestamp: currentDia,
+            value: diastolicVal
+          }
+        })
+        console.log('updated bp reading');
+
+      } else {
+
+        systolicVal = bpReading.sys.value;
+        diastolicVal = bpReading.dias.value;
+        console.log('reset bp reading');
+
+      }
+
       return `${systolicVal}/${diastolicVal}`;
+
     }
     // if (index >= 0) {
     //   return rxbox[index].tpo_value;

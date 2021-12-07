@@ -3,7 +3,7 @@ import axios from "axios";
 const baseDomain =
   process.env.REACT_APP_ENV === "LOCAL"
     ? process.env.REACT_APP_LOCAL
-    : process.env.REACT_APP_STAGING;
+    : window.location.origin;
 
 const baseURL = `${baseDomain}/api`;
 
