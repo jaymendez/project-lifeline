@@ -10,7 +10,7 @@ import { RepositoryFactory } from "../../../api/repositories/RepositoryFactory";
 
 const MonitorRepository = RepositoryFactory.get("monitor");
 const PatientRepository = RepositoryFactory.get("patient");
-const RXBOX_INTERVAL = 5000;
+const RXBOX_INTERVAL = 3000;
 
 const DOMAIN =
   process.env.REACT_APP_ENV === "LOCAL"
@@ -47,7 +47,7 @@ const TelemetryDashboard = (props) => {
   const [rxboxData, setRxboxData] = useState([]);
   const [patients, setPatients] = useState([]);
   const [monitor, setMonitor] = useState({});
-  const [refreshInterval] = useState(60);
+  const [refreshInterval] = useState(30);
   const [code] = useState({
     ecg: "76282-3",
     spo2: "59407-7",
@@ -147,6 +147,7 @@ const TelemetryDashboard = (props) => {
 
   const getPatientRxboxData = (patientId) => {
     const data = [...rxboxData];
+    console.log("getPatientRxboxData", data);
     if (data.length) {
       const rxbox = data.filter((el) => {
         if (Array.isArray(patientId)) {
@@ -174,7 +175,7 @@ const TelemetryDashboard = (props) => {
   };
 
   const autoRefresh = () => {
-    setTimeout(function () {
+    setInterval(function () {
       // window.location.reload();
       getMonitorWithPatientId();
     }, refreshInterval * 1000);

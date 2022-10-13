@@ -321,7 +321,7 @@ const MonitorSetup = () => {
       errors: [],
     };
     const { source, destination, draggableId } = result;
-    let patientId = parseInt(draggableId, 10);
+    let patientId = draggableId.split("-")[1];
     if (!destination) {
       return;
     }
@@ -334,14 +334,9 @@ const MonitorSetup = () => {
       sourceMonitorId = parseInt(sourceMonitorId.slice(sourceMonitorId.indexOf("-") + 1), 10);
     }
     if (destinationMonitorId.indexOf("-") >= 0) {
-      destinationMonitorId = parseInt(
-        destinationMonitorId.slice(destinationMonitorId.indexOf("-") + 1),
-        10
-      );
+      destinationMonitorId = destinationMonitorId.split("-")[1];
     }
-    if (draggableId.indexOf("-") >= 0) {
-      patientId = parseInt(draggableId.slice(draggableId.indexOf("-") + 1), 10);
-    }
+
     // const updateMonitors = _.cloneDeep(monitors);
     const updateMonitors = [...monitors];
     const sourceIndex = _.findIndex(updateMonitors, function (o) {
