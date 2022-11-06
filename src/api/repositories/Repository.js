@@ -5,7 +5,7 @@ const baseDomain =
     ? process.env.REACT_APP_LOCAL
     : window.location.origin;
 
-const baseURL = `${baseDomain}/api`;
+const baseURL = process.env.REACT_APP_LIFELINE_BACKEND_URL || `${baseDomain}/api`;
 
 export default axios.create({
   baseURL,
