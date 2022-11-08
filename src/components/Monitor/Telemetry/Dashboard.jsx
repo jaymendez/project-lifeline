@@ -287,12 +287,16 @@ const TelemetryDashboard = (props) => {
   const initPusher = (rxboxDataState, monitorDataState) => {
 
     let event = process.env.REACT_APP_PUSHER_EVENT;
-    let url = process.env.REACT_APP_LIFELINE_BACKEND_URL || `http://localhost:3000`;
-    console.log("TESTING MONITOR DATA", monitorDataState);
+    let url = (process.env.REACT_APP_LIFELINE_BACKEND_URL ? process.env.REACT_APP_LIFELINE_BACKEND_URL.replace("/api", "") : null) || (window.location.origin).replace("/api", "") || `http://localhost:3000`;
+
     let socket = io(url, {
       query: {
         monitor: monitorDataState.name
       }
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket connected successfully.');
     });
 
     socket.on(event, (args, _callback) => {
@@ -318,32 +322,50 @@ const TelemetryDashboard = (props) => {
       });
 
       if (RXBOX_DATA.length > 0) {
-        parsedData = RXBOX_DATA.map(el1 => parsedData.find(el2 => el2.tpo_subject === el1.tpo_subject && el2.tpo_code === el1.tpo_code && moment(el2.tpo_effectivity) > moment(el1.tpo_effectivity)) || el1);
-        setRxboxData(parsedData);
-        console.log("PUSHER UPDATED", parsedData);
+        let parsedData2 = RXBOX_DATA.map(el1 => parsedData.find(el2 => el2.tpo_subject === el1.tpo_subject && el2.tpo_code === el1.tpo_code && moment(el2.tpo_effectivity) > moment(el1.tpo_effectivity)) || el1);
+        
+        parsedData.forEach(data1 => {
+          let patientDataExist = false;
+          RXBOX_DATA.forEach(data2 => {
+
+            if (data1.tpo_subject === data2.tpo_subject && data1.tpo_code === data2.tpo_code) {
+              patientDataExist = true;
+            }
+
+            
+          });
+          if (patientDataExist == false) {
+            parsedData2.push(data1);
+          }
+        });
+        
+        RXBOX_DATA = parsedData2;
+        setRxboxData(parsedData2);
+        console.log("PUSHER UPDATED", parsedData2);
       } else {
         console.log("PUSHER FAILED TO UPDATE");
       }
     });
 
     socket.connect();
+    console.log('Establishing socket connection...');
 
   };
 
   useEffect(() => {
-    getPatientObservation();
-    setInterval(getPatientObservation, RXBOX_INTERVAL);
     // setInterval(getPatientObservationTest, RXBOX_INTERVAL);
     getMonitorWithPatientId().then(monitorReturn => {
+      getPatientObservation();
+      setInterval(getPatientObservation, RXBOX_INTERVAL);
       initPusher(rxboxData, monitorReturn);
     });
     autoRefresh();
   }, []);
-  
+
   useEffect(() => {
     getPatients();
   }, [monitor]);
-  
+
   useEffect(() => {
     // getPatientRxboxData([8, 9]);
   }, [rxboxData]);
