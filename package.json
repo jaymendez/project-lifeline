@@ -20,7 +20,7 @@
     "clsx": "^1.1.0",
     "lodash": "^4.17.21",
     "material-table": "^1.57.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "pusher-js": "^4.1.0",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",
